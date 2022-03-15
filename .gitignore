@@ -3,5 +3,6 @@
 out
 build
 **/*.class
-.mvn
+.mvn/wrapper/*
+!.mvn/wrapper/maven-wrapper.properties
 target

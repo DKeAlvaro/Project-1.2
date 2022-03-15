@@ -6,15 +6,16 @@ public interface MotionState {
     double getXPosition();
     double getYPosition();
 
-
+    static MotionState zero() {
+        return new Standard(0, 0, 0, 0);
+    }
 
     record Standard(
             double xSpeed,
             double ySpeed,
             double xPosition,
-            double yPosition) 
-        
-            implements MotionState {
+            double yPosition
+    ) implements MotionState {
         @Override
         public double getXSpeed() {
             return xSpeed;
