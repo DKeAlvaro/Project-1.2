@@ -14,30 +14,6 @@ public Solver(){
        
 
 }
-    
-    /*kurt:  some thoughts, feel free to change
-    
-    1. a boolean method to decide if the ball stop in the target area
-    
-    public boolean hitTarget(double x, double y, double xt, double yt, double r){
-        return (Math.pow(x-xt, 2)+Math.pow(y-yt, 2) <= Math.pow(r, 2))          //  is that ok when the ball lay on the boarder? 
-    }
-    
-    
-    
-    2. initial acceleration.
-     its simply -1*uk*g. Check the equation, since the deltaH&deltaX is 0, vy also 0(assume we start on the even ground.)
-     incase not even ground, we can use
-     (uk*g*xv)/Math.sqrt(xv*xv+yv*yv)
-      
-    3. a boolean method to check if we hit the border of game.  the ball should stop if we hit the border.
-    currently we lack some parameters, such as the size of gui, the loaction of 
-    
-    
-    */
-
-    
-
 
     public static void main(String[]args){
         solverAttempt1 solver = new solverAttempt1(0.06, 0.1, 0, 0, 1, 0);
@@ -47,10 +23,6 @@ public Solver(){
     }
     @Override
         public MotionState calculate(MotionState state, Acceleration acceleration, double deltaT) {
-            
-            if(state.getXSpeed() == 0 && state.getYSpeed()==0){
-
-            }
             double xSpeed = state.getXSpeed() + acceleration.getX() *deltaT;
             double ySpeed = state.getYSpeed() + acceleration.getY() *deltaT;
             double x= state.getXPosition() + state.getXSpeed()* deltaT;
@@ -87,7 +59,7 @@ public Solver(){
      * @return True if both are 0, false otherwise
      */
     public boolean isVelocity0(MotionState motionState){
-        if(motionState.getXSpeed() == 0 && motionState.getYSpeed() == 0){
+        if(motionState.getXSpeed() < 0.0000001 && motionState.getYSpeed() < 0.0000001){
             return true;
         }else{
             return false;
@@ -137,7 +109,7 @@ public Solver(){
     }
     public double heightFunction (double x, double y){
         // TO DO: get the function from the input file
-        return Math.pow(x, 3);
+       
 
     }
     
