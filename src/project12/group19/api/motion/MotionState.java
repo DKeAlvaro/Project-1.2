@@ -1,4 +1,4 @@
-package src.project12.group19.api.motion;
+package project12.group19.api.motion;
 
 public interface MotionState {
     double getXSpeed();

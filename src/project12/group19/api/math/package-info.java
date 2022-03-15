@@ -6,4 +6,4 @@
  * {@code expression} package contains definitions for working with
  * mathematical expressions / parsed formulas.
  */
-package src.project12.group19.api.math;
+package project12.group19.api.math;

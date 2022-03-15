@@ -1,6 +1,6 @@
-package src.project12.group19.api.support;
+package project12.group19.api.support;
 
-import src.project12.group19.api.domain.Player;
+import project12.group19.api.domain.Player;
 
 import java.io.IOException;
 import java.util.List;

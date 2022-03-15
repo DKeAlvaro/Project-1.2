@@ -1,6 +1,6 @@
-package src.project12.group19;
+package project12.group19;
 
-import src.project12.group19.api.motion.MotionState;
+import project12.group19.api.motion.MotionState;
 
 public class MotionStateAlvaro implements MotionState {
     double xSpeed;

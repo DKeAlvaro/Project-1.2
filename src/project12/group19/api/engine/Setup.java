@@ -1,9 +1,9 @@
-package src.project12.group19.api.engine;
+package project12.group19.api.engine;
 
-import src.project12.group19.api.domain.Player;
-import src.project12.group19.api.domain.State;
-import src.project12.group19.api.game.Configuration;
-import src.project12.group19.api.motion.MotionCalculator;
+import project12.group19.api.domain.Player;
+import project12.group19.api.domain.State;
+import project12.group19.api.game.Configuration;
+import project12.group19.api.motion.MotionCalculator;
 
 import java.util.List;
 import java.util.function.Consumer;

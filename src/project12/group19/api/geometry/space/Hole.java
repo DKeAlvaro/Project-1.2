@@ -1,4 +1,4 @@
-package src.project12.group19.api.geometry.space;
+package project12.group19.api.geometry.space;
 
 public class Hole {
     private double xHole;

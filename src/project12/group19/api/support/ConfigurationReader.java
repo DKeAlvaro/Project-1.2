@@ -1,6 +1,6 @@
-package src.project12.group19.api.support;
+package project12.group19.api.support;
 
-import src.project12.group19.api.game.Configuration;
+import project12.group19.api.game.Configuration;
 
 import java.io.IOException;
 

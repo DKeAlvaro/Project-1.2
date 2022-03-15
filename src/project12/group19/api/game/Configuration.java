@@ -1,10 +1,10 @@
-package src.project12.group19.api.game;
+package project12.group19.api.game;
 
-import src.project12.group19.api.domain.Item;
-import src.project12.group19.api.geometry.space.HeightProfile;
-import src.project12.group19.api.geometry.space.Hole;
-import src.project12.group19.api.motion.Friction;
-import src.project12.group19.api.motion.MotionState;
+import project12.group19.api.domain.Item;
+import project12.group19.api.geometry.space.HeightProfile;
+import project12.group19.api.geometry.space.Hole;
+import project12.group19.api.motion.Friction;
+import project12.group19.api.motion.MotionState;
 
 import java.util.Set;
 
