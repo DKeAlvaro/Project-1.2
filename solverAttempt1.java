@@ -5,15 +5,15 @@ public class solverAttempt1 {
      private double y; //curent y
      private double xv; //velocity x 
      private double yv; // velocity y
-     
+     private double h;
 
      private double g; //gravity
      private double uk; //kinetic friction
      private double stepSize;
      private double accX; // acceleration x
      private double accY; //acceleration y
-     private double [] outputArray;
-     double h= 0.000000001; // very small number for derivation
+     private double [] outputArray;// very small number for derivation
+     
 
      
 public solverAttempt1( double kineticFriction, double stepSize, double initialX, double initialY,  double initialVX, double inititialVY){
@@ -27,6 +27,7 @@ public solverAttempt1( double kineticFriction, double stepSize, double initialX,
     this.accX = 0; 
     this.accY = 0;
     double [] outputArray  = {x,y,xv,yv};
+    this.h = 0.00000001; 
 
 }
 
@@ -35,7 +36,8 @@ public solverAttempt1( double kineticFriction, double stepSize, double initialX,
 
     public static void main(String[]args){
         solverAttempt1 solver = new solverAttempt1(0.06, 0.1, 0, 0, 1, 0);
-
+        
+        System.out.println(solver.derivativeHX(1000, 1));
 
     }
 
@@ -61,32 +63,31 @@ public solverAttempt1( double kineticFriction, double stepSize, double initialX,
 
     }
 
-    public  double accelerationX ( double x){
-        double accX = (-1)*g* (derivativeHX(x)) - (uk*g*xv)/Math.sqrt(xv*xv+yv*yv);
+    public  double accelerationX ( double x, double y){
+        double accX = (-1)*g* (derivativeHX(x,y)) - (uk*g*xv)/Math.sqrt(xv*xv+yv*yv);
         return accX;
     }
 
-    public  double accelerationY (double y){
-        double accY = (-1)*g*(derivativeHY(y)) - (uk*g*yv)/Math.sqrt(xv*xv+yv*yv);
+    public  double accelerationY (double x,double y){
+        double accY = (-1)*g*(derivativeHY(x,y)) - (uk*g*yv)/Math.sqrt(xv*xv+yv*yv);
         return accY;
     }
 
-    public double derivativeHX(double x){
+    public double derivativeHX(double x, double y){
         
-        return (xHeightFunction(x+h) - xHeightFunction(x))/h;
+        return (heightFunction(x+h, y) - heightFunction(x, y))/h;
 
     }
-    public double derivativeHY(double y){
-        return (yHeightFunction(y+h) - yHeightFunction(y))/h;
+    public double derivativeHY(double x, double y){
+        return (heightFunction(x, y+h) - heightFunction(x,y))/h;
         
     }
-    public double xHeightFunction (double x){
+    public double heightFunction (double x, double y){
         // TO DO: get the function from the input file
+        return Math.pow(x, 3);
 
     }
-    public double yHeightFunction (double y){
-        // TO DO: get the function from the input file
-    }
+    
 
 
 
