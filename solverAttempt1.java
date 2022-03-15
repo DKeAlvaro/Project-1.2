@@ -30,6 +30,27 @@ public solverAttempt1( double kineticFriction, double stepSize, double initialX,
     this.h = 0.00000001; 
 
 }
+    
+    /*kurt:  some thoughts, feel free to change
+    
+    1. a boolean method to decide if the ball stop in the target area
+    
+    public boolean hitTarget(double x, double y, double xt, double yt, double r){
+        return (Math.pow(x-xt, 2)+Math.pow(y-yt, 2) <= Math.pow(r, 2))          //  is that ok when the ball lay on the boarder? 
+    }
+    
+    
+    
+    2. initial acceleration.
+     its simply -1*uk*g. Check the equation, since the deltaH&deltaX is 0, vy also 0(assume we start on the even ground.)
+     incase not even ground, we can use
+     (uk*g*xv)/Math.sqrt(xv*xv+yv*yv)
+      
+    3. a boolean method to check if we hit the border of game.  the ball should stop if we hit the border.
+    currently we lack some parameters, such as the size of gui, the loaction of 
+    
+    
+    */
 
     
 
