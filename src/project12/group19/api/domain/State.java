@@ -1,6 +1,6 @@
-package project12.group19.api.domain;
+package src.project12.group19.api.domain;
 
-import project12.group19.api.motion.MotionState;
+import src.project12.group19.api.motion.MotionState;
 
 /**
  * Contains current game state.

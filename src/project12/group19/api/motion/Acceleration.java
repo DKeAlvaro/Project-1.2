@@ -1,6 +1,6 @@
-package project12.group19.api.motion;
+package src.project12.group19.api.motion;
 
-import project12.group19.api.geometry.space.HeightProfile;
+import src.project12.group19.api.geometry.space.HeightProfile;
 
 /**
  * A special container which is derived for specific point using

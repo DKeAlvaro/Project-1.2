@@ -1,4 +1,4 @@
-package project12.group19.api.motion;
+package src.project12.group19.api.motion;
 
 public interface MotionState {
     double getXSpeed();
@@ -6,12 +6,15 @@ public interface MotionState {
     double getXPosition();
     double getYPosition();
 
+
+
     record Standard(
             double xSpeed,
             double ySpeed,
             double xPosition,
-            double yPosition
-    ) implements MotionState {
+            double yPosition) 
+        
+            implements MotionState {
         @Override
         public double getXSpeed() {
             return xSpeed;

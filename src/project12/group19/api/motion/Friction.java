@@ -1,4 +1,4 @@
-package project12.group19.api.motion;
+package src.project12.group19.api.motion;
 
 /**
  * A container for details of friction of specific material.

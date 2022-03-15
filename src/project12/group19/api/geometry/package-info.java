@@ -5,4 +5,4 @@
  * artificially reduced to (mostly) 2d only , there is a {@code planar}
  * package containing definitions for operating in 2d planar space.
  */
-package project12.group19.api.geometry;
+package src.project12.group19.api.geometry;

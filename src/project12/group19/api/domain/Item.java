@@ -1,6 +1,6 @@
-package project12.group19.api.domain;
+package src.project12.group19.api.domain;
 
-import project12.group19.api.geometry.plane.PlanarCoordinate;
+import src.project12.group19.api.geometry.plane.PlanarCoordinate;
 
 public interface Item {
     String getType();

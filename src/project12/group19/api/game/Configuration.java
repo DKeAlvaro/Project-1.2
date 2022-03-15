@@ -1,9 +1,10 @@
-package project12.group19.api.game;
+package src.project12.group19.api.game;
 
-import project12.group19.api.domain.Item;
-import project12.group19.api.geometry.space.HeightProfile;
-import project12.group19.api.motion.Friction;
-import project12.group19.api.motion.MotionState;
+import src.project12.group19.api.domain.Item;
+import src.project12.group19.api.geometry.space.HeightProfile;
+import src.project12.group19.api.geometry.space.Hole;
+import src.project12.group19.api.motion.Friction;
+import src.project12.group19.api.motion.MotionState;
 
 import java.util.Set;
 
@@ -13,14 +14,12 @@ public interface Configuration {
     MotionState getInitialMotion();
     Friction getGroundFriction();
     Friction getSandFriction();
+    Hole hole();
 
-    record Standard(
-            HeightProfile heightProfile,
-            Set<Item> obstacles,
-            MotionState initialMotion,
-            Friction groundFriction,
-            Friction sandFriction
-    ) implements Configuration {
+
+
+    record Standard(HeightProfile heightProfile, Set<Item> obstacles, MotionState initialMotion, Friction groundFriction, Friction sandFriction, Hole hole) 
+    implements Configuration {
         @Override
         public HeightProfile getHeightProfile() {
             return heightProfile;
@@ -44,6 +43,10 @@ public interface Configuration {
         @Override
         public Friction getSandFriction() {
             return sandFriction;
+        }
+
+        public Hole getHole(){
+            return hole;
         }
     }
 }

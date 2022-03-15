@@ -1,4 +1,4 @@
-package project12.group19.api.geometry.plane;
+package src.project12.group19.api.geometry.plane;
 
 public interface PlanarRectangle extends PlanarPositioned, PlanarDimensioned {
     static PlanarRectangle create(PlanarCoordinate coordinate, PlanarDimensions dimensions) {

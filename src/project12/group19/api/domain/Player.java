@@ -1,4 +1,4 @@
-package project12.group19.api.domain;
+package src.project12.group19.api.domain;
 
 import java.util.Optional;
 
