@@ -7,6 +7,10 @@ public class MotionStateClass implements MotionState {
     double ySpeed;
     double xPosition;
     double yPosition;
+    
+
+
+    
 
     public MotionStateClass(double xSpeed, double ySpeed, double xPosition, double yPosition){
         this.xSpeed =xSpeed;

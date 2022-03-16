@@ -14,7 +14,7 @@ public interface Configuration {
     MotionState getInitialMotion();
     Friction getGroundFriction();
     Friction getSandFriction();
-    Hole hole();
+    Hole getHole();
 
 
 

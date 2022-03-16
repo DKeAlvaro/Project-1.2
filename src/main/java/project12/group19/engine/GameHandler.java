@@ -27,7 +27,7 @@ public class GameHandler implements Engine {
                 setup.getConfiguration().getHeightProfile(),
                 new Item.Standard("ball", PlanarCoordinate.create(initialMotion.getXPosition(), initialMotion.getYPosition())),
                 setup.getConfiguration().getObstacles(),
-                setup.getConfiguration().hole()
+                setup.getConfiguration().getHole()
         );
         AtomicReference<State> state = new AtomicReference<>(new State.Standard(
                 course,

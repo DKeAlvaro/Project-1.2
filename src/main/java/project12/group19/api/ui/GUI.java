@@ -1,8 +1,9 @@
+package project12.group19.api.ui;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 
 public class GUI extends JFrame implements ActionListener {
 
@@ -10,17 +11,16 @@ public class GUI extends JFrame implements ActionListener {
     JPanel field;
     JLayeredPane support;
     JPanel panel;
-    JLabel l0,l1,l2;
+    JLabel l0, l1, l2;
     JTextField fieldx;
     JTextField fieldy;
-    Font f1,f2;
+    Font f1, f2;
     JButton hit, restart;
     JLabel ballLabel, infoPosition;
-    ImageIcon image,background;
+    ImageIcon image, background;
     GrassComponent grassCom;
 
-
-    public GUI(){
+    public GUI() {
 
         frame = new JFrame();
         panel = new JPanel();
@@ -39,24 +39,23 @@ public class GUI extends JFrame implements ActionListener {
         restart = new JButton("RESTART");
 
         field.setLayout(null);
-        field.setBounds(0,0,600,600);
+        field.setBounds(0, 0, 600, 600);
 
-       background = new ImageIcon(getClass().getResource("fieldBack.png"));
+        background = new ImageIcon(getClass().getResource("fieldBack.png"));
 
         image = new ImageIcon(getClass().getResource("golfBall.png"));
         ballLabel.setIcon(image);
-        ballLabel.setBounds(50,50,40,40);
+        ballLabel.setBounds(50, 50, 40, 40);
 
-        infoPosition.setBounds(10,530,300,20);
+        infoPosition.setBounds(10, 530, 300, 20);
         infoPosition.setForeground(Color.WHITE);
         infoPosition.setFont(f1);
 
-
-       frame.setLayout(null);
-//        JLabel temp = new JLabel();
-//        temp.setIcon(background);
-//        frame.setContentPane(temp);
-//        frame.setSize(900,600);
+        frame.setLayout(null);
+        // JLabel temp = new JLabel();
+        // temp.setIcon(background);
+        // frame.setContentPane(temp);
+        // frame.setSize(900,600);
 
         l0.setForeground(new Color(33, 38, 41));
         l1.setForeground(new Color(33, 38, 41));
@@ -66,36 +65,35 @@ public class GUI extends JFrame implements ActionListener {
         l1.setFont(f1);
         l2.setFont(f1);
 
-        l0.setBounds(10,15,285,35);
-        l1.setBounds(75,70,150,35);
-        fieldx.setBounds(75,100,150,35);
-        l2.setBounds(75,145,150,35);
-        fieldy.setBounds(75,175,150,35);
+        l0.setBounds(10, 15, 285, 35);
+        l1.setBounds(75, 70, 150, 35);
+        fieldx.setBounds(75, 100, 150, 35);
+        l2.setBounds(75, 145, 150, 35);
+        fieldy.setBounds(75, 175, 150, 35);
 
-        hit.setBounds(45,450,200,40);
+        hit.setBounds(45, 450, 200, 40);
         hit.setBackground(new Color(36, 81, 107));
         hit.setOpaque(true);
         hit.addActionListener(this);
         hit.setFont(f1);
 
-        restart.setBounds(45,510,200,40);
+        restart.setBounds(45, 510, 200, 40);
         restart.setBackground(new Color(36, 81, 107));
         restart.setOpaque(true);
         restart.setFont(f1);
 
-        panel.setBounds(600,0,300,600);
+        panel.setBounds(600, 0, 300, 600);
         panel.setBackground(new Color(141, 191, 214));
         panel.setLayout(null);
 
         grassCom = new GrassComponent();
-        field.setLayout(new GridLayout(1,1));
+        field.setLayout(new GridLayout(1, 1));
         field.add(grassCom);
-        //field.add(ballLabel);
-        support.setBounds(0,0,600,600);
-        support.setBounds(0,0,600,600);
-        support.add(field,Integer.valueOf(0));
-        support.add(ballLabel,Integer.valueOf(1));
-
+        // field.add(ballLabel);
+        support.setBounds(0, 0, 600, 600);
+        support.setBounds(0, 0, 600, 600);
+        support.add(field, Integer.valueOf(0));
+        support.add(ballLabel, Integer.valueOf(1));
 
         panel.add(fieldx);
         panel.add(fieldy);
@@ -104,10 +102,10 @@ public class GUI extends JFrame implements ActionListener {
         panel.add(l0);
         panel.add(hit);
         panel.add(restart);
-        //frame.add(ballLabel);
-        //frame.add(infoPosition);
+        // frame.add(ballLabel);
+        // frame.add(infoPosition);
 
-        frame.setSize(900,600);
+        frame.setSize(900, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.add(panel);
@@ -123,16 +121,14 @@ public class GUI extends JFrame implements ActionListener {
         new GUI();
     }
 
-
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        if (e.getSource() == hit){
-            ballLabel.setLocation(100,100);
+        if (e.getSource() == hit) {
+            ballLabel.setLocation(100, 100);
             grassCom.repaint();
 
         }
 
     }
 }
-    
