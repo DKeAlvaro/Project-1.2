@@ -1,20 +1,24 @@
 package project12.group19.incubating;
 
+import project12.group19.MotionStateClass;
+import project12.group19.api.domain.Item;
+import project12.group19.api.game.Configuration;
+import project12.group19.api.geometry.space.HeightProfile;
+import project12.group19.api.geometry.space.Hole;
+import project12.group19.api.motion.Friction;
+import project12.group19.api.motion.MotionState;
+import project12.group19.api.support.ConfigurationReader;
+import project12.group19.math.parser.Parser;
+import project12.group19.math.parser.component.ComponentRegistry;
+import project12.group19.math.parser.expression.InfixExpression;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
-
-import project12.group19.api.game.Configuration;
-import project12.group19.api.support.ConfigurationReader;
-import project12.group19.api.geometry.space.HeightProfile;
-import project12.group19.api.domain.Item;
-import project12.group19.*;
-import project12.group19.api.geometry.space.Hole;
-import project12.group19.api.motion.Friction;
-import project12.group19.api.motion.MotionState;
 
 public class Reader implements ConfigurationReader {
     public Configuration read(String path) throws IOException {
@@ -35,9 +39,7 @@ public class Reader implements ConfigurationReader {
         Friction sandFriction = null;
         Hole hole;
 
-        int valuesIndex = 0;
-        String[] values = new String[12];
-        Arrays.fill(values, "");
+        Map<String, String> values = new HashMap<>();
 
         File file = new File(path);
         BufferedReader br = new BufferedReader(new FileReader(file));
@@ -49,24 +51,32 @@ public class Reader implements ConfigurationReader {
             while (st.charAt(index) != '=') {
                 index++;
             }
+            int separatorIndex = index;
             if (st.charAt(index) == '=') {
-                index += 2;
-                while (index < st.length()) {
-                    values[valuesIndex] += st.charAt(index);
-                    index++;
-                }
-                valuesIndex++;
+                String key = st.substring(0, separatorIndex - 1).trim();
+                String value = st.substring(separatorIndex + 1).trim();
+                values.put(key, value);
             }
         }
-
-        for (int i = 0; i < values.length; i++) {
-            // System.out.println(values[i]);
-        }
-        xPosition = Integer.parseInt(values[0]);
-        yPosition = Integer.parseInt(values[1]);
-        xHole = Integer.parseInt(values[2]);
-        yHole = Integer.parseInt(values[3]);
-        radius = Double.parseDouble(values[4]);
+        xPosition = Integer.parseInt(values.get("x0"));
+        yPosition = Integer.parseInt(values.get("y0"));
+        xHole = Integer.parseInt(values.get("xt"));
+        yHole = Integer.parseInt(values.get("yt"));
+        radius = Double.parseDouble(values.get("r"));
+        InfixExpression heightExpression = new Parser(ComponentRegistry.standard()).parse(values.get("heightProfile"));
+        heightProfile = (x, y) -> {
+            InfixExpression resolved = heightExpression.resolve(Map.of("x", x, "y", y, "pi", Math.PI));
+            return resolved.calculate()
+                    .orElseThrow(() -> {
+                        String message = String.format(
+                                "Height profile function %s is not defined in point x=.4%f, y=.4%f",
+                                resolved,
+                                x,
+                                y
+                        );
+                        return new IllegalArgumentException(message);
+                    });
+        };
 
         initialMotion = new MotionStateClass(xSpeed, ySpeed, xPosition, yPosition);
         hole = new Hole(xHole, yHole, radius);
