@@ -2,50 +2,36 @@ package project12.group19.api.math.expression;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
+import java.util.OptionalDouble;
 
 public interface Expression {
-    /**
-     * Tells whether provided context satisfies all unset variables.
-     */
-    boolean isComputable(Context context);
-    double compute(Context context);
+    OptionalDouble evaluate(Context context);
 
     record Constant(double value) implements Expression {
         @Override
-        public boolean isComputable(Context context) {
-            return true;
-        }
-
-        @Override
-        public double compute(Context context) {
-            return value;
+        public OptionalDouble evaluate(Context context) {
+            return OptionalDouble.of(value);
         }
     }
 
     record Variable(String name) implements Expression {
         @Override
-        public boolean isComputable(Context context) {
-            return Optional.ofNullable(context.getVariables().get(name))
-                    .map(replacement -> replacement.isComputable(context))
-                    .orElse(false);
-        }
-
-        @Override
-        public double compute(Context context) {
-            return context.getVariables().get(name).compute(context);
+        public OptionalDouble evaluate(Context context) {
+            Expression expression = context.getVariables().get(name);
+            if (expression == null) {
+                return OptionalDouble.empty();
+            }
+            return expression.evaluate(context);
         }
     }
 
     record Subtraction(Expression minuend, Expression subtrahend) implements Expression {
         @Override
-        public boolean isComputable(Context context) {
-            return minuend.isComputable(context) && subtrahend.isComputable(context);
-        }
+        public OptionalDouble evaluate(Context context) {
+            OptionalDouble a = minuend.evaluate(context);
+            OptionalDouble b = subtrahend.evaluate(context);
 
-        @Override
-        public double compute(Context context) {
-            return minuend.compute(context) - subtrahend.compute(context);
+            return a.isPresent() && b.isPresent() ? OptionalDouble.of(a.getAsDouble() - b.getAsDouble()) : OptionalDouble.empty();
         }
     }
 
@@ -59,13 +45,19 @@ public interface Expression {
         }
 
         @Override
-        public boolean isComputable(Context context) {
-            return components.stream().allMatch(component -> component.isComputable(context));
-        }
+        public OptionalDouble evaluate(Context context) {
+            double sum = 0;
+            for (Expression component : components) {
+                OptionalDouble evaluation = component.evaluate(context);
 
-        @Override
-        public double compute(Context context) {
-            return components.stream().mapToDouble(component -> component.compute(context)).sum();
+                if (evaluation.isEmpty()) {
+                    return OptionalDouble.empty();
+                }
+
+                sum += evaluation.getAsDouble();
+            }
+
+            return OptionalDouble.of(sum);
         }
     }
 
@@ -79,86 +71,102 @@ public interface Expression {
         }
 
         @Override
-        public boolean isComputable(Context context) {
-            return components.stream().allMatch(component -> component.isComputable(context));
-        }
+        public OptionalDouble evaluate(Context context) {
+            double accumulator = 1;
 
-        @Override
-        public double compute(Context context) {
-            return components.stream().mapToDouble(component -> component.compute(context)).reduce(1, (left, right) -> left * right);
+            for (Expression component : components) {
+                OptionalDouble evaluation = component.evaluate(context);
+
+                if (evaluation.isEmpty()) {
+                    return OptionalDouble.empty();
+                }
+
+                accumulator *= evaluation.getAsDouble();
+            }
+
+            return OptionalDouble.of(accumulator);
         }
     }
 
     record Division(Expression dividend, Expression divisor) implements Expression {
         @Override
-        public boolean isComputable(Context context) {
-            return dividend.isComputable(context) && divisor.isComputable(context);
-        }
+        public OptionalDouble evaluate(Context context) {
+            OptionalDouble a = dividend.evaluate(context);
+            OptionalDouble b = dividend.evaluate(context);
 
-        @Override
-        public double compute(Context context) {
-            return dividend.compute(context) / divisor.compute(context);
+            if (a.isEmpty() || b.isEmpty() || b.getAsDouble() == 0) {
+                return OptionalDouble.empty();
+            }
+
+            return OptionalDouble.of(a.getAsDouble() / b.getAsDouble());
         }
     }
 
     record Sine(Expression argument) implements Expression {
         @Override
-        public boolean isComputable(Context context) {
-            return argument.isComputable(context);
-        }
+        public OptionalDouble evaluate(Context context) {
+            OptionalDouble evaluation = argument.evaluate(context);
 
-        @Override
-        public double compute(Context context) {
-            return Math.sin(argument.compute(context));
+            if (evaluation.isEmpty()) {
+                return OptionalDouble.empty();
+            }
+
+            return OptionalDouble.of(Math.sin(evaluation.getAsDouble()));
         }
     }
 
     record Cosine(Expression argument) implements Expression {
         @Override
-        public boolean isComputable(Context context) {
-            return argument.isComputable(context);
-        }
+        public OptionalDouble evaluate(Context context) {
+            OptionalDouble evaluation = argument.evaluate(context);
 
-        @Override
-        public double compute(Context context) {
-            return Math.cos(argument.compute(context));
+            if (evaluation.isEmpty()) {
+                return OptionalDouble.empty();
+            }
+
+            return OptionalDouble.of(Math.cos(evaluation.getAsDouble()));
         }
     }
 
     record Absolute(Expression argument) implements Expression {
         @Override
-        public boolean isComputable(Context context) {
-            return argument.isComputable(context);
-        }
+        public OptionalDouble evaluate(Context context) {
+            OptionalDouble evaluation = argument.evaluate(context);
 
-        @Override
-        public double compute(Context context) {
-            return Math.abs(argument.compute(context));
+            if (evaluation.isEmpty()) {
+                return OptionalDouble.empty();
+            }
+
+            return OptionalDouble.of(Math.abs(evaluation.getAsDouble()));
         }
     }
 
     record Exponent(Expression base, Expression power) implements Expression {
         @Override
-        public boolean isComputable(Context context) {
-            return base.isComputable(context) && power.isComputable(context);
-        }
+        public OptionalDouble evaluate(Context context) {
+            OptionalDouble b = base.evaluate(context);
+            OptionalDouble p = power.evaluate(context);
 
-        @Override
-        public double compute(Context context) {
-            return Math.pow(base.compute(context), power.compute(context));
+            if (b.isEmpty() || p.isEmpty()) {
+                return OptionalDouble.empty();
+            }
+
+            return OptionalDouble.of(Math.pow(b.getAsDouble(), p.getAsDouble()));
         }
     }
 
     record Logarithm(Expression base, Expression value) implements Expression {
         @Override
-        public boolean isComputable(Context context) {
-            return base.isComputable(context) && value.isComputable(context);
-        }
+        public OptionalDouble evaluate(Context context) {
+            OptionalDouble b = base.evaluate(context);
+            OptionalDouble v = value.evaluate(context);
 
-        @Override
-        public double compute(Context context) {
+            if (b.isEmpty() || v.isEmpty()) {
+                return OptionalDouble.empty();
+            }
+
             // just changing the base, nothing to see here
-            return Math.log(value.compute(context)) / Math.log(base.compute(context));
+            return OptionalDouble.of(Math.log(b.getAsDouble()) / Math.log(v.getAsDouble()));
         }
     }
 }
