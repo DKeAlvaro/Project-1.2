@@ -1,6 +1,7 @@
 package project12.group19.api.domain;
 
 import project12.group19.api.geometry.space.HeightProfile;
+import project12.group19.api.geometry.space.Hole;
 
 import java.util.Set;
 
@@ -11,11 +12,13 @@ public interface Course {
     HeightProfile getSurface();
     Item getBall();
     Set<Item> getObstacles();
+    Hole getHole();
 
     record Standard(
             HeightProfile surface,
             Item ball,
-            Set<Item> obstacles
+            Set<Item> obstacles,
+            Hole hole
     ) implements Course {
         @Override
         public HeightProfile getSurface() {
@@ -30,6 +33,11 @@ public interface Course {
         @Override
         public Set<Item> getObstacles() {
             return obstacles;
+        }
+
+        @Override
+        public Hole getHole() {
+            return hole;
         }
     }
 }
