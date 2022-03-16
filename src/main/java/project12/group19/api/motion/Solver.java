@@ -14,17 +14,27 @@ public Solver(){
 }
 
     public static void main(String[]args){
+        long startTime = System.nanoTime();
         //this was just for testing
         Solver solver = new Solver();
         MotionState motionState = new MotionState.Standard(3,0,-1,-0.5);
         FrictionC friction = new FrictionC(0.2, 0.1);
+        
+        double deltaT = 0.001;
 
-        while(solver.isMoving(motionState, friction)){
-            Acc acceleration = solver.acceleration(motionState, friction);
-            motionState = solver.calculate(motionState, acceleration, 0.001);
-            System.out.print(motionState.getXPosition() + " " + motionState.getYPosition());
-            System.out.println(" ");
+        while(solver.isMoving(motionState, friction, deltaT)){
+            Acc acceleration = solver.acceleration(motionState, friction, deltaT);
+            motionState = solver.calculate(motionState, acceleration, deltaT);
+            
+            
         }
+        long endTime = System.nanoTime();
+        long duration = (long) ((endTime - startTime)/Math.pow(10, 6));
+        System.out.println(motionState.getXPosition() + " " + motionState.getYPosition());
+        System.out.println(".    time: "+ duration + " ms.");
+        
+
+
         
         
 
@@ -43,12 +53,14 @@ public Solver(){
      * This method checks if the ball is still moving, should be called before computing next state
      * @param motionState Contains velocity x, velocity y, x, y
      * @param friction
+     * @param deltaT
      * @return True if the ball is moving, false if the ball stops
+     
      */
-    public boolean isMoving(MotionState motionState, FrictionC friction){
+    public boolean isMoving(MotionState motionState, FrictionC friction, double deltaT){
         double x = motionState.getXPosition();
         double y = motionState.getYPosition();
-        if(isVelocity0(motionState)){
+        if(isVelocity0(motionState, deltaT)){
             if(derivativeHX(x, y)==0 && derivativeHY(x, y)==0 ){
                 return false;
             }else if(friction.getStaticCoefficient() > Math.sqrt(Math.pow(derivativeHX(x, y), 2)+ Math.pow(derivativeHY(x, y), 2))){
@@ -64,10 +76,11 @@ public Solver(){
     /**
      * Checks if both Vx and Vy are 0, if it is true, diffrent function for coputing acceleration should be used
      * @param motionState
+     * @param deltaT
      * @return True if both are 0, false otherwise
      */
-    public boolean isVelocity0(MotionState motionState){
-        if(motionState.getXSpeed() < 0.0000001 && motionState.getYSpeed() < 0.0000001){
+    public boolean isVelocity0(MotionState motionState, double deltaT){
+        if(motionState.getXSpeed() < deltaT/10 && motionState.getYSpeed() < deltaT/10){
             return true;
         }else{
             return false;
@@ -79,12 +92,13 @@ public Solver(){
      * Computes the accelreation in direction X and Y, taking into account if Vx and Vy are both 0 or not
      * @param motion Motion State
      * @param f friction FrictionC
+     * @param deltaT
      * @return 
      */
-    public  Acc acceleration (MotionState motion, FrictionC f){
+    public  Acc acceleration (MotionState motion, FrictionC f, double deltaT){
         double accX;
         double accY;
-        if(isVelocity0 (motion)){
+        if(isVelocity0 (motion, deltaT)){
              accX =(-1)*g* (derivativeHX(motion.getXPosition(), motion.getYPosition()))- f.getDynamicCoefficient() *g*derivativeHX(motion.getXPosition(), motion.getYPosition())/ Math.sqrt(Math.pow(derivativeHX(motion.getXPosition(), motion.getYPosition()), 2)+ Math.pow(derivativeHY(motion.getXPosition(), motion.getYPosition()), 2));
              accY = (-1)*g* (derivativeHY(motion.getXPosition(), motion.getYPosition()))- f.getDynamicCoefficient() *g* derivativeHY(motion.getXPosition(), motion.getYPosition())/ Math.sqrt(Math.pow(derivativeHX(motion.getXPosition(), motion.getYPosition()), 2)+ Math.pow(derivativeHY(motion.getXPosition(), motion.getYPosition()), 2));
         }else{
@@ -121,7 +135,10 @@ public Solver(){
         // TO DO: get the function from the input file
        //return 0.1 *x +1;
        //this are functions for testing
-       return Math.pow(Math.E, -(x*x + y*y)/40);
+      return Math.pow(Math.E, -(x*x + y*y)/40);
+      //return 0.05 *y +2;
+      //return 0.5*(Math.sin((x-y)/7)+0.9);
+      //return 0;
 
     }
     
