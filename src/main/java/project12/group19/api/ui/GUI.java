@@ -1,27 +1,53 @@
-package project12.group19.api.ui;
+package main.java.project12.group19.api.ui;
+
+import main.java.project12.group19.api.ui.GrassComponent;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-public class GUI extends JFrame implements ActionListener {
+public class GUI {
 
+    // Initializing the Objects
     JFrame frame;
-    JPanel field;
+    JPanel field, panel;
     JLayeredPane support;
-    JPanel panel;
-    JLabel l0, l1, l2;
-    JTextField fieldx;
-    JTextField fieldy;
-    Font f1, f2;
+    JLabel l0, l1, l2, ballLabel, infoPosition, message;
+    JTextField fieldx, fieldy;
     JButton hit, restart;
-    JLabel ballLabel, infoPosition;
-    ImageIcon image, background;
+    Font f1, f2;
+    ImageIcon image;
     GrassComponent grassCom;
+    int counter = 0;
 
-    public GUI() {
+    //get from config
+    int ballX;
+    int ballY;
+    int ballZ;
 
+    int targetX;
+    int targetY;
+    int targetR;
+
+    /**
+     * Constructor of the graphic interface of the
+     * golf game. Objects and created and added to
+     * JPanel and JFrame.
+     */
+    public GUI(int targetX, int targetY, int targetR, int initialX, int intialY, int initialZ) {
+        // Configuring the locations of ball and target
+        ballX = initialX;
+        ballY = intialY;
+        ballZ = initialZ;
+
+        ballX=GrassComponent.coorToSwingX(ballX)-20;
+        ballY = GrassComponent.coorToSwingX(ballY)-20;
+
+        this.targetX = targetX;
+        this.targetY = targetX;
+        this.targetR = targetR;
+
+
+        // Creating the Objects
         frame = new JFrame();
         panel = new JPanel();
         field = new JPanel();
@@ -29,6 +55,7 @@ public class GUI extends JFrame implements ActionListener {
         l0 = new JLabel("Input your values:");
         l1 = new JLabel("X Velocity:");
         l2 = new JLabel("Y Velocity:");
+        message = new JLabel();
         ballLabel = new JLabel();
         infoPosition = new JLabel("Current position: x = 0, y = 0, z = 0");
         fieldx = new JTextField();
@@ -37,25 +64,22 @@ public class GUI extends JFrame implements ActionListener {
         f2 = new Font("Times New Roman", Font.PLAIN, 25);
         hit = new JButton("HIT");
         restart = new JButton("RESTART");
+        image = new ImageIcon(getClass().getResource("golfBall.png"));
+        grassCom = new GrassComponent(targetX,targetY,targetR);
+
+        message.setForeground(new Color(33, 38, 41));
+        message.setFont(f2);
+        message.setBounds(30, 275, 240, 80);
 
         field.setLayout(null);
         field.setBounds(0, 0, 600, 600);
 
-        background = new ImageIcon(getClass().getResource("fieldBack.png"));
-
-        image = new ImageIcon(getClass().getResource("golfBall.png"));
         ballLabel.setIcon(image);
-        ballLabel.setBounds(50, 50, 40, 40);
+        ballLabel.setBounds(ballX, GrassComponent.coorToSwingY(ballY)-20, 40, 40);
 
-        infoPosition.setBounds(10, 530, 300, 20);
+        infoPosition.setBounds(10, 570, 400, 20);
         infoPosition.setForeground(Color.WHITE);
         infoPosition.setFont(f1);
-
-        frame.setLayout(null);
-        // JLabel temp = new JLabel();
-        // temp.setIcon(background);
-        // frame.setContentPane(temp);
-        // frame.setSize(900,600);
 
         l0.setForeground(new Color(33, 38, 41));
         l1.setForeground(new Color(33, 38, 41));
@@ -72,29 +96,37 @@ public class GUI extends JFrame implements ActionListener {
         fieldy.setBounds(75, 175, 150, 35);
 
         hit.setBounds(45, 450, 200, 40);
-        hit.setBackground(new Color(36, 81, 107));
+        hit.setBackground(Color.white);
         hit.setOpaque(true);
-        hit.addActionListener(this);
+        hit.addActionListener(e -> hitBall());
         hit.setFont(f1);
 
         restart.setBounds(45, 510, 200, 40);
-        restart.setBackground(new Color(36, 81, 107));
+        restart.setBackground(Color.WHITE);
         restart.setOpaque(true);
         restart.setFont(f1);
+        restart.addActionListener(e -> {
+            ballLabel.setLocation(ballX, ballY);
+            grassCom.repaint();
+        });
 
+        // Setting the user-friendly Panel
         panel.setBounds(600, 0, 300, 600);
         panel.setBackground(new Color(141, 191, 214));
         panel.setLayout(null);
 
-        grassCom = new GrassComponent();
+        // Setting the game Panel
         field.setLayout(new GridLayout(1, 1));
         field.add(grassCom);
-        // field.add(ballLabel);
         support.setBounds(0, 0, 600, 600);
         support.setBounds(0, 0, 600, 600);
-        support.add(field, Integer.valueOf(0));
-        support.add(ballLabel, Integer.valueOf(1));
 
+        support.add(field, Integer.valueOf(0));
+
+        support.add(ballLabel, Integer.valueOf(1));
+        support.add(infoPosition, Integer.valueOf(2));
+
+        // Adding Objects to the user-friendly Panel
         panel.add(fieldx);
         panel.add(fieldy);
         panel.add(l1);
@@ -102,10 +134,10 @@ public class GUI extends JFrame implements ActionListener {
         panel.add(l0);
         panel.add(hit);
         panel.add(restart);
-        // frame.add(ballLabel);
-        // frame.add(infoPosition);
+        panel.add(message);
 
-        frame.setSize(900, 600);
+        // Setting the Frame and adding Panels to it
+        frame.setSize(900, 628);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.add(panel);
@@ -117,18 +149,102 @@ public class GUI extends JFrame implements ActionListener {
 
     }
 
+    /**
+     * Main method to launch the gold game program.
+     *
+     * @param args an array of Strings passed as
+     *             parameters when you are running your
+     *             application through command line in the OS.
+     */
     public static void main(String[] args) {
-        new GUI();
+        new GUI(10,10,2,-20,-20,5);
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
+    /**
+     * The ball is hit once the button "HIT"
+     * is clicked. Solver function calculates
+     * the position of the ball after the hit
+     * and this method places it accordingly.
+     */
+    public void hitBall() {
 
-        if (e.getSource() == hit) {
-            ballLabel.setLocation(100, 100);
-            grassCom.repaint();
+        int xVel = Integer.parseInt(fieldx.getText());
+        int yVel = Integer.parseInt(fieldy.getText());
+        System.out.println(xVel + "  " + yVel);
+        //input for velocity to solver
 
+
+        //assign result values from solver
+        int newX = xVel;
+        int newY = yVel;
+        int newZ; //get from solver/engine
+
+        infoPosition.setText("Current position: x = " + newX + ", y = " + newY + ", z = 0");
+        //multiply by 6 both values here
+        newX = newX * 12;
+        newY = newY * 12;
+
+        //adjust to panel coordinates
+        newX = GrassComponent.coorToSwingX(newX);
+        newY = GrassComponent.coorToSwingY(newY);
+
+        System.out.println(newX + "  " + newY); // we'll leave it here now for testing
+
+        ballLabel.setLocation(newX - 20, newY - 20);
+        grassCom.repaint();
+
+        int state = 0; //get from solver/engine
+        if (counter < 3) {
+            switch (state) {
+                case 1:
+                    counter++;
+                    message.setText("<html>" + "The ball is out of field. <br> Try again. <br> You have " +
+                            (4 - counter) + " tries left.");
+                    break;
+                case 2:
+                    message.setText("<html>" + "You have " + (4 - counter) + " tries left.");
+                    break;
+                case 3:
+                    message.setText("");
+                    JFrame win = new JFrame();
+                    JLabel youWon = new JLabel();
+
+                    youWon.setText("Congratulations! You won!");
+                    youWon.setBounds(10, 15, 280, 30);
+                    youWon.setFont(f2);
+                    youWon.setForeground(new Color(33, 38, 41));
+
+                    win.setSize(300, 100);
+                    win.getContentPane().setBackground(new Color(141, 191, 214));
+                    win.setResizable(false);
+                    win.setDefaultCloseOperation(win.DISPOSE_ON_CLOSE);
+                    win.setLayout(null);
+                    win.add(youWon);
+                    win.setLocationRelativeTo(null);
+                    win.setTitle("WIN! WIN! WIN!");
+                    win.setVisible(true);
+                    break;
+            }
+        } else {
+            message.setText("");
+            JFrame loss = new JFrame();
+            JLabel youLose = new JLabel();
+
+            youLose.setText("You are a loser :(");
+            youLose.setBounds(10, 15, 280, 30);
+            youLose.setFont(f2);
+            youLose.setForeground(new Color(33, 38, 41));
+
+            loss.setSize(300, 100);
+            loss.getContentPane().setBackground(new Color(141, 191, 214));
+            loss.setResizable(false);
+            loss.setDefaultCloseOperation(loss.DISPOSE_ON_CLOSE);
+            loss.setLayout(null);
+            loss.add(youLose);
+            loss.setLocationRelativeTo(null);
+            loss.setTitle("LOSER");
+            loss.setVisible(true);
         }
-
     }
 }
+    

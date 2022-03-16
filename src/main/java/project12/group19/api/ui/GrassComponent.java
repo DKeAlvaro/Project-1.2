@@ -11,6 +11,14 @@ public class GrassComponent extends JComponent {
     private static double[] rangeArr = new double[2];
     private static double[] heights = new double [14400];
     private static double[] intervals = new double[12];
+    private int tarX;
+    private int tarY;
+    private int tarR;
+    public GrassComponent(int tarX, int tarY, int tarR){
+        this.tarX = tarX;
+        this.tarY = tarY;
+        this.tarR = tarR;
+    }
 
 
     /**
@@ -40,7 +48,7 @@ public class GrassComponent extends JComponent {
             x=x+5;
         }
 
-        Target target = new Target(-10,-5,3);
+        Target target = new Target(tarX,tarY,tarR);
         g2.setPaint(Color.BLACK);
         target.draw(g2);
     }
