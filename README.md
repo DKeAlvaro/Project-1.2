@@ -37,8 +37,25 @@ All source code is organized in `src` directory.
 
 ### Building
 
-TBD
+The project is built by [maven](https://maven.apache.org/). Maven 
+[wrapper](https://maven.apache.org/wrapper/) is also used, so target 
+machine doesn't need to have anything but JDK installed.
+
+To build the project, simply invoke `./mvnw package` 
+(`./mvnw.cmd package` on Windows may be required). This will compile the 
+project and create an executable JAR file in `target/` 
+(`target/putting-1.0.0-SNAPSHOT.jar`).
 
 ### Launching
 
-Once built, TBD
+The built JAR contains all definitions for launch:
+
+```
+java -jar target/putting-1.0.0-SNAPSHOT.jar
+```
+
+Alternatively, use maven:
+
+```
+./mvnw java:exec
+```
