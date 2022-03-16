@@ -1,34 +1,45 @@
 package project12.group19.incubating;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Arrays;
-import java.io.*;
+import java.util.Set;
 
-public class Reader {
+import project12.group19.api.game.Configuration;
+import project12.group19.api.support.ConfigurationReader;
+import project12.group19.api.geometry.space.HeightProfile;
+import project12.group19.api.domain.Item;
+import project12.group19.*;
+import project12.group19.api.geometry.space.Hole;
+import project12.group19.api.motion.Friction;
+import project12.group19.api.motion.MotionState;
 
-    public static String location = "C:\\Users\\Alvaro\\Desktop\\example_inputfile.txt";
-    public static int x0;
-    public static int y0;
-    public static int xt;
-    public static int yt;
-    public static double r;
-    public static double muk;
-    public static double mus;
+public class Reader implements ConfigurationReader {
+    public Configuration read(String path) throws IOException {
 
-    public static double x;
-    public static double y;
-    public static double heightProfile;
+        double xSpeed = 0;
+        double ySpeed = 0;
+        double xPosition;
+        double yPosition;
 
-    public static double muks;
-    public static double muss;
+        double xHole;
+        double yHole;
+        double radius;
 
-    public static void main(String[] args) throws Exception {
+        HeightProfile heightProfile = null;
+        Set<Item> obstacles = null;
+        MotionState initialMotion;
+        Friction groundFriction = null;
+        Friction sandFriction = null;
+        Hole hole;
 
         int valuesIndex = 0;
         String[] values = new String[12];
         Arrays.fill(values, "");
 
-        File file = new File(location);
+        File file = new File(path);
         BufferedReader br = new BufferedReader(new FileReader(file));
         String st;
         int index = 0;
@@ -44,7 +55,6 @@ public class Reader {
                     values[valuesIndex] += st.charAt(index);
                     index++;
                 }
-
                 valuesIndex++;
             }
         }
@@ -52,16 +62,15 @@ public class Reader {
         for (int i = 0; i < values.length; i++) {
             // System.out.println(values[i]);
         }
+        xPosition = Integer.parseInt(values[0]);
+        yPosition = Integer.parseInt(values[1]);
+        xHole = Integer.parseInt(values[2]);
+        yHole = Integer.parseInt(values[3]);
+        radius = Double.parseDouble(values[4]);
 
-        x0 = Integer.parseInt(values[0]);
-        y0 = Integer.parseInt(values[1]);
-        xt = Integer.parseInt(values[2]);
-        yt = Integer.parseInt(values[3]);
-        r = Double.parseDouble(values[4]);
-        muk = Double.parseDouble(values[5]);
-        mus = Double.parseDouble(values[6]);
+        initialMotion = new MotionStateClass(xSpeed, ySpeed, xPosition, yPosition);
+        hole = new Hole(xHole, yHole, radius);
 
-        System.out.println(x0);
-
+        return new Configuration.Standard(heightProfile, obstacles, initialMotion, groundFriction, sandFriction, hole);
     }
 }
