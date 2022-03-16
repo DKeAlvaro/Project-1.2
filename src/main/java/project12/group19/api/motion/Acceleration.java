@@ -11,4 +11,16 @@ import project12.group19.api.geometry.space.HeightProfile;
 public interface Acceleration {
     double getX();
     double getY();
+
+    record Standard(double x, double y) implements Acceleration {
+        @Override
+        public double getX() {
+            return x;
+        }
+
+        @Override
+        public double getY() {
+            return y;
+        }
+    }
 }
