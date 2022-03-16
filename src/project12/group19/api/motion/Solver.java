@@ -1,7 +1,5 @@
-import project12.group19.api.motion.Acceleration;
-import project12.group19.api.motion.Friction;
-import project12.group19.api.motion.MotionCalculator;
-import project12.group19.api.motion.MotionState;
+
+package project12.group19.api.motion;
 
 public class Solver implements MotionCalculator{
    
@@ -16,9 +14,19 @@ public Solver(){
 }
 
     public static void main(String[]args){
-        solverAttempt1 solver = new solverAttempt1(0.06, 0.1, 0, 0, 1, 0);
+        //this was just for testing
+        Solver solver = new Solver();
+        MotionState motionState = new MotionState.Standard(3,0,-1,-0.5);
+        FrictionC friction = new FrictionC(0.2, 0.1);
+
+        while(solver.isMoving(motionState, friction)){
+            Acc acceleration = solver.acceleration(motionState, friction);
+            motionState = solver.calculate(motionState, acceleration, 0.001);
+            System.out.print(motionState.getXPosition() + " " + motionState.getYPosition());
+            System.out.println(" ");
+        }
         
-        System.out.println(solver.derivativeHX(1000, 1));
+        
 
     }
     @Override
@@ -37,7 +45,7 @@ public Solver(){
      * @param friction
      * @return True if the ball is moving, false if the ball stops
      */
-    public boolean isMoving(MotionState motionState, Friction friction){
+    public boolean isMoving(MotionState motionState, FrictionC friction){
         double x = motionState.getXPosition();
         double y = motionState.getYPosition();
         if(isVelocity0(motionState)){
@@ -69,20 +77,22 @@ public Solver(){
 
     /**
      * Computes the accelreation in direction X and Y, taking into account if Vx and Vy are both 0 or not
-     * @param motion
-     * @param f friction
+     * @param motion Motion State
+     * @param f friction FrictionC
      * @return 
      */
-    public  Acceleration accelerationY (MotionState motion, Friction f){
+    public  Acc acceleration (MotionState motion, FrictionC f){
+        double accX;
+        double accY;
         if(isVelocity0 (motion)){
-            double accX =(-1)*g* (derivativeHX(motion.getXPosition(), motion.getYPosition()))- f.getDynamicCoefficient() *g*derivativeHX(motion.getXPosition(), motion.getYPosition())/ Math.sqrt(Math.pow(derivativeHX(motion.getXPosition(), motion.getYPosition()), 2)+ Math.pow(derivativeHY(motion.getXPosition(), motion.getYPosition()), 2));
-            double accY = (-1)*g* (derivativeHY(motion.getXPosition(), motion.getYPosition()))- f.getDynamicCoefficient() *g* derivativeHY(motion.getXPosition(), motion.getYPosition())/ Math.sqrt(Math.pow(derivativeHX(motion.getXPosition(), motion.getYPosition()), 2)+ Math.pow(derivativeHY(motion.getXPosition(), motion.getYPosition()), 2));
+             accX =(-1)*g* (derivativeHX(motion.getXPosition(), motion.getYPosition()))- f.getDynamicCoefficient() *g*derivativeHX(motion.getXPosition(), motion.getYPosition())/ Math.sqrt(Math.pow(derivativeHX(motion.getXPosition(), motion.getYPosition()), 2)+ Math.pow(derivativeHY(motion.getXPosition(), motion.getYPosition()), 2));
+             accY = (-1)*g* (derivativeHY(motion.getXPosition(), motion.getYPosition()))- f.getDynamicCoefficient() *g* derivativeHY(motion.getXPosition(), motion.getYPosition())/ Math.sqrt(Math.pow(derivativeHX(motion.getXPosition(), motion.getYPosition()), 2)+ Math.pow(derivativeHY(motion.getXPosition(), motion.getYPosition()), 2));
         }else{
-            double accY = (-1)*g*(derivativeHY(motion.getXPosition(), motion.getYPosition())) - (f.getDynamicCoefficient()*g*motion.getYSpeed)/Math.sqrt(Math.pow(motion.getXSpeed(), 2) + Math.pow(motion.getYSpeed(), 2));
-            double accX = (-1)*g*(derivativeHX(motion.getXPosition(), motion.getYPosition())) - (f.getDynamicCoefficient()*g* motion.getXSpeed())/Math.sqrt(Math.pow(motion.getXSpeed(), 2) + Math.pow(motion.getYSpeed(), 2));
+             accY = (-1)*g*(derivativeHY(motion.getXPosition(), motion.getYPosition())) - (f.getDynamicCoefficient()*g*motion.getYSpeed())/Math.sqrt(Math.pow(motion.getXSpeed(), 2) + Math.pow(motion.getYSpeed(), 2));
+             accX = (-1)*g*(derivativeHX(motion.getXPosition(), motion.getYPosition())) - (f.getDynamicCoefficient()*g* motion.getXSpeed())/Math.sqrt(Math.pow(motion.getXSpeed(), 2) + Math.pow(motion.getYSpeed(), 2));
         }
         
-        return new Acceleration (accX, accY);
+        return new Acc(accX, accY);
     }
 
     
@@ -109,7 +119,9 @@ public Solver(){
     }
     public double heightFunction (double x, double y){
         // TO DO: get the function from the input file
-       
+       //return 0.1 *x +1;
+       //this are functions for testing
+       return Math.pow(Math.E, -(x*x + y*y)/40);
 
     }
     
