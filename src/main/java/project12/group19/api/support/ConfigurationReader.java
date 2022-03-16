@@ -6,5 +6,4 @@ import java.io.IOException;
 
 public interface ConfigurationReader {
     Configuration read(String path) throws IOException;
-    
 }
