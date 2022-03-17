@@ -1,17 +1,7 @@
-package project12.group19.api.ui;
-
-import project12.group19.api.domain.Player;
-import project12.group19.api.domain.State;
-import project12.group19.api.geometry.space.HeightProfile;
-import project12.group19.support.ResourceLoader;
-
 import javax.swing.*;
 import java.awt.*;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
-public class GUI implements Renderer {
-    private final HitTransmitter transmitter = new HitTransmitter();
+public class GUI {
 
     // Initializing the Objects
     JFrame frame;
@@ -39,19 +29,23 @@ public class GUI implements Renderer {
      * golf game. Objects and created and added to
      * JPanel and JFrame.
      */
-    public GUI(HeightProfile surface, int targetX, int targetY, int targetR, int initialX, int intialY, int initialZ) {
+    public GUI(int targetX, int targetY, int targetR, int initialX, int initialY, int initialZ) {
+
         // Configuring the locations of ball and target
-        ballX = initialX;
-        ballY = intialY;
+        ballX = initialX * 12;
+        ballY = initialY * 12;
         ballZ = initialZ;
 
-        // ballX=GrassComponent.coorToSwingX(ballX)-20;
-        ballY = GrassComponent.coorToSwingX(ballY)-20;
+        System.out.println("after constructor call: " + ballX + " " + ballY);
+
+        ballX = GrassComponent.coorToSwingX(ballX) - 20;
+        ballY = GrassComponent.coorToSwingY(ballY) - 20;
+
+        System.out.println("after transformation: " + ballX + " " + ballY);
 
         this.targetX = targetX;
         this.targetY = targetX;
         this.targetR = targetR;
-
 
         // Creating the Objects
         frame = new JFrame();
@@ -63,15 +57,15 @@ public class GUI implements Renderer {
         l2 = new JLabel("Y Velocity:");
         message = new JLabel();
         ballLabel = new JLabel();
-        infoPosition = new JLabel("Current position: x = 0, y = 0, z = 0");
+        infoPosition = new JLabel();
         fieldx = new JTextField();
         fieldy = new JTextField();
         f1 = new Font("Times New Roman", Font.ITALIC, 20);
         f2 = new Font("Times New Roman", Font.PLAIN, 25);
         hit = new JButton("HIT");
         restart = new JButton("RESTART");
-        image = new ImageIcon(ResourceLoader.load("golfBall.png"));
-        grassCom = new GrassComponent(surface, targetX, targetY, targetR);
+        image = new ImageIcon(getClass().getResource("golfBall.png"));
+        grassCom = new GrassComponent(targetX,targetY,targetR);
 
         message.setForeground(new Color(33, 38, 41));
         message.setFont(f2);
@@ -81,10 +75,11 @@ public class GUI implements Renderer {
         field.setBounds(0, 0, 600, 600);
 
         ballLabel.setIcon(image);
-        ballLabel.setBounds(ballX, GrassComponent.coorToSwingY(ballY)-20, 40, 40);
+        ballLabel.setBounds(ballX, ballY, 40, 40);
 
         infoPosition.setBounds(10, 570, 400, 20);
         infoPosition.setForeground(Color.WHITE);
+        infoPosition.setText("Current position: x = " + initialX + ", y = "+ initialY + ", z = " + initialZ);
         infoPosition.setFont(f1);
 
         l0.setForeground(new Color(33, 38, 41));
@@ -104,6 +99,7 @@ public class GUI implements Renderer {
         hit.setBounds(45, 450, 200, 40);
         hit.setBackground(Color.white);
         hit.setOpaque(true);
+        hit.setFocusable(false);
         hit.addActionListener(e -> hitBall());
         hit.setFont(f1);
 
@@ -111,6 +107,7 @@ public class GUI implements Renderer {
         restart.setBackground(Color.WHITE);
         restart.setOpaque(true);
         restart.setFont(f1);
+        restart.setFocusable(false);
         restart.addActionListener(e -> {
             ballLabel.setLocation(ballX, ballY);
             grassCom.repaint();
@@ -128,7 +125,6 @@ public class GUI implements Renderer {
         support.setBounds(0, 0, 600, 600);
 
         support.add(field, Integer.valueOf(0));
-
         support.add(ballLabel, Integer.valueOf(1));
         support.add(infoPosition, Integer.valueOf(2));
 
@@ -153,6 +149,22 @@ public class GUI implements Renderer {
         frame.setLayout(null);
         frame.setVisible(true);
 
+//        // Configuring the locations of ball and target
+//        ballX = initialX;
+//        ballY = initialY;
+//        ballZ = initialZ;
+//
+//        System.out.println(" after constructor call: " + ballX + " " + ballY);
+//
+//        ballX = GrassComponent.coorToSwingX(initialX)-20;
+//        ballY = GrassComponent.coorToSwingX(initialY)-20;
+//
+//        System.out.println("after transformation: " + ballX + " " + ballY);
+//
+//        this.targetX = targetX;
+//        this.targetY = targetX;
+//        this.targetR = targetR;
+
     }
 
     /**
@@ -163,7 +175,7 @@ public class GUI implements Renderer {
      *             application through command line in the OS.
      */
     public static void main(String[] args) {
-        new GUI((x, y) -> 1 + 0.1 * x, 10,10,2,-20,-20,5);
+        new GUI(-10,18,2,-10,18,5);
     }
 
     /**
@@ -176,16 +188,16 @@ public class GUI implements Renderer {
 
         int xVel = Integer.parseInt(fieldx.getText());
         int yVel = Integer.parseInt(fieldy.getText());
-        System.out.println(xVel + "  " + yVel);
+        System.out.println("Velocity from field: " + xVel + "  " + yVel);
         //input for velocity to solver
 
 
         //assign result values from solver
         int newX = xVel;
         int newY = yVel;
-        int newZ; //get from solver/engine
+        int newZ = 0; //get from solver/engine
 
-        infoPosition.setText("Current position: x = " + newX + ", y = " + newY + ", z = 0");
+        infoPosition.setText("Current position: x = " + newX + ", y = " + newY + ", z = " + newZ);
         //multiply by 6 both values here
         newX = newX * 12;
         newY = newY * 12;
@@ -194,7 +206,7 @@ public class GUI implements Renderer {
         newX = GrassComponent.coorToSwingX(newX);
         newY = GrassComponent.coorToSwingY(newY);
 
-        System.out.println(newX + "  " + newY); // we'll leave it here now for testing
+        System.out.println("From coordinates to Swing: " + (newX-20) + "  " + (newY-20)); // we'll leave it here now for testing
 
         ballLabel.setLocation(newX - 20, newY - 20);
         grassCom.repaint();
@@ -252,28 +264,5 @@ public class GUI implements Renderer {
             loss.setVisible(true);
         }
     }
-
-    @Override
-    public void render(State state) {
-
-        ballLabel.setLocation(ballX, ballY);
-        grassCom.repaint();
-    }
-
-    public Player getController() {
-        return transmitter;
-    }
-
-    public static class HitTransmitter implements Player {
-        private final AtomicReference<Hit> memory = new AtomicReference<>();
-
-        @Override
-        public Optional<Hit> play(State state) {
-            return Optional.ofNullable(memory.getAndSet(null));
-        }
-
-        protected void record(Hit hit) {
-            memory.set(hit);
-        }
-    }
 }
+    
