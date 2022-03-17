@@ -92,6 +92,18 @@
                     <mainClass>project12.group19.Entrypoint</mainClass>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.3.2</version>
+
+                <configuration>
+                    <outputDirectory>${project.basedir}/doc/generated</outputDirectory>
+                    <reportOutputDirectory>${project.basedir}/doc/generated</reportOutputDirectory>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 </project>
