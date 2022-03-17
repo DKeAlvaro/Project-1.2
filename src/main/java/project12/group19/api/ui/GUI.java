@@ -18,12 +18,16 @@ public class GUI implements Renderer {
     public static final CoordinateTranslator TRANSLATOR = new CoordinateTranslator(12, 12, WIDTH, HEIGHT);
 
     private final HitTransmitter transmitter = new HitTransmitter();
+    private final HeightProfile surface;
 
     // Initializing the Objects
     JFrame frame;
     JPanel field, panel;
     JLayeredPane support;
     JLabel l0, l1, l2, ballLabel, infoPosition, message;
+    JLabel statusPositionLabel;
+    JTextPane statusPositionMessage;
+    JLabel statusGameState;
     JTextField fieldx, fieldy;
     JButton hit, restart;
     Font f1, f2;
@@ -49,6 +53,7 @@ public class GUI implements Renderer {
      * JPanel and JFrame.
      */
     public GUI(HeightProfile surface, int targetX, int targetY, double targetR, int initialX, int initialY, int initialZ) {
+        this.surface = surface;
         // Configuring the locations of ball and target
         ballX = initialX * 12;
         ballY = initialY * 12;
@@ -78,6 +83,21 @@ public class GUI implements Renderer {
         l1 = new JLabel("X Velocity:");
         l2 = new JLabel("Y Velocity:");
         message = new JLabel();
+
+        statusPositionLabel = new JLabel();
+        statusPositionLabel.setText("Position:");
+        statusPositionLabel.setBackground(new Color(141, 191, 214));
+        statusPositionLabel.setVisible(true);
+        statusPositionLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        statusPositionLabel.setBounds(10, 250, 200, 50);
+        statusPositionMessage = new JTextPane();
+        statusPositionMessage.setBackground(new Color(141, 191, 214));
+        statusPositionMessage.setBounds(30, 300, 200, 50);
+        statusGameState = new JLabel();
+        statusGameState.setHorizontalAlignment(SwingConstants.LEFT);
+        statusGameState.setBackground(new Color(141, 191, 214));
+        statusGameState.setBounds(10, 400, 200, 50);
+
         ballLabel = new JLabel();
         infoPosition = new JLabel();
         fieldx = new JTextField();
@@ -104,6 +124,9 @@ public class GUI implements Renderer {
         infoPosition.setText("Current position: x = " + initialX + ", y = "+ initialY + ", z = " + initialZ);
         infoPosition.setFont(f1);
 
+        statusGameState.setFont(f2);
+        statusPositionLabel.setFont(f2);
+
         l0.setForeground(new Color(33, 38, 41));
         l1.setForeground(new Color(33, 38, 41));
         l2.setForeground(new Color(33, 38, 41));
@@ -118,7 +141,7 @@ public class GUI implements Renderer {
         l2.setBounds(75, 145, 150, 35);
         fieldy.setBounds(75, 175, 150, 35);
 
-        hit.setBounds(45, 450, 200, 40);
+        hit.setBounds(45, 510, 200, 40);
         hit.setBackground(Color.white);
         hit.setOpaque(true);
         hit.setFocusable(false);
@@ -136,10 +159,10 @@ public class GUI implements Renderer {
         restart.setOpaque(true);
         restart.setFont(f1);
         restart.setFocusable(false);
-        restart.addActionListener(e -> {
-            ballLabel.setLocation(initialX, initialY);
-            grassCom.repaint();
-        });
+//        restart.addActionListener(e -> {
+//            ballLabel.setLocation(initialX, initialY);
+//            grassCom.repaint();
+//        });
 
         // Setting the user-friendly Panel
         panel.setBounds(600, 0, 300, 600);
@@ -154,7 +177,7 @@ public class GUI implements Renderer {
 
         support.add(field, Integer.valueOf(0));
         support.add(ballLabel, Integer.valueOf(1));
-        support.add(infoPosition, Integer.valueOf(2));
+//        support.add(infoPosition, Integer.valueOf(2));
 
         // Adding Objects to the user-friendly Panel
         panel.add(fieldx);
@@ -162,9 +185,13 @@ public class GUI implements Renderer {
         panel.add(l1);
         panel.add(l2);
         panel.add(l0);
-        panel.add(hit);
-        panel.add(restart);
+
         panel.add(message);
+        panel.add(hit);
+        panel.add(statusPositionLabel);
+        panel.add(statusPositionMessage);
+        panel.add(statusGameState);
+        //panel.add(restart);
 
         // Setting the Frame and adding Panels to it
         frame.setSize(900, 628);
@@ -296,12 +323,26 @@ public class GUI implements Renderer {
     @Override
     public void render(State state) {
         MotionState ballState = state.getBallState();
-        infoPosition.setText("Current position: x = " + ballState.getXPosition() + ", y = " + ballState.getYPosition());
-        infoPosition.setVisible(true);
+        if (!state.isStatic() && !state.isTerminal()) {
+            statusPositionMessage.setText(String.format(
+                    "x=%.3f\ny=%.3f\nz=%.3f",
+                    ballState.getXPosition(),
+                    ballState.getYPosition(),
+                    surface.getHeight(ballState.getXPosition(), ballState.getYPosition())
+            ));
+        }
+
+        if (state.isTerminal()) {
+            statusGameState.setText(state.getFouls() == 0 ? "Won!" : "Lost!");
+        } else if (state.getFouls() > 0 && state.getFouls() < 4) {
+            statusGameState.setText("Fouls: " + state.getFouls() + "/3");
+        }
+
         ballLabel.setLocation(
                 TRANSLATOR.toPixelX(ballState.getXPosition()) - (image.getIconWidth() / 2),
                 TRANSLATOR.toPixelY(ballState.getYPosition()) - (image.getIconHeight() / 2)
         );
+
         grassCom.repaint();
     }
 

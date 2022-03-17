@@ -54,6 +54,18 @@ The built JAR contains all definitions for launch:
 java -jar target/putting-1.0.0-SNAPSHOT.jar
 ```
 
+JAR supports two arguments:
+
+- Path to configuration file with surface function, friction values,
+and so on. By default, it looks for configuration.properties.
+- Path to configuration file with hits in following format:
+
+    ```
+    x = 10, y = -10
+    x = 1.0, y = 2
+    x = 3.5, y = 6.5
+    ```
+
 Alternatively, use maven:
 
 ```
