@@ -15,13 +15,14 @@ public class GrassComponent extends JComponent {
     private static double[] intervals = new double[12];
     private int tarX;
     private int tarY;
-    private int tarR;
+    private double tarR;
     private final HeightProfile surface;
 
-    public GrassComponent(HeightProfile surface, int tarX, int tarY, int tarR){
+    public GrassComponent(HeightProfile surface, int tarX, int tarY, double tarR){
         this.tarX = tarX;
         this.tarY = tarY;
         this.tarR = tarR;
+
         this.surface = surface;
 
         getHeights();

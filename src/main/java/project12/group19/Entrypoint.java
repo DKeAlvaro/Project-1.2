@@ -52,20 +52,17 @@ public class Entrypoint {
     }
 
     private static GUI createUI(Configuration configuration, boolean showControls) {
-        int pixels = 600;
-        double meters = 0.1;
-        double scale = pixels / meters;
         return new GUI(
                 configuration.getHeightProfile(),
-                (int) (configuration.getHole().getxHole() * scale),
-                (int) (configuration.getHole().getyHole() * scale),
-                (int) (configuration.getHole().getRadius() * scale),
-                (int) (configuration.getInitialMotion().getXPosition() * scale),
-                (int) (configuration.getInitialMotion().getYPosition() * scale),
+                GUI.TRANSLATOR.toPixelX(configuration.getHole().getxHole()),
+                GUI.TRANSLATOR.toPixelY(configuration.getHole().getyHole()),
+                configuration.getHole().getRadius() * 25,
+                GUI.TRANSLATOR.toPixelX(configuration.getInitialMotion().getXPosition()) / 12,
+                GUI.TRANSLATOR.toPixelY(configuration.getInitialMotion().getYPosition()) / 12,
                 (int) (configuration.getHeightProfile().getHeight(
                         configuration.getInitialMotion().getXPosition(),
                         configuration.getInitialMotion().getYPosition()
-                ) * scale)
+                ) * 12)
         );
     }
 

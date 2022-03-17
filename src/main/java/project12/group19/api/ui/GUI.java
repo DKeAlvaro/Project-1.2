@@ -15,8 +15,9 @@ public class GUI implements Renderer {
     private static final int WIDTH = 600;
     private static final int HEIGHT = 600;
 
+    public static final CoordinateTranslator TRANSLATOR = new CoordinateTranslator(12, 12, WIDTH, HEIGHT);
+
     private final HitTransmitter transmitter = new HitTransmitter();
-    private final CoordinateTranslator translator;
 
     // Initializing the Objects
     JFrame frame;
@@ -37,7 +38,7 @@ public class GUI implements Renderer {
 
     int targetX;
     int targetY;
-    int targetR;
+    double targetR;
 
     int initialX;
     int initialY;
@@ -47,8 +48,7 @@ public class GUI implements Renderer {
      * golf game. Objects and created and added to
      * JPanel and JFrame.
      */
-    public GUI(HeightProfile surface, int targetX, int targetY, int targetR, int initialX, int initialY, int initialZ) {
-        translator = new CoordinateTranslator(12, 12, WIDTH, HEIGHT);
+    public GUI(HeightProfile surface, int targetX, int targetY, double targetR, int initialX, int initialY, int initialZ) {
         // Configuring the locations of ball and target
         ballX = initialX * 12;
         ballY = initialY * 12;
@@ -65,7 +65,7 @@ public class GUI implements Renderer {
         System.out.println("after transformation: " + ballX + " " + ballY);
 
         this.targetX = targetX;
-        this.targetY = targetX;
+        this.targetY = targetY;
         this.targetR = targetR;
 
         // Creating the Objects
@@ -73,6 +73,7 @@ public class GUI implements Renderer {
         panel = new JPanel();
         field = new JPanel();
         support = new JLayeredPane();
+        support.setVisible(true);
         l0 = new JLabel("Input your values:");
         l1 = new JLabel("X Velocity:");
         l2 = new JLabel("Y Velocity:");
@@ -295,9 +296,11 @@ public class GUI implements Renderer {
     @Override
     public void render(State state) {
         MotionState ballState = state.getBallState();
+        infoPosition.setText("Current position: x = " + ballState.getXPosition() + ", y = " + ballState.getYPosition());
+        infoPosition.setVisible(true);
         ballLabel.setLocation(
-                translator.toPixelX(ballState.getXPosition()) - (image.getIconWidth() / 2),
-                translator.toPixelY(ballState.getYPosition()) - (image.getIconHeight() / 2)
+                TRANSLATOR.toPixelX(ballState.getXPosition()) - (image.getIconWidth() / 2),
+                TRANSLATOR.toPixelY(ballState.getYPosition()) - (image.getIconHeight() / 2)
         );
         grassCom.repaint();
     }
