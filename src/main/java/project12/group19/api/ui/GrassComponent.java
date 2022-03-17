@@ -1,4 +1,6 @@
-package main.java.project12.group19.api.ui;
+package project12.group19.api.ui;
+
+import project12.group19.api.geometry.space.HeightProfile;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,10 +16,18 @@ public class GrassComponent extends JComponent {
     private int tarX;
     private int tarY;
     private int tarR;
-    public GrassComponent(int tarX, int tarY, int tarR){
+    private final HeightProfile surface;
+
+    public GrassComponent(HeightProfile surface, int tarX, int tarY, int tarR){
         this.tarX = tarX;
         this.tarY = tarY;
         this.tarR = tarR;
+        this.surface = surface;
+
+        getHeights();
+        findMax(heights);
+        findMin(heights);
+        getIntervals();
     }
 
 
@@ -27,10 +37,6 @@ public class GrassComponent extends JComponent {
      */
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
-        getHeights();
-        findMax(heights);
-        findMin(heights);
-        getIntervals();
 
         int x = 0;
         int y = 0;
@@ -56,7 +62,7 @@ public class GrassComponent extends JComponent {
     /**
      * Method to calculate height of each tile in the field.
      */
-    public static void getHeights(){
+    private void getHeights(){
         int x = 0;
         int y = 0;
         int index = 0;
@@ -164,17 +170,11 @@ public class GrassComponent extends JComponent {
      * @param y y - coordinate of the point
      * @return height of the point
      */
-    public static double calcHeight(int x, int y){
-        double newX =coorToRealX(x);
+    public double calcHeight(int x, int y){
+        double newX = coorToRealX(x);
         double newY = coorToRealY(y);
 
-
-        newX = newX/10.0;
-        newY = newY/10.0;
-
-        double z = 0.1*x+1;
-        //connection to engine to have function
-        return z;
+        return surface.getHeight(newX, newY);
     }
 
     /**
