@@ -5,13 +5,6 @@ public class Solver implements MotionCalculator{
    
     private double h =  0.00000001; 
     private final double g = 9.81;
-     
-
-     
-public Solver(){
-       
-
-}
 
     public static void main(String[]args){
         long startTime = System.nanoTime();

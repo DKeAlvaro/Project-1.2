@@ -63,6 +63,11 @@ public class Reader implements ConfigurationReader {
         xHole = Integer.parseInt(values.get("xt"));
         yHole = Integer.parseInt(values.get("yt"));
         radius = Double.parseDouble(values.get("r"));
+        groundFriction = Friction.create(
+                Double.parseDouble(values.get("mus")),
+                Double.parseDouble(values.get("muk"))
+        );
+
         InfixExpression heightExpression = new Parser(ComponentRegistry.standard()).parse(values.get("heightProfile"));
         heightProfile = (x, y) -> {
             InfixExpression resolved = heightExpression.resolve(Map.of("x", x, "y", y, "pi", Math.PI));
