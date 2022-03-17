@@ -18,6 +18,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public class Reader implements ConfigurationReader {
@@ -67,6 +68,9 @@ public class Reader implements ConfigurationReader {
                 Double.parseDouble(values.get("mus")),
                 Double.parseDouble(values.get("muk"))
         );
+        double timescale = Optional.ofNullable(values.get("timeScale"))
+                .map(Double::parseDouble)
+                .orElse(1.0);
 
         InfixExpression heightExpression = new Parser(ComponentRegistry.standard()).parse(values.get("heightProfile"));
         heightProfile = (x, y) -> {
@@ -86,6 +90,6 @@ public class Reader implements ConfigurationReader {
         initialMotion = new MotionStateClass(xSpeed, ySpeed, xPosition, yPosition);
         hole = new Hole(xHole, yHole, radius);
 
-        return new Configuration.Standard(heightProfile, obstacles, initialMotion, groundFriction, sandFriction, hole);
+        return new Configuration.Standard(heightProfile, obstacles, initialMotion, groundFriction, sandFriction, hole, timescale);
     }
 }

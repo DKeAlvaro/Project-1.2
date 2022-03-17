@@ -15,11 +15,36 @@ public interface Configuration {
     Friction getGroundFriction();
     Friction getSandFriction();
     Hole getHole();
+    double getTimeScale();
 
+    record Standard(
+            HeightProfile heightProfile,
+            Set<Item> obstacles,
+            MotionState initialMotion,
+            Friction groundFriction,
+            Friction sandFriction,
+            Hole hole,
+            double timeScale
+    ) implements Configuration {
+        public Standard(
+                HeightProfile heightProfile,
+                Set<Item> obstacles,
+                MotionState initialMotion,
+                Friction groundFriction,
+                Friction sandFriction,
+                Hole hole
+        ) {
+            this(
+                    heightProfile,
+                    obstacles,
+                    initialMotion,
+                    groundFriction,
+                    sandFriction,
+                    hole,
+                    1
+            );
+        }
 
-
-    record Standard(HeightProfile heightProfile, Set<Item> obstacles, MotionState initialMotion, Friction groundFriction, Friction sandFriction, Hole hole) 
-    implements Configuration {
         @Override
         public HeightProfile getHeightProfile() {
             return heightProfile;
@@ -45,8 +70,14 @@ public interface Configuration {
             return sandFriction;
         }
 
+        @Override
         public Hole getHole(){
             return hole;
+        }
+
+        @Override
+        public double getTimeScale() {
+            return timeScale;
         }
     }
 }

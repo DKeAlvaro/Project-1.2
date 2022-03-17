@@ -171,8 +171,8 @@ public class GrassComponent extends JComponent {
      * @return height of the point
      */
     public double calcHeight(int x, int y){
-        double newX = coorToRealX(x);
-        double newY = coorToRealY(y);
+        double newX = coorToRealX(x) / 12.0;
+        double newY = -coorToRealY(y) / 12.0;
 
         return surface.getHeight(newX, newY);
     }
