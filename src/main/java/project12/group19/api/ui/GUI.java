@@ -1,7 +1,17 @@
+package project12.group19.api.ui;
+
+import project12.group19.api.domain.Player;
+import project12.group19.api.domain.State;
+import project12.group19.api.geometry.space.HeightProfile;
+import project12.group19.support.ResourceLoader;
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
-public class GUI {
+public class GUI implements Renderer {
+    private final HitTransmitter transmitter = new HitTransmitter();
 
     // Initializing the Objects
     JFrame frame;
@@ -29,7 +39,7 @@ public class GUI {
      * golf game. Objects and created and added to
      * JPanel and JFrame.
      */
-    public GUI(int targetX, int targetY, int targetR, int initialX, int initialY, int initialZ) {
+    public GUI(HeightProfile surface, int targetX, int targetY, int targetR, int initialX, int initialY, int initialZ) {
 
         // Configuring the locations of ball and target
         ballX = initialX * 12;
@@ -64,8 +74,8 @@ public class GUI {
         f2 = new Font("Times New Roman", Font.PLAIN, 25);
         hit = new JButton("HIT");
         restart = new JButton("RESTART");
-        image = new ImageIcon(getClass().getResource("golfBall.png"));
-        grassCom = new GrassComponent(targetX,targetY,targetR);
+        image = new ImageIcon(ResourceLoader.load("golfBall.png"));
+        grassCom = new GrassComponent(surface, targetX, targetY, targetR);
 
         message.setForeground(new Color(33, 38, 41));
         message.setFont(f2);
@@ -175,7 +185,7 @@ public class GUI {
      *             application through command line in the OS.
      */
     public static void main(String[] args) {
-        new GUI(-10,18,2,-10,18,5);
+        new GUI((x, y) -> 1 + 0.1 * x, -10,18,2,-10,18,5);
     }
 
     /**
@@ -264,5 +274,28 @@ public class GUI {
             loss.setVisible(true);
         }
     }
+
+    @Override
+    public void render(State state) {
+
+        ballLabel.setLocation(ballX, ballY);
+        grassCom.repaint();
+    }
+
+    public Player getController() {
+        return transmitter;
+    }
+
+    public static class HitTransmitter implements Player {
+        private final AtomicReference<Hit> memory = new AtomicReference<>();
+
+        @Override
+        public Optional<Hit> play(State state) {
+            return Optional.ofNullable(memory.getAndSet(null));
+        }
+
+        protected void record(Hit hit) {
+            memory.set(hit);
+        }
+    }
 }
-    
