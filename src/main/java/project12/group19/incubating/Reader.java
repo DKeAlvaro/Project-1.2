@@ -24,7 +24,7 @@ import java.util.Set;
 public class Reader implements ConfigurationReader {
     public Configuration read(String path) throws IOException {
 
-        double xSpeed = 3;
+        double xSpeed = 0;
         double ySpeed = 0;
         double xPosition;
         double yPosition;

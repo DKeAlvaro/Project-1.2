@@ -90,11 +90,11 @@ public class GameHandler implements Engine {
                         current.getBallState().getXSpeed() + identity.getXVelocity(),
                         current.getBallState().getYSpeed() + identity.getYVelocity(),
                         current.getBallState().getXPosition(),
-                        current.getBallState().getXPosition()
+                        current.getBallState().getYPosition()
                 ))
                 .orElse(current.getBallState());
 
-        if (ballMotion.getAbsoluteSpeed() < Solver.MOTION_ERROR) {
+        if (ballMotion.getAbsoluteSpeed() < 1E-3) {
             double x = ballMotion.getXPosition();
             double y = ballMotion.getYPosition();
             // TODO calculate this once and store somewhere
@@ -103,6 +103,10 @@ public class GameHandler implements Engine {
             double dh = Math.sqrt(dhdx * dhdx + dhdy * dhdy);
 
             if (dh < setup.getConfiguration().getGroundFriction().getStaticCoefficient()) {
+                if (!current.isStatic()) {
+                    System.out.println("The ball has stopped");
+                }
+
                 return new State.Standard(
                         current.getCourse(),
                         ballMotion,
@@ -112,6 +116,17 @@ public class GameHandler implements Engine {
                         current.getFouls()
                 );
             }
+        }
+
+        if (Math.abs(ballMotion.getXPosition()) > 25 || Math.abs(ballMotion.getYPosition()) > 25) {
+            return new State.Standard(
+                    current.getCourse(),
+                    setup.getConfiguration().getInitialMotion(),
+                    false,
+                    false,
+                    hits,
+                    current.getFouls() + 1
+            );
         }
 
         return new State.Standard(

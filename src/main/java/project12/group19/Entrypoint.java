@@ -86,14 +86,19 @@ public class Entrypoint {
 
         Setup.Standard setup = new Setup.Standard(configuration, 60, 10, new Solver(), player, List.of(
                 gui::render,
-                state -> System.out.printf(
-                        "x=%.3f, y=%.3f, vx=%.3f, vy=%.3f, z=%.3f\n",
-                        state.getBallState().getXPosition(),
-                        state.getBallState().getYPosition(),
-                        state.getBallState().getXSpeed(),
-                        state.getBallState().getYSpeed(),
-                        configuration.getHeightProfile().getHeight(state.getBallState().getXPosition(), state.getBallState().getYPosition())
-                )
+                state -> {
+                    if (state.isStatic()) {
+                        return;
+                    }
+                    System.out.printf(
+                            "x=%.3f, y=%.3f, vx=%.3f, vy=%.3f, z=%.3f\n",
+                            state.getBallState().getXPosition(),
+                            state.getBallState().getYPosition(),
+                            state.getBallState().getXSpeed(),
+                            state.getBallState().getYSpeed(),
+                            configuration.getHeightProfile().getHeight(state.getBallState().getXPosition(), state.getBallState().getYPosition())
+                    );
+                }
         ));
 
         new GameHandler().launch(setup);
