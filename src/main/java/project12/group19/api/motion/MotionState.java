@@ -6,6 +6,10 @@ public interface MotionState {
     double getXPosition();
     double getYPosition();
 
+    default double getAbsoluteSpeed() {
+        return Math.sqrt(getXSpeed() * getXSpeed() + getYSpeed() * getYSpeed());
+    }
+
     static MotionState zero() {
         return new Standard(0, 0, 0, 0);
     }
