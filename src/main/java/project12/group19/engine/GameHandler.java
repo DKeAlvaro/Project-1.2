@@ -58,6 +58,10 @@ public class GameHandler implements Engine {
     }
 
     private State tick(State current, Setup setup) {
+        if (current.isTerminal()) {
+            return current;
+        }
+
         double targetDistanceX = current.getBallState().getXPosition() - current.getCourse().getHole().getxHole();
         double targetDistanceY = current.getBallState().getYPosition() - current.getCourse().getHole().getyHole();
         double targetDistance = Math.sqrt(targetDistanceX * targetDistanceX + targetDistanceY * targetDistanceY);
@@ -119,10 +123,11 @@ public class GameHandler implements Engine {
         }
 
         if (Math.abs(ballMotion.getXPosition()) > 25 || Math.abs(ballMotion.getYPosition()) > 25) {
+            boolean termination = current.getFouls() >= 3;
             return new State.Standard(
                     current.getCourse(),
-                    setup.getConfiguration().getInitialMotion(),
-                    false,
+                    termination ? current.getBallState() : setup.getConfiguration().getInitialMotion(),
+                    termination,
                     false,
                     hits,
                     current.getFouls() + 1
