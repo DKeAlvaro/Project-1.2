@@ -6,3 +6,6 @@ build
 .mvn/wrapper/*
 !.mvn/wrapper/maven-wrapper.properties
 target
+replay.txt
+configuration.properties
+.DS_Store

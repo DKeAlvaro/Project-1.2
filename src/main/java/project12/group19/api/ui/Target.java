@@ -1,4 +1,4 @@
-package main.java.project12.group19.api.ui;
+package project12.group19.api.ui;
 
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
@@ -29,7 +29,4 @@ public class Target {
         Ellipse2D.Double target = new Ellipse2D.Double(xLeft,yTop,2*radius,2*radius);
         g2.fill(target);
     }
-
-
-
 }

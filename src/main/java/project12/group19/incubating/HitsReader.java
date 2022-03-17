@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-import project12.group19.api.support.ConfigurationReader;
-
 public class HitsReader {
 
     public static void main(String[] args) throws IOException {
@@ -14,7 +12,7 @@ public class HitsReader {
         test.read("C:\\Users\\Alvaro\\Documents\\GitHub\\Project-1.2\\input-example-for-hits.txt");
     }
 
-    public float[][] read(String path) throws IOException {
+    public double[][] read(String path) throws IOException {
         File file = new File(path);
 
         BufferedReader br = new BufferedReader(new FileReader(file));
@@ -27,7 +25,7 @@ public class HitsReader {
         while ((st = br.readLine()) != null) {
             lines++;
         }
-        float hits[][] = new float[lines][2]; // storing the hits in a 2d array (x & y positions)
+        double hits[][] = new double[lines][2]; // storing the hits in a 2d array (x & y positions)
 
         BufferedReader fr = new BufferedReader(new FileReader(file));
 
@@ -43,7 +41,7 @@ public class HitsReader {
                     currentNumber += st.charAt(index);
                     index++;
                 }
-                hits[xIndex][0] = Float.parseFloat(currentNumber);
+                hits[xIndex][0] = Double.parseDouble(currentNumber);
                 currentNumber = "";
             }
 
@@ -56,7 +54,7 @@ public class HitsReader {
                     currentNumber += st.charAt(index);
                     index++;
                 }
-                hits[xIndex][1] = Float.parseFloat(currentNumber);
+                hits[xIndex][1] = Double.parseDouble(currentNumber);
                 xIndex += 1;
                 currentNumber = "";
             }

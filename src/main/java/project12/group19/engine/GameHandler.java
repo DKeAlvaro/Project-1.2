@@ -8,9 +8,12 @@ import project12.group19.api.engine.Setup;
 import project12.group19.api.game.Configuration;
 import project12.group19.api.geometry.plane.PlanarCoordinate;
 import project12.group19.api.geometry.space.Hole;
+import project12.group19.api.motion.Acceleration;
 import project12.group19.api.motion.Friction;
 import project12.group19.api.motion.MotionCalculator;
 import project12.group19.api.motion.MotionState;
+import project12.group19.math.DerivativeEstimator;
+import project12.group19.motion.AccelerationCalculator;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -47,10 +50,20 @@ public class GameHandler implements Engine {
 
     private State tick(State current, Setup setup) {
         double deltaT = 1.0 / setup.getDesiredTickRate();
+        AccelerationCalculator accelerationCalculator = new AccelerationCalculator(
+                setup.getConfiguration().getHeightProfile(),
+                new DerivativeEstimator(1E-6),
+                setup.getConfiguration().getGroundFriction()
+        );
+
+        Acceleration acceleration = accelerationCalculator.getAcceleration(
+                PlanarCoordinate.create(current.getBallState().getXPosition(), current.getBallState().getYPosition()),
+                current.getBallState()
+        );
 
         return new State.Standard(
                 current.getCourse(),
-                setup.getMotionCalculator().calculate(current.getBallState(), null, deltaT),
+                setup.getMotionCalculator().calculate(current.getBallState(), acceleration, deltaT),
                 false,
                 false,
                 current.getHits(),

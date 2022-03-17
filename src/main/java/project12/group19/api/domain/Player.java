@@ -8,10 +8,26 @@ import java.util.Optional;
  * optional) or refuse to (by returning empty optional).
  */
 public interface Player {
-    Optional<Hit> play(Course course);
+    Optional<Hit> play(State state);
 
     interface Hit {
         double getXVelocity();
         double getYVelocity();
+
+        record Standard(double xVelocity, double yVelocity) implements Hit {
+            @Override
+            public double getXVelocity() {
+                return xVelocity;
+            }
+
+            @Override
+            public double getYVelocity() {
+                return yVelocity;
+            }
+        }
+
+        static Hit create(double xVelocity, double yVelocity) {
+            return new Standard(xVelocity, yVelocity);
+        }
     }
 }
