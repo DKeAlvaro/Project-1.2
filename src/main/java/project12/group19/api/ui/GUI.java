@@ -1,6 +1,6 @@
-package main.java.project12.group19.api.ui;
+package project12.group19.api.ui;
 
-import main.java.project12.group19.api.ui.GrassComponent;
+
 
 import javax.swing.*;
 import java.awt.*;
@@ -39,7 +39,7 @@ public class GUI {
         ballY = intialY;
         ballZ = initialZ;
 
-        ballX=GrassComponent.coorToSwingX(ballX)-20;
+        // ballX=GrassComponent.coorToSwingX(ballX)-20;
         ballY = GrassComponent.coorToSwingX(ballY)-20;
 
         this.targetX = targetX;
@@ -157,7 +157,7 @@ public class GUI {
      *             application through command line in the OS.
      */
     public static void main(String[] args) {
-        new GUI(10,10,2,-20,-20,5);
+        new GUI(10,20,5,50,0,0);        
     }
 
     /**

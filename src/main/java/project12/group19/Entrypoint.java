@@ -18,10 +18,10 @@ public class Entrypoint {
         Reader reader = new Reader();
         project12.group19.api.game.Configuration configuration;
         configuration = reader.read(location);
-        // MotionCalculator initialState = (MotionCalculator) c.getInitialMotion();
+        
 
         new Setup.Standard(configuration, 3, 3, null, null, null);
-        new GUI();
+        new GUI((int)configuration.getHole().getxHole(), (int)configuration.getHole().getyHole(), (int)configuration.getHole().getRadius(), (int)configuration.getInitialMotion().getXPosition(), (int)configuration.getInitialMotion().getYPosition(), 0);
 
     }
 }

@@ -1,4 +1,4 @@
-package main.java.project12.group19.api.ui;
+package project12.group19.api.ui;
 
 import javax.swing.*;
 import java.awt.*;
