@@ -333,7 +333,7 @@ public class GUI implements Renderer {
         }
 
         if (state.isTerminal()) {
-            statusGameState.setText(state.getFouls() == 0 ? "Won!" : "Lost!");
+            statusGameState.setText(state.getFouls() < 4 ? "Won!" : "Lost!");
         } else if (state.getFouls() > 0 && state.getFouls() < 4) {
             statusGameState.setText("Fouls: " + state.getFouls() + "/3");
         }
