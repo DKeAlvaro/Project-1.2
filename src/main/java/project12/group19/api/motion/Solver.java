@@ -13,12 +13,12 @@ public class Solver implements MotionCalculator {
         long startTime = System.nanoTime();
         //this was just for testing
         Solver solver = new Solver();
-        MotionState motionState = new MotionState.Standard(3,0,-1,-0.5);
-        FrictionC friction = new FrictionC(0.2, 0.1);
+        MotionState motionState = new MotionState.Standard(2,0,0,0);
+        FrictionC friction = new FrictionC(0.1, 0.05);
         
         double deltaT = 0.001;
 
-        HeightProfile heightProfile = (x, y) -> Math.sin((x - y) / 7);
+        HeightProfile heightProfile = (x, y) -> (1/20) *(Math.pow(x,2) + Math.pow(y, 2));//Math.sin((x - y) / 7);
         while(solver.isMoving(heightProfile, motionState, friction, deltaT)){
             Acc acceleration = solver.acceleration(heightProfile, motionState, friction, deltaT);
             motionState = solver.calculate(motionState, acceleration, deltaT);
@@ -140,7 +140,7 @@ public class Solver implements MotionCalculator {
         // TO DO: get the function from the input file
        //return 0.1 *x +1;
        //this are functions for testing
-      return Math.pow(Math.E, -(x*x + y*y)/40);
+      return (1/20)*(Math.pow(x,2)+ Math.pow(y,2));
       //return 0.05 *y +2;
       //return 0.5*(Math.sin((x-y)/7)+0.9);
       //return 0;
