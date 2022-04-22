@@ -9,11 +9,15 @@ import project12.group19.engine.GameHandler;
 import project12.group19.incubating.HitsReader;
 import project12.group19.incubating.Reader;
 import project12.group19.player.FixedPlayer;
+import project12.group19.player.ai.HitCalculator;
+import project12.group19.player.ai.NaiveBot;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class Entrypoint {
@@ -77,26 +81,22 @@ public class Entrypoint {
         Optional<double[][]> replay = resolveReplay(args);
         Configuration configuration = resolveConfiguration(args);
         GUI gui = createUI(configuration, replay.isEmpty());
-        Player player = replay
-                .<Player>map(FixedPlayer::new)
-                .orElse(gui.getController());
+        Map<String, Player> players = new HashMap<>();
+        players.put("human", gui.getController());
+        players.put("bot.naive", new NaiveBot(new HitCalculator.Directed(3)));
+        replay.map(FixedPlayer::new).ifPresent(player -> players.put("replay", player));
 
-        Setup.Standard setup = new Setup.Standard(configuration, 60, 10, new Solver(), player, List.of(
-                gui::render,
-                state -> {
-                    if (state.isStatic()) {
-                        return;
-                    }
-                    System.out.printf(
-                            "x=%.3f, y=%.3f, vx=%.3f, vy=%.3f, z=%.3f\n",
-                            state.getBallState().getXPosition(),
-                            state.getBallState().getYPosition(),
-                            state.getBallState().getXSpeed(),
-                            state.getBallState().getYSpeed(),
-                            configuration.getHeightProfile().getHeight(state.getBallState().getXPosition(), state.getBallState().getYPosition())
-                    );
-                }
-        ));
+        String selection = Optional.ofNullable(configuration.getPlayer()).orElse("human");
+        Player player = Optional.ofNullable(players.get(selection))
+                .orElseThrow(() -> new IllegalArgumentException("Unknown player type: " + selection));
+
+        Player loggingWrapper = state -> {
+            Optional<Player.Hit> response = player.play(state);
+            response.ifPresent(hit -> System.out.println("Hit was made: " + hit));
+            return response;
+        };
+
+        Setup.Standard setup = new Setup.Standard(configuration, 600, 10, new Solver(), loggingWrapper, List.of(gui::render));
 
         new GameHandler().launch(setup);
 

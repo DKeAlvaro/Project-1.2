@@ -16,10 +16,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class Reader implements ConfigurationReader {
     public Configuration read(String path) throws IOException {
@@ -34,7 +31,7 @@ public class Reader implements ConfigurationReader {
         double radius;
 
         HeightProfile heightProfile = null;
-        Set<Item> obstacles = null;
+        Set<Item> obstacles = Collections.emptySet();
         MotionState initialMotion;
         Friction groundFriction = null;
         Friction sandFriction = null;
@@ -71,10 +68,11 @@ public class Reader implements ConfigurationReader {
         double timescale = Optional.ofNullable(values.get("timeScale"))
                 .map(Double::parseDouble)
                 .orElse(1.0);
+        String player = values.get("player");
 
         InfixExpression heightExpression = new Parser(ComponentRegistry.standard()).parse(values.get("heightProfile"));
         heightProfile = (x, y) -> {
-            InfixExpression resolved = heightExpression.resolve(Map.of("x", x, "y", y, "pi", Math.PI));
+            InfixExpression resolved = heightExpression.resolve(Map.of("x", x, "y", y, "pi", Math.PI, "e", Math.E));
             return resolved.calculate()
                     .orElseThrow(() -> {
                         String message = String.format(
@@ -90,6 +88,15 @@ public class Reader implements ConfigurationReader {
         initialMotion = new MotionStateClass(xSpeed, ySpeed, xPosition, yPosition);
         hole = new Hole(xHole, yHole, radius);
 
-        return new Configuration.Standard(heightProfile, obstacles, initialMotion, groundFriction, sandFriction, hole, timescale);
+        return new Configuration.Standard(
+                heightProfile,
+                obstacles,
+                initialMotion,
+                groundFriction,
+                sandFriction,
+                hole,
+                timescale,
+                player
+        );
     }
 }

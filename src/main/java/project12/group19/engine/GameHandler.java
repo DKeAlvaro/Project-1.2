@@ -154,8 +154,7 @@ public class GameHandler implements Engine {
                         MotionState.zero(),
                         Friction.create(0.1, 0.1),
                         Friction.create(0.1, 0.1),
-                        new Hole(-1, -1, 0.3),
-                        1
+                        new Hole(-1, -1, 0.3)
                 ),
                 3,
                 3,
