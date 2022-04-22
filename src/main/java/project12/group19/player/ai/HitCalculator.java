@@ -8,6 +8,7 @@ import project12.group19.api.motion.MotionState;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 /**
  * Implementations of this interface calculate x-y velocity pair
@@ -74,6 +75,8 @@ public interface HitCalculator {
     }
 
     class Directed implements HitCalculator {
+        private static final double NOISE_PERCENTAGE = 0.2;
+        private static final Random NOISE = new Random();
         private final double force;
 
         public Directed(double force) {
@@ -87,9 +90,14 @@ public interface HitCalculator {
             double xPath = hole.getxHole() - ball.getXPosition();
             double yPath = hole.getyHole() - ball.getYPosition();
             double angle = Math.atan2(yPath, xPath);
-            double xVelocity = Math.cos(angle) * force;
-            double yVelocity = Math.sin(angle) * force;
+            double xVelocity = noisify(Math.cos(angle) * force);
+            double yVelocity = noisify(Math.sin(angle) * force);
             return Optional.of(Player.Hit.create(xVelocity, yVelocity));
+        }
+
+        private static double noisify(double value) {
+            double multiplier = 1 - NOISE_PERCENTAGE * (2 * NOISE.nextDouble() - 1);
+            return value * multiplier;
         }
     }
 }
