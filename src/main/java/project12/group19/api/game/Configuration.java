@@ -16,6 +16,7 @@ public interface Configuration {
     Friction getSandFriction();
     Hole getHole();
     double getTimeScale();
+    String getPlayer();
 
     record Standard(
             HeightProfile heightProfile,
@@ -24,7 +25,8 @@ public interface Configuration {
             Friction groundFriction,
             Friction sandFriction,
             Hole hole,
-            double timeScale
+            double timeScale,
+            String player
     ) implements Configuration {
         public Standard(
                 HeightProfile heightProfile,
@@ -41,7 +43,8 @@ public interface Configuration {
                     groundFriction,
                     sandFriction,
                     hole,
-                    1
+                    1,
+                    null
             );
         }
 
@@ -78,6 +81,11 @@ public interface Configuration {
         @Override
         public double getTimeScale() {
             return timeScale;
+        }
+
+        @Override
+        public String getPlayer() {
+            return player;
         }
     }
 }
