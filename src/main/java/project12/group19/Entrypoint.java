@@ -1,6 +1,7 @@
 package project12.group19;
 
 import project12.group19.api.domain.Player;
+import project12.group19.api.domain.State;
 import project12.group19.api.engine.Setup;
 import project12.group19.api.game.Configuration;
 import project12.group19.api.motion.Solver;
@@ -81,9 +82,10 @@ public class Entrypoint {
         Optional<double[][]> replay = resolveReplay(args);
         Configuration configuration = resolveConfiguration(args);
         GUI gui = createUI(configuration, replay.isEmpty());
+        Solver solver = new Solver();
         Map<String, Player> players = new HashMap<>();
         players.put("human", gui.getController());
-        players.put("bot.naive", new NaiveBot(new HitCalculator.Directed(3)));
+        players.put("bot.naive", new NaiveBot(new HitCalculator.Directed(solver, configuration)));
         replay.map(FixedPlayer::new).ifPresent(player -> players.put("replay", player));
 
         String selection = Optional.ofNullable(configuration.getPlayer()).orElse("human");
@@ -96,7 +98,7 @@ public class Entrypoint {
             return response;
         };
 
-        Setup.Standard setup = new Setup.Standard(configuration, 600, 10, new Solver(), loggingWrapper, List.of(gui::render));
+        Setup.Standard setup = new Setup.Standard(configuration, 60, 10, solver, loggingWrapper, List.of(gui::render));
 
         new GameHandler().launch(setup);
 

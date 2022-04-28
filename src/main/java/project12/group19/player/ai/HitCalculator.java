@@ -2,9 +2,11 @@ package project12.group19.player.ai;
 
 import project12.group19.api.domain.Player;
 import project12.group19.api.domain.State;
+import project12.group19.api.game.Configuration;
 import project12.group19.api.geometry.plane.PlanarCoordinate;
-import project12.group19.api.geometry.space.Hole;
-import project12.group19.api.motion.MotionState;
+import project12.group19.api.motion.Solver;
+//import project12.group19.incubating.HillClimbing1;
+import project12.group19.incubating.HillClimbing2;
 
 import java.util.List;
 import java.util.Optional;
@@ -75,16 +77,20 @@ public interface HitCalculator {
     }
 
     class Directed implements HitCalculator {
-        private static final double NOISE_PERCENTAGE = 0.2;
+        private static final double NOISE_PERCENTAGE = 0;
         private static final Random NOISE = new Random();
-        private final double force;
+        private static Configuration configuration;
+        private final Solver solver;
 
-        public Directed(double force) {
-            this.force = force;
+        public Directed(Solver solver, Configuration configuration) {
+            this.solver = solver;
+            this.configuration = configuration;
+
         }
 
         @Override
         public Optional<Player.Hit> shootAt(State state, PlanarCoordinate target, double tolerance) {
+            /*
             MotionState ball = state.getBallState();
             Hole hole = state.getCourse().getHole();
             double xPath = hole.getxHole() - ball.getXPosition();
@@ -93,7 +99,12 @@ public interface HitCalculator {
             double xVelocity = noisify(Math.cos(angle) * force);
             double yVelocity = noisify(Math.sin(angle) * force);
             return Optional.of(Player.Hit.create(xVelocity, yVelocity));
+            */
+
+            HillClimbing2 hillClimbing2 = new HillClimbing2(solver, configuration);
+            return hillClimbing2.hillClimbing1(state.getBallState().getXPosition(), state.getBallState().getYPosition());
         }
+
 
         private static double noisify(double value) {
             double multiplier = 1 - NOISE_PERCENTAGE * (2 * NOISE.nextDouble() - 1);
