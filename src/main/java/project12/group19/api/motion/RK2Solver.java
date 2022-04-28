@@ -2,25 +2,68 @@ package project12.group19.api.motion;
 
 import project12.group19.api.geometry.space.HeightProfile;
 
+import java.util.function.ToDoubleBiFunction;
+
 public class RK2Solver implements MotionCalculator{
     public static final double MOTION_ERROR = 1E-6;
     private static final double h = 0.00000001;
     private static final double g = 9.81;
+    private final HeightProfile profile = (x,y) -> (0.1*x +1);;
+    private final Friction friction =  new FrictionC(0.1,0.05);
+
+
+    public static void main(String[]args){
+        long startTime = System.nanoTime();
+        //this was just for testing
+        RK2Solver solver = new RK2Solver();
+        MotionState motionState = new MotionState.Standard(2,0,0,0);
+        FrictionC friction = new FrictionC(0.2, 0.05);
+
+        double deltaT = 0.0001;
+
+        HeightProfile heightProfile = (x, y) -> (0.1*x +1);//Math.sin((x - y) / 7);
+        while(solver.isMoving(heightProfile, motionState, friction, deltaT)){
+            Acc acceleration = solver.acceleration(heightProfile, motionState, friction, deltaT);
+            motionState = solver.calculate(motionState, acceleration, deltaT);
+
+        }
+        long endTime = System.nanoTime();
+        long duration = (long) ((endTime - startTime)/Math.pow(10, 6));
+
+        System.out.println(motionState.getXPosition() + " " + motionState.getYPosition());
+        System.out.println(".    time: "+ duration + " ms.");
+
+    }
     @Override
     public MotionState calculate(MotionState state, Acceleration acceleration, double deltaT) {
-        double x =0;
-        double y=0;
-        double xSpeed= 0;
-        double ySpeed = 0;
+        double x = state.getXPosition();
+        double y= state.getYPosition();
+        double xSpeed= state.getXSpeed();
+        double ySpeed = state.getYSpeed();
 
+        double k1X= calcK(deltaT, xSpeed);
+        double k1Y= calcK(deltaT, ySpeed);
+        double k1XSpeed= calcK(deltaT, acceleration.getX());
+        double k1YSpeed= calcK(deltaT, acceleration.getY());
 
-        return new MotionState.Standard(xSpeed, ySpeed, x, y);
+        MotionState stateTemp= new MotionState.Standard(xSpeed + (2/3.0)* deltaT* k1XSpeed, ySpeed+ (2/3.0)* deltaT* k1YSpeed, x+ (2/3.0)* deltaT* k1X, y+ (2/3.0)* deltaT*k1Y);
+        Acc newAcc= acceleration(profile, stateTemp, friction, deltaT); //TO DO friction
+
+        double k2X= calcK(deltaT, xSpeed+ (2/3.0)* deltaT * newAcc.getX());
+        double k2Y= calcK(deltaT, ySpeed + (2/3.0) * deltaT * newAcc.getY())  ;
+        double k2XSpeed= calcK(deltaT, newAcc.getX());
+        double k2YSpeed= calcK(deltaT, newAcc.getY());
+
+        double xProjected = x + (1/4.0) * k1X + (3/4.0) * k2X;
+        double yProjected = y + (1/4.0) * k1Y + (3/4.0) * k2Y;
+        double xSpeedProjected = xSpeed + (1/4.0) * k1XSpeed + (3/4.0) * k2XSpeed;
+        double ySpeedProjected = ySpeed + (1/4.0) * k1YSpeed + (3/4.0) * k2YSpeed;
+
+        return new MotionState.Standard(xSpeedProjected, ySpeedProjected, xProjected, yProjected);
     }
-    public double calcK1(double step, double t, double previous){
-        return 0;
-    }
-    public double calcK2(double k1,double step, double t, double previous){
-        return 0;
+
+    public double calcK(double step, double der) {
+        return step * der;
     }
 
      /** Computes the derivate of h with respect to X
