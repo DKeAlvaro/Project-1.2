@@ -27,7 +27,7 @@ public class HillClimbing2 {
     public static HeightProfile profile;
     public static Friction friction;
 
-    public static int numOfShots = 100;
+    public static int numOfShots = 20;
     public static Shoot[] shots = new Shoot[numOfShots];
 
     public static double stepSize = 0.05;
@@ -62,10 +62,15 @@ public class HillClimbing2 {
         return Optional.of(Player.Hit.create((holeX-startingX) * f, (holeY-startingY) * f));
     }
 
-    public Optional<Player.Hit> hillClimbing1(double startingX, double startingY) {
+    public Optional<Player.Hit> StraightShot(double startingX, double startingY) {
         double f = 0.3;
+        return Optional.of(Player.Hit.create((holeX-startingX) * f, (holeY-startingY) * f));
+    }
+
+        public Optional<Player.Hit> hillClimbing1(double startingX, double startingY) {
+        double f = 0.5;
         double iterations;
-        double min = 1.5;
+        double min = 3;
         double max = 0.5;
         double noise;
 
@@ -101,19 +106,23 @@ public class HillClimbing2 {
         return shoot.getDistanceToHole() < lookForBetterShot(shoot).getDistanceToHole();
     }
     public static Shoot lookForBetterShot(Shoot shoot){
-        double deltaT = 1;
+        double deltaT = 0.5;
         double newX;
         double newY;
 
-        if(shoot.getFinalX()>holeX){
+        if(Math.abs(shoot.getFinalX()-holeX) < 0.4){
+            newX = shoot.getxDir();
+        } else if(shoot.getFinalX()>holeX){
             newX = shoot.getxDir() - deltaT;
-        }else {
+        } else{
             newX = shoot.getxDir() + deltaT;
         }
 
-        if (shoot.getFinalY()>holeY){
+        if(Math.abs(shoot.getFinalY()-holeY) < 0.4){
+            newY = shoot.getYDir();
+        } else if(shoot.getFinalY()>holeY){
             newY = shoot.getYDir() - deltaT;
-        }else {
+        } else{
             newY = shoot.getYDir() + deltaT;
         }
         return new Shoot(newX, newY, shoot.getStartingX(), shoot.getStartingY());
@@ -136,10 +145,12 @@ public class HillClimbing2 {
             if(getDistance(holeX, current.getXPosition(), holeY, current.getYPosition()) < minDistance){
                 minDistance = getDistance(holeX, current.getXPosition(), holeY, current.getYPosition());
                 shoot.setDistanceToHole(getDistance(holeX, current.getXPosition(), holeY, current.getYPosition()));
+                shoot.setFinalX(current.getXPosition());
+                shoot.setFinalY(current.getYPosition());
+
             }
         }
-        shoot.setFinalX(current.getXPosition());
-        shoot.setFinalY(current.getYPosition());
+
     }
 
 
