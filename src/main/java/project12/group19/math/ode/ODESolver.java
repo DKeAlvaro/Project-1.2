@@ -1,7 +1,8 @@
 package project12.group19.math.ode;
 
+import project12.group19.math.BinaryOperation;
+
 import java.util.OptionalDouble;
-import java.util.function.DoubleFunction;
 
 /**
  * This interface describes a numerical solver of ordinary differential
@@ -27,5 +28,5 @@ public interface ODESolver {
      * value to be uncomputable, solver is allowed to return empty
      * {@link OptionalDouble} as well.
      */
-    OptionalDouble apply(double value, double position, double step, DoubleFunction<OptionalDouble> derivative);
+    OptionalDouble apply(double value, double position, double step, BinaryOperation derivative);
 }
