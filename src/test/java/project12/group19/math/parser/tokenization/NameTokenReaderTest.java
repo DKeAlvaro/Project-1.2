@@ -19,7 +19,7 @@ class NameTokenReaderTest {
                 Arguments.of("sin", 0, "sin"),
                 Arguments.of("  sin", 2, "sin"),
                 Arguments.of("  sin  ", 2, "sin"),
-                Arguments.of("x.k", 0, "Math.sin"),
+                Arguments.of("x.k", 0, "x.k"),
                 Arguments.of("(y1)", 1, "y1"),
                 Arguments.of("x", 0, "x")
         );
