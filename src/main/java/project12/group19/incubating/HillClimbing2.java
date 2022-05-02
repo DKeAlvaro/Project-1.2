@@ -12,9 +12,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Optional;
 
-import static project12.group19.incubating.HillClimbing2.friction;
-import static project12.group19.incubating.HillClimbing2.profile;
-
 public class HillClimbing2 {
 
     public static Solver solver;
@@ -140,7 +137,7 @@ public class HillClimbing2 {
     public static void getShotDistanceToHole(Friction friction, HeightProfile profile, MotionState current, Shoot shoot) {
         double minDistance = getDistance(holeX, current.getXPosition(), holeY, current.getYPosition());
 
-        while (solver.isMoving(profile, current, new FrictionC(friction.getStaticCoefficient(), 0.2), stepSize)) {
+        while (solver.isMoving(profile, current, new FrictionC(friction.getStaticCoefficient(), 0.2))) {
             current = solver.calculate(current, Solver.acceleration(profile, current, friction, stepSize), stepSize);
             if(getDistance(holeX, current.getXPosition(), holeY, current.getYPosition()) < minDistance){
                 minDistance = getDistance(holeX, current.getXPosition(), holeY, current.getYPosition());
