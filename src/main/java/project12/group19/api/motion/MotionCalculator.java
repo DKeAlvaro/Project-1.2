@@ -8,15 +8,11 @@ public interface MotionCalculator {
      * time {@code currentTime + deltaT}.
      *
      * @param state Current item state.
-     * @param acceleration Precomputed x/y acceleration for the specific
-     * point set in {@param state}. Kept outside of calculator to
-     * prevent repetition since this value would be the same for all
-     * calculator implementations.
      * @param deltaT Number of seconds (fraction of second) "in future"
      * relative to current state at which next state should be computed.
      * @return New motion state for this specific item.
      */
-    MotionState calculate(MotionState state, Acceleration acceleration, double deltaT);
+    MotionState calculate(MotionState state, double deltaT);
 
     /**
      * A dummy implementation that would make the ball rotate around origin
@@ -29,7 +25,7 @@ public interface MotionCalculator {
         }
 
         @Override
-        public MotionState calculate(MotionState state, Acceleration acceleration, double deltaT) {
+        public MotionState calculate(MotionState state, double deltaT) {
             double radius = origin.distanceTo(PlanarCoordinate.create(state.getXPosition(), state.getYPosition()));
             double x = state.getXPosition() - origin.getX();
             double y = state.getYPosition() - origin.getY();

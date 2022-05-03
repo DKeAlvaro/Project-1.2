@@ -138,7 +138,7 @@ public class HillClimbing2 {
         double minDistance = getDistance(holeX, current.getXPosition(), holeY, current.getYPosition());
 
         while (solver.isMoving(profile, current, new FrictionC(friction.getStaticCoefficient(), 0.2))) {
-            current = solver.calculate(current, Solver.acceleration(profile, current, friction, stepSize), stepSize);
+            current = solver.calculate(current, stepSize);
             if(getDistance(holeX, current.getXPosition(), holeY, current.getYPosition()) < minDistance){
                 minDistance = getDistance(holeX, current.getXPosition(), holeY, current.getYPosition());
                 shoot.setDistanceToHole(getDistance(holeX, current.getXPosition(), holeY, current.getYPosition()));

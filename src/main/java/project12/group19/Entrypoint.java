@@ -1,7 +1,6 @@
 package project12.group19;
 
 import project12.group19.api.domain.Player;
-import project12.group19.api.domain.State;
 import project12.group19.api.engine.Setup;
 import project12.group19.api.game.Configuration;
 import project12.group19.api.motion.Solver;
@@ -9,6 +8,7 @@ import project12.group19.api.ui.GUI;
 import project12.group19.engine.GameHandler;
 import project12.group19.incubating.HitsReader;
 import project12.group19.incubating.Reader;
+import project12.group19.math.ode.Euler;
 import project12.group19.player.FixedPlayer;
 import project12.group19.player.ai.HitCalculator;
 import project12.group19.player.ai.NaiveBot;
@@ -82,7 +82,7 @@ public class Entrypoint {
         Optional<double[][]> replay = resolveReplay(args);
         Configuration configuration = resolveConfiguration(args);
         GUI gui = createUI(configuration, replay.isEmpty());
-        Solver solver = new Solver();
+        Solver solver = new Solver(new Euler(), configuration.getHeightProfile(), configuration.getGroundFriction());
         Map<String, Player> players = new HashMap<>();
         players.put("human", gui.getController());
         players.put("bot.naive", new NaiveBot(new HitCalculator.Directed(solver, configuration)));
