@@ -2,9 +2,7 @@ package project12.group19.api.motion;
 
 import project12.group19.api.geometry.space.HeightProfile;
 
-import java.util.function.ToDoubleBiFunction;
-
-public class RK2Solver implements MotionCalculator{
+public class RK2Solver implements MotionCalculator {
     public static final double MOTION_ERROR = 1E-6;
     private static final double h = 0.00000001;
     private static final double g = 9.81;
@@ -23,8 +21,7 @@ public class RK2Solver implements MotionCalculator{
 
         HeightProfile heightProfile = (x, y) -> (0.1*x +1);//Math.sin((x - y) / 7);
         while(solver.isMoving(heightProfile, motionState, friction, deltaT)){
-            Acc acceleration = solver.acceleration(heightProfile, motionState, friction, deltaT);
-            motionState = solver.calculate(motionState, acceleration, deltaT);
+            motionState = solver.calculate(motionState, deltaT);
 
         }
         long endTime = System.nanoTime();
@@ -35,7 +32,7 @@ public class RK2Solver implements MotionCalculator{
 
     }
     @Override
-    public MotionState calculate(MotionState state, Acceleration acceleration, double deltaT) {
+    public MotionState calculate(MotionState state, double deltaT) {
         double x = state.getXPosition();
         double y= state.getYPosition();
         double xSpeed= state.getXSpeed();
@@ -43,8 +40,8 @@ public class RK2Solver implements MotionCalculator{
 
         double k1X= calcK(deltaT, xSpeed);
         double k1Y= calcK(deltaT, ySpeed);
-        double k1XSpeed= calcK(deltaT, acceleration.getX());
-        double k1YSpeed= calcK(deltaT, acceleration.getY());
+        double k1XSpeed= calcK(deltaT, AccCalculator.accelerationX(profile, state, friction));
+        double k1YSpeed= calcK(deltaT, AccCalculator.accelerationY(profile, state, friction));
 
         MotionState stateTemp= new MotionState.Standard(xSpeed + (2/3.0)* deltaT* k1XSpeed, ySpeed+ (2/3.0)* deltaT* k1YSpeed, x+ (2/3.0)* deltaT* k1X, y+ (2/3.0)* deltaT*k1Y);
         Acc newAcc= acceleration(profile, stateTemp, friction, deltaT); //TO DO friction

@@ -24,6 +24,9 @@ public interface ODESolver {
      * for specific value of variable. Since derivative isn't guaranteed
      * to be defined, it returns an {@link OptionalDouble}, which can be
      * empty (and implementations should account for that).
+     * Derivative follows classic {@code f(t, y)} interface, which
+     * means that first parameter would be position and second would be
+     * value.
      * @return Approximated function value. Since it's possible for
      * value to be uncomputable, solver is allowed to return empty
      * {@link OptionalDouble} as well.

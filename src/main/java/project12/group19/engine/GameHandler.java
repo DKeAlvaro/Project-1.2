@@ -44,8 +44,13 @@ public class GameHandler implements Engine {
         ));
         long interval = (long) (1_000_000_000.0 / setup.getDesiredTickRate());
         CompletableFuture<Void> calculations = loop.schedule(epoch -> {
-            state.set(tick(state.get(), setup));
-            return true;
+            try {
+                state.set(tick(state.get(), setup));
+                return true;
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+                return false;
+            }
         }, interval, TimeUnit.NANOSECONDS);
 
         long refreshInterval = (long) (1_000_000_000.0 / setup.getDesiredRefreshRate());
@@ -136,7 +141,7 @@ public class GameHandler implements Engine {
 
         return new State.Standard(
                 current.getCourse(),
-                setup.getMotionCalculator().calculate(ballMotion, acceleration, deltaT),
+                setup.getMotionCalculator().calculate(ballMotion, deltaT),
                 false,
                 false,
                 hits,
