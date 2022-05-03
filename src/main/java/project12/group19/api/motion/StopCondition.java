@@ -3,10 +3,10 @@ package project12.group19.api.motion;
 import project12.group19.api.geometry.space.HeightProfile;
 
 public class StopCondition {
-    Derivative d;
+
 
     public StopCondition(){
-        d= new Derivative();
+
     }
     public static final double MOTION_ERROR = 1E-6;
     /**
@@ -20,8 +20,8 @@ public class StopCondition {
         double x = motionState.getXPosition();
         double y = motionState.getYPosition();
         if(isVelocity0(motionState)){
-            double dhdx = d.derivativeHX(profile, x, y);
-            double dhdy = d.derivativeHY(profile, x, y);
+            double dhdx = Derivative.derivativeHX(profile, x, y);
+            double dhdy = Derivative.derivativeHY(profile, x, y);
             if(Math.abs(dhdx) < MOTION_ERROR && Math.abs(dhdy) <MOTION_ERROR  ){
                 return false;
             }else if(friction.getStaticCoefficient() > Math.sqrt(Math.pow(dhdx, 2)+ Math.pow(dhdy, 2))){
