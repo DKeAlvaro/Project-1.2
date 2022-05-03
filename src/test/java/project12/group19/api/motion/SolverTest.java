@@ -11,7 +11,7 @@ import project12.group19.math.ode.RK2;
 import project12.group19.math.ode.RK4;
 import project12.group19.math.parser.Parser;
 import project12.group19.math.parser.component.ComponentRegistry;
-import project12.group19.math.parser.expression.InfixExpression;
+import project12.group19.math.parser.expression.PostfixExpression;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -45,7 +45,7 @@ class SolverTest {
         int maxStepPower = 6;
         List<ODESolver> solvers = List.of(new Euler(), new RK2(), new RK4());
         Parser parser = new Parser(ComponentRegistry.standard());
-        InfixExpression expression = parser.parse(function);
+        PostfixExpression expression = parser.parse(function);
         HeightProfile profile = (x, y) -> {
             Map<String, Double> var = Map.of("e", Math.E, "pi", Math.PI, "x", x, "y", y);
             return expression.resolve(var).calculate().getAsDouble();

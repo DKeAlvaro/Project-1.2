@@ -7,7 +7,8 @@ public record Token<T>(String source, int offset, Kind kind, T value) {
         VALUE,
         VARIABLE,
         FUNCTION,
-        OPERATOR,
+        BINARY_OPERATOR,
+        UNARY_OPERATOR,
         OPENING_BRACE,
         CLOSING_BRACE
     }

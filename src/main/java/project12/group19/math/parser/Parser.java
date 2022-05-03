@@ -1,7 +1,7 @@
 package project12.group19.math.parser;
 
 import project12.group19.math.parser.component.ComponentRegistry;
-import project12.group19.math.parser.expression.InfixExpression;
+import project12.group19.math.parser.expression.PostfixExpression;
 import project12.group19.math.parser.expression.component.*;
 import project12.group19.math.parser.tokenization.*;
 
@@ -20,13 +20,14 @@ public class Parser {
                 new WhiteSpaceTokenReader(),
                 new BraceTokenReader(),
                 new CommaTokenReader(),
-                new OperatorTokenReader(registry),
+                new UnaryOperatorTokenReader(registry),
+                new BinaryOperatorTokenReader(registry),
                 new ValueTokenReader(),
                 new NameTokenReader()
         ));
     }
 
-    public InfixExpression parse(String source) {
+    public PostfixExpression parse(String source) {
         List<Token<?>> tokens = tokenizer.tokenize(source);
         List<Component> components = new ArrayList<>(tokens.size());
         Stack<Token<?>> operators = new Stack<>();
@@ -34,23 +35,21 @@ public class Parser {
         for (Token<?> token : tokens) {
             switch (token.kind()) {
                 case VALUE -> components.add(new Value(token.source(), (Double) token.value()));
-                case VARIABLE -> components.add(new Variable(token.source()));
+                case VARIABLE -> components.add(resolveVariable(token.source()));
                 case FUNCTION -> operators.add(token);
-                case OPERATOR -> {
-                    OperatorDefinition definition = (OperatorDefinition) token.value();
+                case BINARY_OPERATOR -> {
+                    BinaryOperatorDefinition definition = (BinaryOperatorDefinition) token.value();
 
                     while (hasCandidateOperator(operators, definition)) {
-                        Token<?> previous = operators.pop();
-                        components.add(new Operator(previous.source(), ((OperatorDefinition) previous.value())));
+                        components.add(operatorToComponent(operators.pop()));
                     }
 
                     operators.add(token);
                 }
-                case OPENING_BRACE -> operators.push(token);
+                case UNARY_OPERATOR, OPENING_BRACE -> operators.push(token);
                 case CLOSING_BRACE -> {
                     while (!operators.isEmpty() && operators.peek().kind() != Token.Kind.OPENING_BRACE) {
-                        Token<?> operator = operators.pop();
-                        components.add(new Operator(operator.source(), (OperatorDefinition) operator.value()));
+                        components.add(operatorToComponent(operators.pop()));
                     }
 
                     if (operators.isEmpty()) {
@@ -73,15 +72,35 @@ public class Parser {
                 components.add(getFunction(operator.source()));
             }
 
-            if (operator.kind() == Token.Kind.OPERATOR) {
-                components.add(new Operator(operator.source(), (OperatorDefinition) operator.value()));
+            if (operator.kind() == Token.Kind.BINARY_OPERATOR) {
+                components.add(new BinaryOperator(operator.source(), (BinaryOperatorDefinition) operator.value()));
+            }
+
+            if (operator.kind() == Token.Kind.UNARY_OPERATOR) {
+                components.add(new UnaryOperator(operator.source(), (UnaryOperatorDefinition) operator.value()));
             }
         }
 
-        return new InfixExpression(source, components);
+        return new PostfixExpression(components, source);
     }
 
-    private static boolean hasCandidateOperator(Stack<Token<?>> stack, OperatorDefinition current) {
+    private Component resolveVariable(String name) {
+        if (registry.hasConstant(name)) {
+            return new Value(name, registry.getConstant(name));
+        }
+
+        return new Variable(name);
+    }
+
+    private static Component operatorToComponent(Token<?> operator) {
+        if (operator.value() instanceof BinaryOperatorDefinition) {
+            return new BinaryOperator(operator.source(), (BinaryOperatorDefinition) operator.value());
+        }
+
+        return new UnaryOperator(operator.source(), (UnaryOperatorDefinition) operator.value());
+    }
+
+    private static boolean hasCandidateOperator(Stack<Token<?>> stack, BinaryOperatorDefinition current) {
         if (stack.isEmpty()) {
             return false;
         }
@@ -92,11 +111,11 @@ public class Parser {
             return false;
         }
 
-        if (tip.kind() != Token.Kind.OPERATOR) {
+        if (tip.kind() != Token.Kind.BINARY_OPERATOR) {
             return true;
         }
 
-        OperatorDefinition comparison = ((OperatorDefinition) tip.value());
+        BinaryOperatorDefinition comparison = ((BinaryOperatorDefinition) tip.value());
 
         if (comparison.getPrecedence() > current.getPrecedence()) {
             return true;

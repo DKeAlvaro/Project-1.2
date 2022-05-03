@@ -10,7 +10,7 @@ import project12.group19.api.motion.MotionState;
 import project12.group19.api.support.ConfigurationReader;
 import project12.group19.math.parser.Parser;
 import project12.group19.math.parser.component.ComponentRegistry;
-import project12.group19.math.parser.expression.InfixExpression;
+import project12.group19.math.parser.expression.PostfixExpression;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -114,12 +114,12 @@ public class Reader implements ConfigurationReader {
         int refreshRate = parseInteger(values.get("refreshRate"), 60);
         String player = values.get("player");
 
-        InfixExpression heightExpression = new Parser(ComponentRegistry.standard()).parse(values.get("heightProfile"));
+        PostfixExpression heightExpression = new Parser(ComponentRegistry.standard()).parse(values.get("heightProfile"));
         heightProfile = (x, y) -> {
             if (lake != null && lake.contains(x, y)) {
                 return -1;
             }
-            InfixExpression resolved = heightExpression.resolve(Map.of("x", x, "y", y, "pi", Math.PI, "e", Math.E));
+            PostfixExpression resolved = heightExpression.resolve(Map.of("x", x, "y", y, "pi", Math.PI, "e", Math.E));
             return resolved.calculate().orElseThrow(() -> {
                         String message = String.format(
                                 "Height profile function %s is not defined in point x=.4%f, y=.4%f",
