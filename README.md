@@ -33,25 +33,20 @@ environment
 
 All source code is organized in `src` directory.
 
-`bin` directory contains additional scripts.
-
 ### Building
 
-The project is built by [maven](https://maven.apache.org/). Maven 
-[wrapper](https://maven.apache.org/wrapper/) is also used, so target 
-machine doesn't need to have anything but JDK installed.
+The project is built by [gradle](https://gradle.org/).
 
-To build the project, simply invoke `./mvnw package` 
-(`./mvnw.cmd package` on Windows may be required). This will compile the 
-project and create an executable JAR file in `target/` 
-(`target/putting-1.0.0-SNAPSHOT.jar`).
+To build the project, simply invoke `./gradlew jar`. This will compile 
+the project and create an executable JAR file 
+`build/libs/project12.group19.putting-1.0.0.jar`.
 
 ### Launching
 
 The built JAR contains all definitions for launch:
 
 ```
-java -jar target/putting-1.0.0-SNAPSHOT.jar
+java -jar project12.group19.putting-1.0.0.jar
 ```
 
 JAR supports two arguments:
