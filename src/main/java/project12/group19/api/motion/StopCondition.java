@@ -1,5 +1,6 @@
 package project12.group19.api.motion;
 
+import com.sun.jdi.event.StepEvent;
 import project12.group19.api.geometry.space.HeightProfile;
 
 public class StopCondition {
@@ -8,7 +9,7 @@ public class StopCondition {
     public StopCondition(){
 
     }
-    public static final double MOTION_ERROR = 1E-6;
+    public static final double MOTION_ERROR = 1;
     /**
      * This method checks if the ball is still moving, should be called before computing next state
      * @param motionState Contains velocity x, velocity y, x, y
@@ -16,13 +17,14 @@ public class StopCondition {
      * @return True if the ball is moving, false if the ball stops
 
      */
-    public boolean isMoving(HeightProfile profile, MotionState motionState, FrictionC friction){
+    public boolean isMoving(HeightProfile profile, MotionState motionState, FrictionC friction, double scale){
         double x = motionState.getXPosition();
         double y = motionState.getYPosition();
-        if(isVelocity0(motionState)){
+        if(isVelocity0(motionState, scale)){
             double dhdx = Derivative.derivativeHX(profile, x, y);
             double dhdy = Derivative.derivativeHY(profile, x, y);
-            if(Math.abs(dhdx) < MOTION_ERROR && Math.abs(dhdy) <MOTION_ERROR  ){
+            double threshold = threshold(scale);
+            if(Math.abs(dhdx) < threshold && Math.abs(dhdy) < threshold){
                 return false;
             }else if(friction.getStaticCoefficient() > Math.sqrt(Math.pow(dhdx, 2)+ Math.pow(dhdy, 2))){
                 return false;
@@ -39,11 +41,16 @@ public class StopCondition {
      * @param motionState
      * @return True if both are 0, false otherwise
      */
-    public static boolean isVelocity0(MotionState motionState){
-        if(Math.abs(motionState.getXSpeed()) < MOTION_ERROR && Math.abs(motionState.getYSpeed()) < MOTION_ERROR){
+    public static boolean isVelocity0(MotionState motionState, double step){
+        double threshold = threshold(step);
+        if(Math.abs(motionState.getXSpeed()) < threshold && Math.abs(motionState.getYSpeed()) < threshold){
             return true;
         }else{
             return false;
         }
+    }
+
+    private static double threshold(double step) {
+        return Math.max(step, 1E-6);
     }
 }

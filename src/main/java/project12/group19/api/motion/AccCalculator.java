@@ -18,14 +18,14 @@ public class AccCalculator {
      * @param f friction FrictionC
      * @return
      */
-    public static double accelerationX(HeightProfile profile, MotionState motion, Friction f){
+    public static double accelerationX(HeightProfile profile, MotionState motion, Friction f, double scale){
         double accX;
         double dhdx = Derivative.derivativeHX(profile, motion.getXPosition(), motion.getYPosition());
         double dhdy = Derivative.derivativeHY(profile, motion.getXPosition(), motion.getYPosition());
         double dh = Math.sqrt(Math.pow(dhdx, 2) + Math.pow(dhdy, 2));
 
 
-        if (!(StopCondition.isVelocity0(motion)) ){
+        if (!(StopCondition.isVelocity0(motion, scale)) ){
 
             accX = (-1) * g * (dhdx) - (f.getDynamicCoefficient() * g * motion.getXSpeed()) / Math.sqrt(Math.pow(motion.getXSpeed(), 2) + Math.pow(motion.getYSpeed(), 2));
         } else if (Math.abs(dh) > MOTION_ERROR) {
@@ -46,7 +46,7 @@ public class AccCalculator {
      * @param f friction FrictionC
      * @return
      */
-    public static double accelerationY(HeightProfile profile, MotionState motion, Friction f){
+    public static double accelerationY(HeightProfile profile, MotionState motion, Friction f, double scale){
 
         double accY;
         double dhdx = Derivative.derivativeHX(profile, motion.getXPosition(), motion.getYPosition());
@@ -54,7 +54,7 @@ public class AccCalculator {
         double dh = Math.sqrt(Math.pow(dhdx, 2) + Math.pow(dhdy, 2));
 
 
-        if (!(StopCondition.isVelocity0(motion))) {
+        if (!(StopCondition.isVelocity0(motion, scale))) {
             accY = (-1) * g * (dhdy) - (f.getDynamicCoefficient() * g * motion.getYSpeed()) / Math.sqrt(Math.pow(motion.getXSpeed(), 2) + Math.pow(motion.getYSpeed(), 2));
 
         } else if (Math.abs(dh) > MOTION_ERROR) {

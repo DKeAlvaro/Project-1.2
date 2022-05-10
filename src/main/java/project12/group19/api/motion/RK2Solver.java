@@ -40,8 +40,8 @@ public class RK2Solver implements MotionCalculator {
 
         double k1X= calcK(deltaT, xSpeed);
         double k1Y= calcK(deltaT, ySpeed);
-        double k1XSpeed= calcK(deltaT, AccCalculator.accelerationX(profile, state, friction));
-        double k1YSpeed= calcK(deltaT, AccCalculator.accelerationY(profile, state, friction));
+        double k1XSpeed= calcK(deltaT, AccCalculator.accelerationX(profile, state, friction, deltaT));
+        double k1YSpeed= calcK(deltaT, AccCalculator.accelerationY(profile, state, friction, deltaT));
 
         MotionState stateTemp= new MotionState.Standard(xSpeed + (2/3.0)* deltaT* k1XSpeed, ySpeed+ (2/3.0)* deltaT* k1YSpeed, x+ (2/3.0)* deltaT* k1X, y+ (2/3.0)* deltaT*k1Y);
         Acc newAcc= acceleration(profile, stateTemp, friction, deltaT); //TO DO friction

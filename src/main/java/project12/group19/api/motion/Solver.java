@@ -26,7 +26,8 @@ public class Solver implements MotionCalculator {
             return OptionalDouble.of(AccCalculator.accelerationX(
                     profile,
                     state.withXSpeed(speed),
-                    friction
+                    friction,
+                    deltaT
             ));
         });
     }
@@ -36,7 +37,8 @@ public class Solver implements MotionCalculator {
             return OptionalDouble.of(AccCalculator.accelerationY(
                     profile,
                     state.withYSpeed(speed),
-                    friction
+                    friction,
+                    deltaT
             ));
         });
     }
