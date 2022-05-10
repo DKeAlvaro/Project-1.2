@@ -5,6 +5,7 @@ import project12.group19.api.geometry.space.HeightProfile;
 import project12.group19.api.geometry.space.Hole;
 import project12.group19.api.motion.Friction;
 import project12.group19.api.motion.MotionState;
+import project12.group19.incubating.WaterLake;
 
 import java.util.Set;
 
@@ -17,6 +18,7 @@ public interface Configuration {
     Hole getHole();
     double getTimeScale();
     String getPlayer();
+    WaterLake getLake();
 
     record Standard(
             HeightProfile heightProfile,
@@ -26,7 +28,9 @@ public interface Configuration {
             Friction sandFriction,
             Hole hole,
             double timeScale,
-            String player
+            String player,
+            WaterLake lake
+
     ) implements Configuration {
         public Standard(
                 HeightProfile heightProfile,
@@ -34,7 +38,8 @@ public interface Configuration {
                 MotionState initialMotion,
                 Friction groundFriction,
                 Friction sandFriction,
-                Hole hole
+                Hole hole,
+                WaterLake lake
         ) {
             this(
                     heightProfile,
@@ -44,7 +49,8 @@ public interface Configuration {
                     sandFriction,
                     hole,
                     1,
-                    null
+                    null,
+                    lake
             );
         }
 
@@ -86,6 +92,11 @@ public interface Configuration {
         @Override
         public String getPlayer() {
             return player;
+        }
+
+        @Override
+        public WaterLake getLake(){
+            return lake;
         }
     }
 }

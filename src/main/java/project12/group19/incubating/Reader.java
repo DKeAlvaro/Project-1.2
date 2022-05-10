@@ -30,6 +30,12 @@ public class Reader implements ConfigurationReader {
         double yHole;
         double radius;
 
+        double startingX;
+        double startingY;
+        double endingX;
+        double endingY;
+
+
         HeightProfile heightProfile = null;
         Set<Item> obstacles = Collections.emptySet();
         MotionState initialMotion;
@@ -61,6 +67,16 @@ public class Reader implements ConfigurationReader {
         xHole = Integer.parseInt(values.get("xt"));
         yHole = Integer.parseInt(values.get("yt"));
         radius = Double.parseDouble(values.get("r"));
+        startingX = Double.parseDouble(values.get("startingLakeX"));
+        startingY = Double.parseDouble(values.get("startingLakeY"));
+        endingX = Double.parseDouble(values.get("endingLakeX"));
+        endingY = Double.parseDouble(values.get("endingLakeY"));
+
+        //WaterLake lake = new WaterLake(0,15,0,5);
+
+        WaterLake lake = new WaterLake(startingX,endingX,startingY,endingY);
+
+
         groundFriction = Friction.create(
                 Double.parseDouble(values.get("mus")),
                 Double.parseDouble(values.get("muk"))
@@ -72,9 +88,11 @@ public class Reader implements ConfigurationReader {
 
         InfixExpression heightExpression = new Parser(ComponentRegistry.standard()).parse(values.get("heightProfile"));
         heightProfile = (x, y) -> {
+            if (x >= lake.getStartingX() && x <= lake.getFinishingX() && y >= lake.getStartingY() && y <= lake.getFinishingY()){
+                return -1;
+            }
             InfixExpression resolved = heightExpression.resolve(Map.of("x", x, "y", y, "pi", Math.PI, "e", Math.E));
-            return resolved.calculate()
-                    .orElseThrow(() -> {
+            return resolved.calculate().orElseThrow(() -> {
                         String message = String.format(
                                 "Height profile function %s is not defined in point x=.4%f, y=.4%f",
                                 resolved,
@@ -96,7 +114,8 @@ public class Reader implements ConfigurationReader {
                 sandFriction,
                 hole,
                 timescale,
-                player
+                player,
+                lake
         );
     }
 }

@@ -151,7 +151,7 @@ public class GameHandler implements Engine {
 
     public static void main(String[] args) {
         // dirty, dirty testing
-
+        /*
         Setup setup = new Setup.Standard(
                 new Configuration.Standard(
                         null,
@@ -168,6 +168,10 @@ public class GameHandler implements Engine {
                 Collections.singletonList(state -> System.out.println(state.getBallState()))
         );
 
+
+
         new GameHandler().launch(setup);
+
+         */
     }
 }

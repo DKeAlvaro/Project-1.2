@@ -84,6 +84,10 @@ public class GrassComponent extends JComponent {
      * @return Color to be applied
      */
     public static Color assignColor(double z) {
+
+        if(z<0){
+            return Color.BLUE;
+        }
         if (z <= intervals[0]) {
             return new Color (0,100,0);
         }

@@ -12,6 +12,8 @@ public class Shoot {
     private double finalX;
     private double finalY;
 
+    private boolean inWater = false;
+
     private double distanceToHole;
 
     public static double holeX = HillClimbing2.holeX;
@@ -40,15 +42,7 @@ public class Shoot {
         return distanceToHole;
     }
     public boolean inHole(){
-        return distanceToHole < 0.5;
-    }
-
-    public static double getHoleX() {
-        return holeX;
-    }
-
-    public static double getHoleY() {
-        return holeY;
+        return distanceToHole < ballR;
     }
 
     public void setDistanceToHole(double distanceToHole) {
@@ -76,5 +70,13 @@ public class Shoot {
 
     public double getStartingY() {
         return startingY;
+    }
+
+    public boolean inWater(){
+        return inWater;
+    }
+    public void setInWater(){
+        this.setDistanceToHole(1000);
+        this.inWater = true;
     }
 }
