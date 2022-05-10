@@ -1,5 +1,7 @@
 package project12.group19;
 
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import project12.group19.api.domain.Course;
 import project12.group19.api.domain.Item;
 import project12.group19.api.domain.Player;
@@ -9,7 +11,10 @@ import project12.group19.api.game.Rules;
 import project12.group19.api.geometry.plane.PlanarRectangle;
 import project12.group19.api.motion.Solver;
 import project12.group19.api.ui.GUI;
+import project12.group19.api.ui.Renderer;
 import project12.group19.engine.GameHandler;
+import project12.group19.gui.Drop;
+import project12.group19.gui.LibGdxAdapter;
 import project12.group19.engine.motion.StandardMotionHandler;
 import project12.group19.incubating.HitsReader;
 import project12.group19.incubating.Reader;
@@ -60,7 +65,18 @@ public class Entrypoint {
         return Optional.empty();
     }
 
-    private static GUI createUI(Configuration configuration, boolean showControls) {
+    private static Renderer createUI(Configuration configuration, boolean showControls, boolean use3d) {
+        if (use3d) {
+            Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+            config.setForegroundFPS(60);
+            config.setTitle("Project 1-2 Putting / Group 19");
+            config.setWindowedMode(1000, 900);
+            config.useVsync(true);
+            Drop render = new Drop();
+            new Lwjgl3Application(render, config);
+            return new LibGdxAdapter(render);
+        }
+
         return new GUI(
                 configuration.getHeightProfile(),
                 GUI.TRANSLATOR.toPixelX(configuration.getHole().getxHole()),
@@ -85,11 +101,14 @@ public class Entrypoint {
 
         Optional<double[][]> replay = resolveReplay(args);
         Configuration configuration = resolveConfiguration(args);
-        GUI gui = createUI(configuration, replay.isEmpty());
+        Renderer gui = createUI(configuration, replay.isEmpty(), true);
         Solver solver = new Solver(new Euler(), configuration.getHeightProfile(), configuration.getGroundFriction());
         Map<String, Player> players = new HashMap<>();
-        players.put("human", gui.getController());
+        if (gui instanceof GUI g) {
+            players.put("human", g.getController());
+        }
         players.put("bot.naive", new NaiveBot(new HitCalculator.Adjusting()));
+        players.put("bot.hill-climbing", new NaiveBot(new HitCalculator.Directed(solver, configuration)));
         replay.map(FixedPlayer::new).ifPresent(player -> players.put("replay", player));
 
         String selection = Optional.ofNullable(configuration.getPlayer()).orElse("human");
