@@ -1,7 +1,5 @@
 package project12.group19;
 
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import project12.group19.api.domain.Course;
 import project12.group19.api.domain.Item;
 import project12.group19.api.domain.Player;
@@ -13,9 +11,8 @@ import project12.group19.api.motion.Solver;
 import project12.group19.api.ui.GUI;
 import project12.group19.api.ui.Renderer;
 import project12.group19.engine.GameHandler;
-import project12.group19.gui.Drop;
-import project12.group19.gui.LibGdxAdapter;
 import project12.group19.engine.motion.StandardMotionHandler;
+import project12.group19.gui.LibGdxAdapter;
 import project12.group19.incubating.HitsReader;
 import project12.group19.incubating.Reader;
 import project12.group19.incubating.WaterLake;
@@ -67,14 +64,7 @@ public class Entrypoint {
 
     private static Renderer createUI(Configuration configuration, boolean showControls, boolean use3d) {
         if (use3d) {
-            Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-            config.setForegroundFPS(60);
-            config.setTitle("Project 1-2 Putting / Group 19");
-            config.setWindowedMode(1000, 900);
-            config.useVsync(true);
-            Drop render = new Drop();
-            new Lwjgl3Application(render, config);
-            return new LibGdxAdapter(render);
+            return new LibGdxAdapter(configuration.getHeightProfile());
         }
 
         return new GUI(
