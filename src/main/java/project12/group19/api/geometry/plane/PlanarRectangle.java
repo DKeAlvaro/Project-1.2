@@ -1,6 +1,6 @@
 package project12.group19.api.geometry.plane;
 
-public interface PlanarRectangle extends PlanarPositioned, PlanarDimensioned {
+public interface PlanarRectangle extends PlanarShape, PlanarPositioned, PlanarDimensioned {
     static PlanarRectangle create(PlanarCoordinate coordinate, PlanarDimensions dimensions) {
         return new Standard(coordinate, dimensions);
     }
@@ -15,6 +15,14 @@ public interface PlanarRectangle extends PlanarPositioned, PlanarDimensioned {
 
     static PlanarRectangle create(PlanarCoordinate coordinate, double width, double height) {
         return create(coordinate, PlanarDimensions.create(width, height));
+    }
+
+    static PlanarRectangle square(PlanarCoordinate coordinate, double size) {
+        return square(coordinate.getX(), coordinate.getY(), size);
+    }
+
+    static PlanarRectangle square(double x, double y, double size) {
+        return create(x, y, size, size);
     }
 
     record Standard(
@@ -33,6 +41,12 @@ public interface PlanarRectangle extends PlanarPositioned, PlanarDimensioned {
         @Override
         public PlanarDimensions getDimensions() {
             return dimensions;
+        }
+
+        @Override
+        public boolean contains(double x, double y) {
+            return x >= position.getX() && x <= position.getX() + dimensions.getWidth() &&
+                    y >= position.getY() && y <= position.getY() + dimensions.getHeight();
         }
     }
 }

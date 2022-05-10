@@ -21,6 +21,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * This is the game core.
+ *
+ * GameHandler is responsible to
+ */
 public class GameHandler implements Engine {
     private static final DerivativeEstimator DERIVATIVES = new DerivativeEstimator(1E-6);
 
@@ -62,7 +67,7 @@ public class GameHandler implements Engine {
         CompletableFuture.allOf(calculations, refresh).join();
     }
 
-    private State tick(State current, Setup setup) {
+    public State next(State current, Setup setup) {
         if (current.isTerminal()) {
             return current;
         }
