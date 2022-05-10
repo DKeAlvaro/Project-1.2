@@ -55,8 +55,13 @@ public class GameHandler implements Engine {
 
         long refreshInterval = (long) (1_000_000_000.0 / setup.getDesiredRefreshRate());
         CompletableFuture<Void> refresh = loop.schedule(epoch -> {
-            setup.getListeners().forEach(listener -> listener.accept(state.get()));
-            return !state.get().isTerminal();
+            try {
+                setup.getListeners().forEach(listener -> listener.accept(state.get()));
+                return !state.get().isTerminal();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
         }, refreshInterval, TimeUnit.NANOSECONDS);
 
         CompletableFuture.allOf(calculations, refresh).join();
