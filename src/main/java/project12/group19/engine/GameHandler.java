@@ -90,12 +90,7 @@ public class GameHandler implements Engine {
         double deltaT = (1.0 / setup.getDesiredTickRate()) * setup.getConfiguration().getTimeScale();
 
         HeightProfile heightProfile = setup.getConfiguration().getHeightProfile();
-        Acceleration acceleration = Solver.acceleration(
-                heightProfile,
-                current.getBallState(),
-                setup.getConfiguration().getGroundFriction(),
-                deltaT
-        );
+
 
         Optional<Player.Hit> hit = setup.getPlayer().play(current);
         int hits = hit.map(any -> current.getHits() + 1).orElse(current.getHits());
@@ -108,7 +103,9 @@ public class GameHandler implements Engine {
                 ))
                 .orElse(current.getBallState());
 
-        if (ballMotion.getAbsoluteSpeed() < 1E-3) {
+
+        // TODO: Remove false once GUI is integrated
+        if (ballMotion.getAbsoluteSpeed() < 1E-3 && false) {
             double x = ballMotion.getXPosition();
             double y = ballMotion.getYPosition();
             // TODO calculate this once and store somewhere

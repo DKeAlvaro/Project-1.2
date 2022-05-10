@@ -1,15 +1,14 @@
 package project12.group19;
 
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import project12.group19.api.domain.Player;
 import project12.group19.api.engine.Setup;
 import project12.group19.api.game.Configuration;
+import project12.group19.api.geometry.plane.PlanarCoordinate;
+import project12.group19.api.motion.MotionCalculator;
 import project12.group19.api.motion.Solver;
 import project12.group19.api.ui.GUI;
 import project12.group19.api.ui.Renderer;
 import project12.group19.engine.GameHandler;
-import project12.group19.gui.Drop;
 import project12.group19.gui.LibGdxAdapter;
 import project12.group19.incubating.HitsReader;
 import project12.group19.incubating.Reader;
@@ -63,14 +62,7 @@ public class Entrypoint {
 
     private static Renderer createUI(Configuration configuration, boolean showControls, boolean use3d) {
         if (use3d) {
-            Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-            config.setForegroundFPS(60);
-            config.setTitle("Project 1-2 Putting / Group 19");
-            config.setWindowedMode(1000, 900);
-            config.useVsync(true);
-            Drop render = new Drop();
-            new Lwjgl3Application(render, config);
-            return new LibGdxAdapter(render);
+            return new LibGdxAdapter(configuration.getHeightProfile());
         }
 
         return new GUI(
@@ -116,7 +108,7 @@ public class Entrypoint {
             return response;
         };
 
-        Setup.Standard setup = new Setup.Standard(configuration, 60, 10, solver, loggingWrapper, List.of(gui::render, state -> {
+        Setup.Standard setup = new Setup.Standard(configuration, 60, 10, new MotionCalculator.Circlular(PlanarCoordinate.create(1, 1)), loggingWrapper, List.of(gui::render, state -> {
             if (!state.isStatic()) {
                 System.out.println(state.getBallState());
             }
