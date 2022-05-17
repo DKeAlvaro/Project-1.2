@@ -1,5 +1,7 @@
 package project12.group19.api.motion;
 
+import project12.group19.api.geometry.plane.PlanarCoordinate;
+
 public interface MotionState {
     double getXSpeed();
     double getYSpeed();
@@ -24,6 +26,10 @@ public interface MotionState {
 
     default double getAbsoluteSpeed() {
         return Math.sqrt(getXSpeed() * getXSpeed() + getYSpeed() * getYSpeed());
+    }
+
+    default PlanarCoordinate getPosition() {
+        return PlanarCoordinate.create(getXPosition(), getYPosition());
     }
 
     static MotionState zero() {

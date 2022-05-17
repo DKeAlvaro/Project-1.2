@@ -6,24 +6,18 @@ import project12.group19.api.domain.Player;
 import project12.group19.api.domain.State;
 import project12.group19.api.engine.Engine;
 import project12.group19.api.engine.Setup;
-import project12.group19.api.game.Configuration;
 import project12.group19.api.geometry.plane.PlanarCoordinate;
-import project12.group19.api.geometry.space.HeightProfile;
-import project12.group19.api.geometry.space.Hole;
-import project12.group19.api.motion.*;
-import project12.group19.math.DerivativeEstimator;
+import project12.group19.api.geometry.plane.PlanarRectangle;
+import project12.group19.api.motion.MotionState;
+import project12.group19.api.motion.StopCondition;
 
-import java.util.Collections;
 import java.util.Optional;
-import java.util.OptionalDouble;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class GameHandler implements Engine {
-    private static final DerivativeEstimator DERIVATIVES = new DerivativeEstimator(1E-6);
-
     @Override
     public void launch(Setup setup) {
         EventLoop loop = new EventLoop(Executors.newScheduledThreadPool(4));
@@ -84,14 +78,6 @@ public class GameHandler implements Engine {
 
         double deltaT = (1.0 / setup.getDesiredTickRate()) * setup.getConfiguration().getTimeScale();
 
-        HeightProfile heightProfile = setup.getConfiguration().getHeightProfile();
-        Acceleration acceleration = Solver.acceleration(
-                heightProfile,
-                current.getBallState(),
-                setup.getConfiguration().getGroundFriction(),
-                deltaT
-        );
-
         Optional<Player.Hit> hit = setup.getPlayer().play(current);
         int hits = hit.map(any -> current.getHits() + 1).orElse(current.getHits());
         MotionState ballMotion = hit
@@ -103,31 +89,26 @@ public class GameHandler implements Engine {
                 ))
                 .orElse(current.getBallState());
 
-        if (ballMotion.getAbsoluteSpeed() < 1E-3) {
-            double x = ballMotion.getXPosition();
-            double y = ballMotion.getYPosition();
-            // TODO calculate this once and store somewhere
-            double dhdx = DERIVATIVES.estimate(variableX -> OptionalDouble.of(heightProfile.getHeight(variableX, y)), x).getAsDouble();
-            double dhdy = DERIVATIVES.estimate(variableY -> OptionalDouble.of(heightProfile.getHeight(x, variableY)), y).getAsDouble();
-            double dh = Math.sqrt(dhdx * dhdx + dhdy * dhdy);
-
-            if (dh < setup.getConfiguration().getGroundFriction().getStaticCoefficient()) {
-                if (!current.isStatic()) {
-                    System.out.println("The ball has stopped");
-                }
-
-                return new State.Standard(
-                        current.getCourse(),
-                        ballMotion,
-                        false,
-                        true,
-                        hits,
-                        current.getFouls()
-                );
+        if (!StopCondition.isMoving(setup.getConfiguration().getHeightProfile(), ballMotion, setup.getConfiguration().getGroundFriction(), deltaT)) {
+            if (!current.isStatic()) {
+                System.out.println("The ball has stopped");
             }
+
+            return new State.Standard(
+                    current.getCourse(),
+                    ballMotion,
+                    false,
+                    true,
+                    hits,
+                    current.getFouls()
+            );
         }
 
-        if (Math.abs(ballMotion.getXPosition()) > 25 || Math.abs(ballMotion.getYPosition()) > 25) {
+
+        double width = setup.getConfiguration().getDimensions().getWidth();
+        double height = setup.getConfiguration().getDimensions().getHeight();
+        PlanarRectangle boundaries = PlanarRectangle.create(-width/2, -height/2, width, height);
+        if (!boundaries.includes(ballMotion.getPosition())) {
             boolean termination = current.getFouls() >= 3;
             return new State.Standard(
                     current.getCourse(),
@@ -147,31 +128,5 @@ public class GameHandler implements Engine {
                 hits,
                 current.getFouls()
         );
-    }
-
-    public static void main(String[] args) {
-        // dirty, dirty testing
-        /*
-        Setup setup = new Setup.Standard(
-                new Configuration.Standard(
-                        null,
-                        Collections.emptySet(),
-                        MotionState.zero(),
-                        Friction.create(0.1, 0.1),
-                        Friction.create(0.1, 0.1),
-                        new Hole(-1, -1, 0.3)
-                ),
-                3,
-                3,
-                new MotionCalculator.Circlular(PlanarCoordinate.create(1, 1)),
-                course -> Optional.empty(),
-                Collections.singletonList(state -> System.out.println(state.getBallState()))
-        );
-
-
-
-        new GameHandler().launch(setup);
-
-         */
     }
 }

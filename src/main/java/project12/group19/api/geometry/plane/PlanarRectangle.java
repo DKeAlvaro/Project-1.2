@@ -17,6 +17,12 @@ public interface PlanarRectangle extends PlanarPositioned, PlanarDimensioned {
         return create(coordinate, PlanarDimensions.create(width, height));
     }
 
+    default boolean includes(PlanarCoordinate position) {
+        boolean inY = position.getY() >= getY() && position.getY() <= getY() + getHeight();
+        boolean inX = position.getX() >= getX() && position.getX() <= getX() + getWidth();
+        return inY && inX;
+    }
+
     record Standard(
             PlanarCoordinate position,
             PlanarDimensions dimensions
