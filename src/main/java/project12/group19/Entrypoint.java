@@ -1,15 +1,18 @@
 package project12.group19;
 
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import project12.group19.api.domain.Player;
 import project12.group19.api.engine.Setup;
 import project12.group19.api.game.Configuration;
 import project12.group19.api.geometry.plane.PlanarCoordinate;
 import project12.group19.api.motion.MotionCalculator;
+import project12.group19.api.motion.MotionState;
 import project12.group19.api.motion.Solver;
 import project12.group19.api.ui.GUI;
 import project12.group19.api.ui.Renderer;
 import project12.group19.engine.GameHandler;
-import project12.group19.gui.LibGdxAdapter;
+import project12.group19.gui.Drop;
 import project12.group19.incubating.HitsReader;
 import project12.group19.incubating.Reader;
 import project12.group19.math.ode.Euler;
@@ -24,6 +27,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Entrypoint {
     public static final String DEFAULT_CONFIGURATION_FILE = "configuration.properties";
@@ -61,9 +67,6 @@ public class Entrypoint {
     }
 
     private static Renderer createUI(Configuration configuration, boolean showControls, boolean use3d) {
-        if (use3d) {
-            return new LibGdxAdapter(configuration.getHeightProfile());
-        }
 
         return new GUI(
                 configuration.getHeightProfile(),
@@ -89,33 +92,48 @@ public class Entrypoint {
 
         Optional<double[][]> replay = resolveReplay(args);
         Configuration configuration = resolveConfiguration(args);
-        Renderer gui = createUI(configuration, replay.isEmpty(), true);
-        Solver solver = new Solver(new Euler(), configuration.getHeightProfile(), configuration.getGroundFriction());
-        Map<String, Player> players = new HashMap<>();
-        if (gui instanceof GUI g) {
-            players.put("human", g.getController());
-        }
-        players.put("bot.naive", new NaiveBot(new HitCalculator.Directed(solver, configuration)));
-        replay.map(FixedPlayer::new).ifPresent(player -> players.put("replay", player));
+        AtomicReference<MotionState> capture = new AtomicReference<>();
+        Renderer wrapper = state -> capture.set(state.getBallState());
 
-        String selection = Optional.ofNullable(configuration.getPlayer()).orElse("human");
-        Player player = Optional.ofNullable(players.get(selection))
-                .orElseThrow(() -> new IllegalArgumentException("Unknown player type: " + selection));
+        ExecutorService containment = Executors.newSingleThreadExecutor(runnable -> {
+            var thread = new Thread(runnable);
+            thread.setDaemon(true);
+            return thread;
+        });
 
-        Player loggingWrapper = state -> {
-            Optional<Player.Hit> response = player.play(state);
-            response.ifPresent(hit -> System.out.println("Hit was made: " + hit));
-            return response;
-        };
+        containment.submit(() -> {
+            Solver solver = new Solver(new Euler(), configuration.getHeightProfile(), configuration.getGroundFriction());
+            Map<String, Player> players = new HashMap<>();
+            players.put("bot.naive", new NaiveBot(new HitCalculator.Directed(solver, configuration)));
+            replay.map(FixedPlayer::new).ifPresent(player -> players.put("replay", player));
 
-        Setup.Standard setup = new Setup.Standard(configuration, 60, 10, new MotionCalculator.Circlular(PlanarCoordinate.create(1, 1)), loggingWrapper, List.of(gui::render, state -> {
-            if (!state.isStatic()) {
-                System.out.println(state.getBallState());
-            }
-        }));
+            String selection = Optional.ofNullable(configuration.getPlayer()).orElse("human");
+            Player player = Optional.ofNullable(players.get(selection))
+                    .orElseThrow(() -> new IllegalArgumentException("Unknown player type: " + selection));
 
-        new GameHandler().launch(setup);
+            Player loggingWrapper = state -> {
+                Optional<Player.Hit> response = player.play(state);
+                response.ifPresent(hit -> System.out.println("Hit was made: " + hit));
+                return response;
+            };
 
-        System.out.println("That's all, folks!");
+            Setup.Standard setup = new Setup.Standard(configuration, 60, 10, new MotionCalculator.Circlular(PlanarCoordinate.origin()), loggingWrapper, List.of(wrapper::render, state -> {
+                if (!state.isStatic()) {
+//                    System.out.println(state.getBallState());
+                }
+            }));
+
+            new GameHandler().launch(setup);
+
+            System.out.println("That's all, folks!");
+        });
+
+
+        Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+        config.setForegroundFPS(60);
+        config.setTitle("Project 1-2 Putting / Group 19");
+        config.setWindowedMode(1000, 900);
+        config.useVsync(true);
+        new Lwjgl3Application(new Drop(configuration.getHeightProfile(), capture::get), config);
     }
 }
