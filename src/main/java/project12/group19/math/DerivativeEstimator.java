@@ -25,7 +25,7 @@ public class DerivativeEstimator {
             return OptionalDouble.of((right.getAsDouble() - left.getAsDouble()) / (2 * step));
         }
 
-        // only of values is defined
+        // only one of values is defined
 
         OptionalDouble current = subject.getValue(position);
 
