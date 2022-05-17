@@ -31,27 +31,43 @@ environment
 
 ### Organization
 
-All source code is organized in `src` directory.
+Source code is stored in `src` directory using classic java conventions
+(`main/java` for source code, `main/resources` for assets, `test/java`
+for tests). Additional documentation is placed in `doc`.
 
-`bin` directory contains additional scripts.
+### Setup Guide
+
+1. Install Java 17 or above & IDEA (seriously, vscode won't suffice).
+2. Import the project in your IDEA.
+3. Set Java SDK to installed one in File -> Project Structure
+4. Open gradle tab on the right and double-click Tasks -> other -> dist.
+If it successfully finishes, then it means your build environment is 
+properly set.
+5. Open gradle tab on the right and double-click Tasks -> documentation 
+-> javadoc. After completion, right-click on `doc/generated` -> Mark 
+directory as -> Excluded.
+6. Copy `configuration.properties.dist` to `configuration.properties`.
+The difference between them is that first goes into git, the latter does
+not.
+7. If IDEA complaints about something that can't be found after git 
+pull, check for gradle update icon in right corner and click it. If icon
+is missing, try doing it manually in gradle tab -> right-click on the 
+project -> reload gradle project.
 
 ### Building
 
-The project is built by [maven](https://maven.apache.org/). Maven 
-[wrapper](https://maven.apache.org/wrapper/) is also used, so target 
-machine doesn't need to have anything but JDK installed.
+The project is built by [gradle](https://gradle.org/).
 
-To build the project, simply invoke `./mvnw package` 
-(`./mvnw.cmd package` on Windows may be required). This will compile the 
-project and create an executable JAR file in `target/` 
-(`target/putting-1.0.0-SNAPSHOT.jar`).
+To build the project, simply invoke `./gradlew jar`. This will compile 
+the project and create an executable JAR file 
+`build/libs/project12.group19.putting-1.0.0.jar`.
 
 ### Launching
 
 The built JAR contains all definitions for launch:
 
 ```
-java -jar target/putting-1.0.0-SNAPSHOT.jar
+java -jar build/libs/project12.group19.putting-1.0.0.jar
 ```
 
 JAR supports two arguments:
@@ -66,8 +82,3 @@ and so on. By default, it looks for configuration.properties.
     x = 3.5, y = 6.5
     ```
 
-Alternatively, use maven:
-
-```
-./mvnw java:exec
-```
