@@ -351,12 +351,13 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
         spriteBatch.begin();
 
         font.setColor(Color.RED);
-        font.getData().setScale(1.5f);
-        font.draw(spriteBatch, menu, 20, 880);
-        font.getData().setScale(1.3f);
 
         if (showBallInfo) {
-            font.draw(spriteBatch, BallInfo, 220, 880);
+            font.getData().setScale(1.3f);
+            font.draw(spriteBatch, BallInfo, 20, 880);
+        } else {
+            font.getData().setScale(1.5f);
+            font.draw(spriteBatch, menu, 20, 880);
         }
         spriteBatch.end();
 

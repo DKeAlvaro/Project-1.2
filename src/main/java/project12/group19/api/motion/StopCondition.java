@@ -1,6 +1,5 @@
 package project12.group19.api.motion;
 
-import com.sun.jdi.event.StepEvent;
 import project12.group19.api.geometry.space.HeightProfile;
 
 public class StopCondition {
@@ -41,13 +40,8 @@ public class StopCondition {
      * @param motionState
      * @return True if both are 0, false otherwise
      */
-    public static boolean isVelocity0(MotionState motionState, double step){
-        double threshold = threshold(step);
-        if(Math.abs(motionState.getXSpeed()) < threshold && Math.abs(motionState.getYSpeed()) < threshold){
-            return true;
-        }else{
-            return false;
-        }
+    public static boolean isVelocity0(MotionState motionState, double step) {
+        return motionState.getAbsoluteSpeed() < threshold(step);
     }
 
     private static double threshold(double step) {

@@ -1,5 +1,6 @@
 package project12.group19.engine;
 
+import project12.group19.api.domain.Player;
 import project12.group19.api.domain.State;
 import project12.group19.api.engine.Engine;
 import project12.group19.api.engine.Setup;
@@ -7,6 +8,7 @@ import project12.group19.api.game.state.Round;
 import project12.group19.api.motion.MotionResult;
 import project12.group19.api.motion.MotionState;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -73,8 +75,9 @@ public class GameHandler implements Engine {
                             .nextRound(next.getState().getPosition());
                 }
 
-                System.out.println("Performing a hit");
-                return setup.getPlayer().play(current)
+                Optional<Player.Hit> hit = setup.getPlayer().play(current);
+                hit.ifPresent(v -> System.out.println("Performing a hit: " + v));
+                return hit
                         .map(current::withHit)
                         .orElse(current);
             default:
