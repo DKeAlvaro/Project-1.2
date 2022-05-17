@@ -3,10 +3,7 @@ package project12.group19.incubating;
 import project12.group19.api.domain.Player;
 import project12.group19.api.game.Configuration;
 import project12.group19.api.geometry.space.HeightProfile;
-import project12.group19.api.motion.Friction;
-import project12.group19.api.motion.FrictionC;
-import project12.group19.api.motion.MotionState;
-import project12.group19.api.motion.Solver;
+import project12.group19.api.motion.*;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -152,7 +149,7 @@ public class HillClimbing2 {
     public static void getShotDistanceToHole(Friction friction, HeightProfile profile, MotionState current, Shoot shoot) {
         double minDistance = getDistance(holeX, current.getXPosition(), holeY, current.getYPosition());
 
-        while (solver.isMoving(profile, current, new FrictionC(friction.getStaticCoefficient(), 0.2))) {
+        while (StopCondition.isMoving(profile, current, friction, stepSize)) {
             current = solver.calculate(current, stepSize);
             if(getDistance(holeX, current.getXPosition(), holeY, current.getYPosition()) < minDistance){
                 minDistance = getDistance(holeX, current.getXPosition(), holeY, current.getYPosition());

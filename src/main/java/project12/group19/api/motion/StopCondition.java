@@ -17,7 +17,7 @@ public class StopCondition {
      * @return True if the ball is moving, false if the ball stops
 
      */
-    public boolean isMoving(HeightProfile profile, MotionState motionState, FrictionC friction, double scale){
+    public static boolean isMoving(HeightProfile profile, MotionState motionState, Friction friction, double scale){
         double x = motionState.getXPosition();
         double y = motionState.getYPosition();
         if(isVelocity0(motionState, scale)){
