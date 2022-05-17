@@ -1,5 +1,8 @@
 package project12.group19.api.domain;
 
+import project12.group19.api.geometry.plane.PlanarCoordinate;
+import project12.group19.geometry.LineInterval;
+
 import java.util.Optional;
 
 /**
@@ -9,6 +12,9 @@ import java.util.Optional;
  */
 public interface Player {
     Optional<Hit> play(State state);
+    default Optional<PlanarCoordinate> position(State state, LineInterval selection) {
+        return Optional.of(selection.start());
+    }
 
     interface Hit {
         double getXVelocity();

@@ -26,6 +26,10 @@ public interface Item {
             PlanarCoordinate coordinate,
             double size
     ) implements Item {
+        public Standard(String type, PlanarCoordinate coordinate) {
+            this(type, coordinate, 1.0);
+        }
+
         @Override
         public String getType() {
             return type;

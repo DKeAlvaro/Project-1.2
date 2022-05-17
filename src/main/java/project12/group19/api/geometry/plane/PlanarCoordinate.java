@@ -8,6 +8,14 @@ public interface PlanarCoordinate {
         return Math.sqrt(Math.pow(getX() - other.getX(), 2) + Math.pow(getY() - other.getY(), 2));
     }
 
+    default PlanarCoordinate add(double x, double y) {
+        return create(getX() + x, getY() + y);
+    }
+
+    default boolean isCloseTo(PlanarCoordinate other, double precision) {
+        return Math.abs(getX() - other.getX()) < precision && Math.abs(getY() - other.getY()) < precision;
+    }
+
     static PlanarCoordinate create(double x, double y) {
         return new Standard(x, y);
     }

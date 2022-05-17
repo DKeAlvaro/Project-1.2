@@ -50,7 +50,7 @@ public class GameHandler implements Engine {
         long interval = (long) (1_000_000_000.0 / setup.getDesiredTickRate());
         CompletableFuture<Void> calculations = loop.schedule(epoch -> {
             try {
-                state.set(tick(state.get(), setup));
+                state.set(next(state.get(), setup));
                 return true;
             } catch (RuntimeException e) {
                 e.printStackTrace();

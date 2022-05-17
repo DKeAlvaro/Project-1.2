@@ -7,3 +7,4 @@ replay.txt
 configuration.properties
 .DS_Store
 .gradle
+allure-results

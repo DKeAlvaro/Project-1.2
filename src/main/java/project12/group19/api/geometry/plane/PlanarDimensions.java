@@ -8,6 +8,14 @@ public interface PlanarDimensions {
         return new Standard(getWidth() * widthMultiplier, getHeight() * heightMultiplier);
     }
 
+    default PlanarDimensions add(PlanarDimensions other) {
+        return new Standard(getWidth() + other.getWidth(), getHeight() + other.getHeight());
+    }
+
+    default PlanarDimensions subtract(PlanarDimensions other) {
+        return new Standard(getWidth() - other.getWidth(), getHeight() - other.getHeight());
+    }
+
     default PlanarDimensions scale(double multiplier) {
         return scale(multiplier, multiplier);
     }
@@ -29,6 +37,16 @@ public interface PlanarDimensions {
     }
 
     record Standard(double width, double height) implements PlanarDimensions {
+        public Standard {
+            if (width < 0) {
+                throw new IllegalArgumentException("Width less than zero was passed: " + width);
+            }
+
+            if (height < 0) {
+                throw new IllegalArgumentException("Height less than zero was passed: " + height);
+            }
+        }
+
         @Override
         public double getWidth() {
             return width;
