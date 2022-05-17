@@ -1,5 +1,7 @@
 package project12.group19;
 
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import project12.group19.api.domain.Course;
 import project12.group19.api.domain.Item;
 import project12.group19.api.domain.Player;
@@ -7,12 +9,13 @@ import project12.group19.api.engine.Setup;
 import project12.group19.api.game.Configuration;
 import project12.group19.api.game.Rules;
 import project12.group19.api.geometry.plane.PlanarRectangle;
+import project12.group19.api.motion.MotionState;
 import project12.group19.api.motion.Solver;
 import project12.group19.api.ui.GUI;
 import project12.group19.api.ui.Renderer;
 import project12.group19.engine.GameHandler;
 import project12.group19.engine.motion.StandardMotionHandler;
-import project12.group19.gui.LibGdxAdapter;
+import project12.group19.gui.Drop;
 import project12.group19.incubating.HitsReader;
 import project12.group19.incubating.Reader;
 import project12.group19.incubating.WaterLake;
@@ -25,6 +28,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class Entrypoint {
@@ -63,9 +69,6 @@ public class Entrypoint {
     }
 
     private static Renderer createUI(Configuration configuration, boolean showControls, boolean use3d) {
-        if (use3d) {
-            return new LibGdxAdapter(configuration.getHeightProfile());
-        }
 
         return new GUI(
                 configuration.getHeightProfile(),
@@ -91,61 +94,76 @@ public class Entrypoint {
 
         Optional<double[][]> replay = resolveReplay(args);
         Configuration configuration = resolveConfiguration(args);
-        Renderer gui = createUI(configuration, replay.isEmpty(), true);
-        Solver solver = new Solver(new Euler(), configuration.getHeightProfile(), configuration.getGroundFriction());
-        Map<String, Player> players = new HashMap<>();
-        if (gui instanceof GUI g) {
-            players.put("human", g.getController());
-        }
-        players.put("bot.naive", new NaiveBot(new HitCalculator.Adjusting()));
-        players.put("bot.hill-climbing", new NaiveBot(new HitCalculator.Directed(solver, configuration)));
-        replay.map(FixedPlayer::new).ifPresent(player -> players.put("replay", player));
+        AtomicReference<MotionState> capture = new AtomicReference<>();
+        Renderer wrapper = state -> capture.set(state.getBallState());
 
-        String selection = Optional.ofNullable(configuration.getPlayer()).orElse("human");
-        Player player = Optional.ofNullable(players.get(selection))
-                .orElseThrow(() -> new IllegalArgumentException("Unknown player type: " + selection));
+        ExecutorService containment = Executors.newSingleThreadExecutor(runnable -> {
+            var thread = new Thread(runnable);
+            thread.setDaemon(true);
+            return thread;
+        });
 
-        Player loggingWrapper = state -> {
-            Optional<Player.Hit> response = player.play(state);
-            response.ifPresent(hit -> System.out.println("Hit was made: " + hit));
-            return response;
-        };
+        containment.submit(() -> {
+            Solver solver = new Solver(new Euler(), configuration.getHeightProfile(), configuration.getGroundFriction());
+            Map<String, Player> players = new HashMap<>();
+            players.put("bot.naive", new NaiveBot(new HitCalculator.Adjusting()));
+            players.put("bot.hill-climbing", new NaiveBot(new HitCalculator.Directed(solver, configuration)));
+            replay.map(FixedPlayer::new).ifPresent(player -> players.put("replay", player));
 
-        Course course = new Course.Standard(
-                configuration.getHeightProfile(),
-                configuration.getGroundFriction(),
-                new Item.Standard("ball", configuration.getInitialMotion().getPosition()),
-                configuration.getObstacles(),
-                configuration.getLakes().stream().map(WaterLake::toPlanarRectangle).collect(Collectors.toSet()),
-                configuration.getHole()
-        );
+            String selection = Optional.ofNullable(configuration.getPlayer()).orElse("human");
+            Player player = Optional.ofNullable(players.get(selection))
+                    .orElseThrow(() -> new IllegalArgumentException("Unknown player type: " + selection));
 
-        PlanarRectangle field = PlanarRectangle.create(
-                -configuration.getDimensions().getWidth() / 2,
-                -configuration.getDimensions().getHeight() / 2,
-                configuration.getDimensions()
-        );
+            Player loggingWrapper = state -> {
+                Optional<Player.Hit> response = player.play(state);
+                response.ifPresent(hit -> System.out.println("Hit was made: " + hit));
+                return response;
+            };
 
-        Rules rules = new Rules.Standard(
-                OptionalInt.of(3),
-                OptionalInt.empty(),
-                field,
-                true
-        );
+            Course course = new Course.Standard(
+                    configuration.getHeightProfile(),
+                    configuration.getGroundFriction(),
+                    new Item.Standard("ball", configuration.getInitialMotion().getPosition()),
+                    configuration.getObstacles(),
+                    configuration.getLakes().stream().map(WaterLake::toPlanarRectangle).collect(Collectors.toSet()),
+                    configuration.getHole()
+            );
 
-        Setup.Standard setup = new Setup.Standard(
-                configuration,
-                course,
-                rules,
-                configuration.getDesiredTickRate(),
-                configuration.getDesiredRefreshRate(),
-                new StandardMotionHandler(course, rules, solver),
-                loggingWrapper,
-                List.of(gui::render)
-        );
+            PlanarRectangle field = PlanarRectangle.create(
+                    -configuration.getDimensions().getWidth() / 2,
+                    -configuration.getDimensions().getHeight() / 2,
+                    configuration.getDimensions()
+            );
 
-        new GameHandler().launch(setup);
+            Rules rules = new Rules.Standard(
+                    OptionalInt.of(3),
+                    OptionalInt.empty(),
+                    field,
+                    true
+            );
 
-        System.out.println("That's all, folks!");
+            Setup.Standard setup = new Setup.Standard(
+                    configuration,
+                    course,
+                    rules,
+                    configuration.getDesiredTickRate(),
+                    configuration.getDesiredRefreshRate(),
+                    new StandardMotionHandler(course, rules, solver),
+                    loggingWrapper,
+                    List.of(wrapper::render)
+            );
+
+            new GameHandler().launch(setup);
+
+            System.out.println("That's all, folks!");
+        });
+
+
+        Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+        config.setForegroundFPS(60);
+        config.setTitle("Project 1-2 Putting / Group 19");
+        config.setWindowedMode(1000, 900);
+        config.useVsync(true);
+        new Lwjgl3Application(new Drop(configuration.getHeightProfile(), capture::get), config);
     }
 }
