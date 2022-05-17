@@ -1,6 +1,5 @@
 package project12.group19.incubating;
 
-import project12.group19.MotionStateClass;
 import project12.group19.api.domain.Item;
 import project12.group19.api.game.Configuration;
 import project12.group19.api.geometry.space.HeightProfile;
@@ -103,7 +102,7 @@ public class Reader implements ConfigurationReader {
                     });
         };
 
-        initialMotion = new MotionStateClass(xSpeed, ySpeed, xPosition, yPosition);
+        initialMotion = new MotionState.Standard(xSpeed, ySpeed, xPosition, yPosition);
         hole = new Hole(xHole, yHole, radius);
 
         return new Configuration.Standard(

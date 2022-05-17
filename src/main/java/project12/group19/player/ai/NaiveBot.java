@@ -2,7 +2,6 @@ package project12.group19.player.ai;
 
 import project12.group19.api.domain.Player;
 import project12.group19.api.domain.State;
-import project12.group19.api.game.Configuration;
 import project12.group19.api.geometry.plane.PlanarCoordinate;
 import project12.group19.api.geometry.space.Hole;
 

@@ -1,11 +1,9 @@
 package project12.group19.api.motion;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import project12.group19.api.geometry.space.HeightProfile;
-import project12.group19.infrastructure.cli.Argument;
 import project12.group19.math.ode.Euler;
 import project12.group19.math.ode.ODESolver;
 import project12.group19.math.ode.RK2;
@@ -14,12 +12,13 @@ import project12.group19.math.parser.Parser;
 import project12.group19.math.parser.component.ComponentRegistry;
 import project12.group19.math.parser.expression.InfixExpression;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class SolverTest {
     public static Stream<Arguments> testInputs() {
@@ -43,7 +42,7 @@ class SolverTest {
             double staticFriction,
             double dynamicFriction
     ) {
-        FrictionC friction = new FrictionC(staticFriction, dynamicFriction);
+        Friction friction = new Friction.Standard(staticFriction, dynamicFriction);
         int maxStepPower = 6;
         List<ODESolver> solvers = List.of(new Euler(), new RK2(), new RK4());
         Parser parser = new Parser(ComponentRegistry.standard());

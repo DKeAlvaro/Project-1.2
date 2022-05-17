@@ -7,7 +7,7 @@ public class RK2Solver implements MotionCalculator {
     private static final double h = 0.00000001;
     private static final double g = 9.81;
     private final HeightProfile profile = (x,y) -> (0.1*x +1);;
-    private final Friction friction =  new FrictionC(0.1,0.05);
+    private final Friction friction =  new Friction.Standard(0.1,0.05);
 
 
     public static void main(String[]args){
@@ -15,7 +15,7 @@ public class RK2Solver implements MotionCalculator {
         //this was just for testing
         RK2Solver solver = new RK2Solver();
         MotionState motionState = new MotionState.Standard(2,0,0,0);
-        FrictionC friction = new FrictionC(0.2, 0.05);
+        Friction friction = new Friction.Standard(0.2, 0.05);
 
         double deltaT = 0.0001;
 
@@ -131,7 +131,7 @@ public class RK2Solver implements MotionCalculator {
      * @return True if the ball is moving, false if the ball stops
 
      */
-    public boolean isMoving(HeightProfile profile, MotionState motionState, FrictionC friction, double deltaT){
+    public boolean isMoving(HeightProfile profile, MotionState motionState, Friction friction, double deltaT){
         double x = motionState.getXPosition();
         double y = motionState.getYPosition();
         if(isVelocity0(motionState, deltaT)){
