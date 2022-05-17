@@ -1,6 +1,7 @@
 package project12.group19.api.game;
 
 import project12.group19.api.domain.Item;
+import project12.group19.api.geometry.plane.PlanarDimensions;
 import project12.group19.api.geometry.space.HeightProfile;
 import project12.group19.api.geometry.space.Hole;
 import project12.group19.api.motion.Friction;
@@ -19,6 +20,7 @@ public interface Configuration {
     double getTimeScale();
     String getPlayer();
     WaterLake getLake();
+    PlanarDimensions getDimensions();
 
     record Standard(
             HeightProfile heightProfile,
@@ -29,9 +31,33 @@ public interface Configuration {
             Hole hole,
             double timeScale,
             String player,
-            WaterLake lake
+            WaterLake lake,
+            PlanarDimensions dimensions
 
     ) implements Configuration {
+        public Standard(
+                HeightProfile heightProfile,
+                Set<Item> obstacles,
+                MotionState initialMotion,
+                Friction groundFriction,
+                Friction sandFriction,
+                Hole hole,
+                WaterLake lake,
+                PlanarDimensions dimensions
+        ) {
+            this(
+                    heightProfile,
+                    obstacles,
+                    initialMotion,
+                    groundFriction,
+                    sandFriction,
+                    hole,
+                    1,
+                    null,
+                    lake,
+                    dimensions
+            );
+        }
         public Standard(
                 HeightProfile heightProfile,
                 Set<Item> obstacles,
@@ -48,9 +74,8 @@ public interface Configuration {
                     groundFriction,
                     sandFriction,
                     hole,
-                    1,
-                    null,
-                    lake
+                    lake,
+                    PlanarDimensions.create(50, 50)
             );
         }
 
@@ -97,6 +122,11 @@ public interface Configuration {
         @Override
         public WaterLake getLake(){
             return lake;
+        }
+
+        @Override
+        public PlanarDimensions getDimensions() {
+            return dimensions;
         }
     }
 }
