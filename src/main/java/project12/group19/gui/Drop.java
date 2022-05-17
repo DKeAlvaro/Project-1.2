@@ -23,12 +23,50 @@ import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
-import project12.group19.api.geometry.space.HeightProfile;
+import project12.group19.api.domain.Course;
+import project12.group19.api.domain.Item;
+import project12.group19.api.domain.Player;
+import project12.group19.api.engine.Setup;
+import project12.group19.api.game.Configuration;
+import project12.group19.api.game.Rules;
+import project12.group19.api.geometry.plane.PlanarRectangle;
 import project12.group19.api.motion.MotionState;
+import project12.group19.api.motion.Solver;
+import project12.group19.engine.GameHandler;
+import project12.group19.engine.motion.StandardMotionHandler;
+import project12.group19.incubating.HillClimbing2;
+import project12.group19.incubating.WaterLake;
+import project12.group19.math.ode.Euler;
+import project12.group19.math.ode.ODESolver;
+import project12.group19.math.ode.RK2;
+import project12.group19.math.ode.RK4;
+import project12.group19.player.ai.HitCalculator;
+import project12.group19.player.ai.NaiveBot;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.OptionalInt;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
 public class Drop extends ApplicationAdapter implements ApplicationListener {
+    private static final String SOLVER_SELECTION_MENU = "Select solver:\n1.Euler\n2.Runge-Kutta 2nd Order\n3.Runge-Kutta 4th Order";
+    private static final String BOT_SELECTION_MENU = "Press keys:\nR: Rule-based Bot\nB: AI Bot";
+    private static final String LAUNCH_MENU = "Press P to continue";
+
+    private static final Map<Integer, ODESolver> SOLVERS = Map.of(
+            Input.Keys.NUM_1, new Euler(),
+            Input.Keys.NUM_2, new RK2(),
+            Input.Keys.NUM_3, new RK4()
+    );
+
+    private ODESolver solver;
+    private Player bot;
+
+    private boolean launched;
 
     public PerspectiveCamera camera;
     public CameraInputController camController;
@@ -48,7 +86,10 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
 
     SpriteBatch spriteBatch;
     BitmapFont font;
-    CharSequence bots = "Press keys:\nR: Rule-based Bot\nB: AI Bot";
+    CharSequence menu = SOLVER_SELECTION_MENU;
+    CharSequence BallInfo ="BallLocation X: \nY: \n Z: ";
+    boolean showBallInfo = false;
+
 
     MeshPartBuilder mb1;
     Material terrain;
@@ -61,13 +102,11 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
 
 	Renderable renderable;
 	NodePart blockPart;
+    private final Configuration configuration;
+    private final AtomicReference<MotionState> ballState = new AtomicReference<>();
 
-    private final HeightProfile surface;
-    private final Supplier<MotionState> ballStateProvider;
-
-    public Drop(HeightProfile surface, Supplier<MotionState> ballStateProvider) {
-        this.surface = surface;
-        this.ballStateProvider = ballStateProvider;
+    public Drop(Configuration configuration) {
+        this.configuration = configuration;
     }
 
     @Override
@@ -169,7 +208,7 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
                 float[] ff = verticeList(x0, y0, x0 + 1, y0 + 1, accuracy);
                 while (count < 18 * 2 / accuracy / accuracy) {
                     MeshPartBuilder.VertexInfo va = new MeshPartBuilder.VertexInfo().setPos(ff[count],
-                            ff[count + 1], ff[count + 2]).setNor(0, 0, 0).setCol(null).setUV(0.0f, 0.0f);
+                            ff[count + 1], ff[count + 2]).setNor(0, 0, 1).setCol(null).setUV(0.0f, 0.0f);
                    // here assign Color:
 
                     float z = heightFunction(ff[count],ff[count+1]);
@@ -208,52 +247,90 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
 
     @Override
     public void render() {
-        Optional.ofNullable(ballStateProvider.get()).ifPresent(state -> {
+        Optional.ofNullable(ballState.get()).ifPresent(state -> {
             float x = (float) state.getXPosition();
             float y = (float) state.getYPosition();
             float z = heightFunction(x, y);
             setBallLocation(x, y, z+0.4f);
+            BallInfo = "BallLocation  \nX: "+ x+"\nY: "+y+"\nZ: "+z;
         });
-// click 'P'  to start
-        if(Gdx.input.isKeyPressed(Input.Keys.P)){
 
-            System.out.println("MOVE the Ball");
-            // to do: here add the code to start the bot
+        if (solver == null) {
+            for (Integer key : SOLVERS.keySet()) {
+                if (Gdx.input.isKeyJustPressed(key)) {
+                    solver = SOLVERS.get(key);
+                    menu = BOT_SELECTION_MENU;
+                    break;
+                }
+            }
+        } else if (bot == null) {
+            if(Gdx.input.isKeyJustPressed(Input.Keys.R)){
+                bot = new NaiveBot(new HitCalculator.Adjusting());
+                System.out.println("Rule based Bot");
+                menu = LAUNCH_MENU;
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.B)){
+                HillClimbing2 hillClimbing = new HillClimbing2(new Solver(solver, configuration.getHeightProfile(), configuration.getGroundFriction()), configuration);
+                bot = state -> hillClimbing.hillClimbing1(state.getBallState().getXPosition(), state.getBallState().getYPosition());
+                System.out.println("Hillclimbing based Bot");
+                menu = LAUNCH_MENU;
+            }
+        } else if (!launched) {
+            if (Gdx.input.isKeyPressed(Input.Keys.P)) {
+                launched = true;
+
+                ExecutorService containment = Executors.newSingleThreadExecutor(runnable -> {
+                    var thread = new Thread(runnable);
+                    thread.setDaemon(true);
+                    return thread;
+                });
+
+                containment.submit(() -> {
+                    Solver solver = new Solver(new Euler(), configuration.getHeightProfile(), configuration.getGroundFriction());
+
+                    Course course = new Course.Standard(
+                            configuration.getHeightProfile(),
+                            configuration.getGroundFriction(),
+                            new Item.Standard("ball", configuration.getInitialMotion().getPosition()),
+                            configuration.getObstacles(),
+                            configuration.getLakes().stream().map(WaterLake::toPlanarRectangle).collect(Collectors.toSet()),
+                            configuration.getHole()
+                    );
+
+                    PlanarRectangle field = PlanarRectangle.create(
+                            -configuration.getDimensions().getWidth() / 2,
+                            -configuration.getDimensions().getHeight() / 2,
+                            configuration.getDimensions()
+                    );
+
+                    Rules rules = new Rules.Standard(
+                            OptionalInt.of(3),
+                            OptionalInt.empty(),
+                            field,
+                            true
+                    );
+
+                    Setup.Standard setup = new Setup.Standard(
+                            configuration,
+                            course,
+                            rules,
+                            configuration.getDesiredTickRate(),
+                            configuration.getDesiredRefreshRate(),
+                            new StandardMotionHandler(course, rules, solver),
+                            bot,
+                            List.of(state -> ballState.set(state.getBallState()))
+                    );
+
+                    new GameHandler().launch(setup);
+
+                    System.out.println("That's all, folks!");
+                });
+            }
+        } else {
+            showBallInfo = true;
         }
+
         modelbatch.begin(camera);
-
-
-        if(Gdx.input.isKeyJustPressed(Input.Keys.R)){
-            System.out.println("Rule based Bot");
-            bots = "Press keys\n1: Euler\n2: RK2\n4: RK4";
-            // todo: connect to Rule Based Bot
-        }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.B)){
-            System.out.println("Ai Bot");
-            bots = "Press keys\n1: Euler\n2: RK2\n4: RK4";
-            // todo: connect to Ai Bot;
-        }
-
-        if(Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)){
-            System.out.println("Euler");
-            //todo: 1.connect to Euler
-            // 2.make game start
-        }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)){
-            System.out.println("RK2");
-            //todo: make game starttodo: 1.connect to RK2
-            //	2.make game start
-        }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.NUM_4)){
-            System.out.println("RK4");
-            //todo: make game starttodo: 1.connect to RK4
-            //	2.make game start
-
-        }
-
-
-
-
         Gdx.gl.glClearColor(0f, 0.28f, 0.5f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         camController.update();
@@ -272,9 +349,15 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
         modelbatch.end();
 
         spriteBatch.begin();
+
         font.setColor(Color.RED);
         font.getData().setScale(1.5f);
-        font.draw(spriteBatch, bots, 20, 880);
+        font.draw(spriteBatch, menu, 20, 880);
+        font.getData().setScale(1.3f);
+
+        if (showBallInfo) {
+            font.draw(spriteBatch, BallInfo, 220, 880);
+        }
         spriteBatch.end();
 
     }
@@ -352,7 +435,7 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
     }
 
     public float heightFunction(float x, float y) {
-        return (float) surface.getHeight(x, y);
+        return (float) configuration.getHeightProfile().getHeight(x, y);
     }
 /*
 	@Override
