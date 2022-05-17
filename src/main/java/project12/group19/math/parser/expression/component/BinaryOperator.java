@@ -1,11 +1,11 @@
 package project12.group19.math.parser.expression.component;
 
-import project12.group19.math.parser.OperatorDefinition;
+import project12.group19.math.parser.BinaryOperatorDefinition;
 
 import java.util.OptionalDouble;
 import java.util.Stack;
 
-public record Operator(String source, OperatorDefinition definition) implements Component {
+public record BinaryOperator(String source, BinaryOperatorDefinition definition) implements Component {
     @Override
     public String getSource() {
         return source;

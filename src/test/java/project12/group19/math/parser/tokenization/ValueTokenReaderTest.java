@@ -4,6 +4,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -37,7 +38,7 @@ class ValueTokenReaderTest {
     @ParameterizedTest
     @MethodSource("values")
     public void positive(String input, int offset, double expectation) {
-        Token<Double> token = SUT.read(input, offset);
+        Token<Double> token = SUT.read(input, offset, List.of());
         assertThat(token, notNullValue());
         assertThat(token.offset(), equalTo(offset));
         assertThat(token.value(), closeTo(expectation, 1E-9));
@@ -46,6 +47,6 @@ class ValueTokenReaderTest {
     @ParameterizedTest
     @MethodSource("nonValues")
     public void negative(String input, int offset) {
-        assertThat(SUT.read(input, offset), nullValue());
+        assertThat(SUT.read(input, offset, List.of()), nullValue());
     }
 }

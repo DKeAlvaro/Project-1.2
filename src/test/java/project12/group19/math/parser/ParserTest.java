@@ -23,7 +23,8 @@ class ParserTest {
         return Stream.of(
                 Arguments.of("3 + 4 * 2 / ( 1 - 5 ) ^ 2 ^ 3", Map.of(), 3 + (6.0/65536)),
                 Arguments.of("sin ( max ( 2, 3 ) / 3 * pi )", Map.of("pi", Math.PI), 0),
-                Arguments.of("0.5*(Math.sin((pi * (x-y))/7))+0.9", Map.of("x", 12.5, "y", 9.0, "pi", Math.PI), 1.4)
+                Arguments.of("0.5*(Math.sin((pi * (x-y))/7))+0.9", Map.of("x", 12.5, "y", 9.0, "pi", Math.PI), 1.4),
+                Arguments.of("-0.5*-(--Math.sin((pi * (x-y))/7))+++0.9", Map.of("x", 12.5, "y", 9.0, "pi", Math.PI), 1.4)
         );
     }
 

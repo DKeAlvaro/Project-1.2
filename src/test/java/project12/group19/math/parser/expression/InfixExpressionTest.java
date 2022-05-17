@@ -1,8 +1,8 @@
 package project12.group19.math.parser.expression;
 
 import org.junit.jupiter.api.Test;
-import project12.group19.math.parser.OperatorDefinition;
-import project12.group19.math.parser.expression.component.Operator;
+import project12.group19.math.parser.BinaryOperatorDefinition;
+import project12.group19.math.parser.expression.component.BinaryOperator;
 import project12.group19.math.parser.expression.component.Value;
 
 import java.util.List;
@@ -18,7 +18,7 @@ class InfixExpressionTest {
                 List.of(
                         Value.of(1),
                         Value.of(0),
-                        new Operator("/", OperatorDefinition.Standard.DIVIDE)
+                        new BinaryOperator("/", BinaryOperatorDefinition.Standard.DIVIDE)
                 )
         );
 

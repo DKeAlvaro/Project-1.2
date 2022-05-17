@@ -1,6 +1,7 @@
 package project12.group19.math.parser.tokenization;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Tokenizer {
@@ -15,7 +16,7 @@ public class Tokenizer {
         List<Token<?>> accumulator = new ArrayList<>(expression.length() / 2);
 
         while (offset < expression.length()) {
-            Token<?> token = getToken(expression, offset);
+            Token<?> token = getToken(expression, offset, Collections.unmodifiableList(accumulator));
 
             if (token == null) {
                 throw new IllegalArgumentException("Failed to parse expression: unknown token at " + offset);
@@ -28,9 +29,9 @@ public class Tokenizer {
         return accumulator;
     }
 
-    private Token<?> getToken(String expression, int offset) {
+    private Token<?> getToken(String expression, int offset, List<Token<?>> preceding) {
         for (TokenReader<?> reader : readers) {
-            Token<?> token = reader.read(expression, offset);
+            Token<?> token = reader.read(expression, offset, preceding);
             if (token != null) {
                 return token;
             }
