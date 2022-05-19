@@ -2,6 +2,7 @@ package project12.group19.incubating;
 
 import project12.group19.api.domain.Item;
 import project12.group19.api.game.Configuration;
+import project12.group19.api.geometry.plane.PlanarDimensions;
 import project12.group19.api.geometry.space.HeightProfile;
 import project12.group19.api.geometry.space.Hole;
 import project12.group19.api.motion.Friction;
@@ -18,10 +19,34 @@ import java.io.IOException;
 import java.util.*;
 
 public class Reader implements ConfigurationReader {
+    private static int parseInteger(String source, int fallback) {
+        return source != null ? Integer.parseInt(source) : fallback;
+    }
+    private static int parseInteger(String source) {
+        return parseInteger(source, 0);
+    }
+
+    private static double parseDouble(String source, double fallback) {
+        return source != null ? Double.parseDouble(source) : fallback;
+    }
+
+    private static WaterLake parseLake(Map<String, String> values) {
+        if (values.containsKey("startingLakeX")) {
+            double startingX = Double.parseDouble(values.get("startingLakeX"));
+            double startingY = Double.parseDouble(values.get("startingLakeY"));
+            double endingX = Double.parseDouble(values.get("endingLakeX"));
+            double endingY = Double.parseDouble(values.get("endingLakeY"));
+
+            return new WaterLake(startingX,endingX,startingY,endingY);
+        }
+
+        return null;
+    }
+
     public Configuration read(String path) throws IOException {
 
-        double xSpeed = 0;
-        double ySpeed = 0;
+        double xSpeed;
+        double ySpeed;
         double xPosition;
         double yPosition;
 
@@ -61,33 +86,37 @@ public class Reader implements ConfigurationReader {
                 values.put(key, value);
             }
         }
-        xPosition = Integer.parseInt(values.get("x0"));
-        yPosition = Integer.parseInt(values.get("y0"));
+        xPosition = parseInteger(values.get("x0"));
+        yPosition = parseInteger(values.get("y0"));
+        xSpeed = parseInteger(values.get("vx"));
+        ySpeed = parseInteger(values.get("vy"));
+
         xHole = Integer.parseInt(values.get("xt"));
         yHole = Integer.parseInt(values.get("yt"));
         radius = Double.parseDouble(values.get("r"));
-        startingX = Double.parseDouble(values.get("startingLakeX"));
-        startingY = Double.parseDouble(values.get("startingLakeY"));
-        endingX = Double.parseDouble(values.get("endingLakeX"));
-        endingY = Double.parseDouble(values.get("endingLakeY"));
 
-        //WaterLake lake = new WaterLake(0,15,0,5);
+        double fieldWidth = parseDouble(values.get("width"), 50);
+        double fieldHeight = parseDouble(values.get("width"), 50);
 
-        WaterLake lake = new WaterLake(startingX,endingX,startingY,endingY);
+        PlanarDimensions field = PlanarDimensions.create(
+                fieldWidth,
+                fieldHeight
+        );
 
+        WaterLake lake = parseLake(values);
 
         groundFriction = Friction.create(
                 Double.parseDouble(values.get("mus")),
                 Double.parseDouble(values.get("muk"))
         );
-        double timescale = Optional.ofNullable(values.get("timeScale"))
-                .map(Double::parseDouble)
-                .orElse(1.0);
+        double timescale = parseDouble(values.get("timeScale"), 1.0);
+        int tickRate = parseInteger(values.get("tickRate"), 60);
+        int refreshRate = parseInteger(values.get("refreshRate"), 60);
         String player = values.get("player");
 
         InfixExpression heightExpression = new Parser(ComponentRegistry.standard()).parse(values.get("heightProfile"));
         heightProfile = (x, y) -> {
-            if (x >= lake.getStartingX() && x <= lake.getFinishingX() && y >= lake.getStartingY() && y <= lake.getFinishingY()){
+            if (lake != null && lake.contains(x, y)) {
                 return -1;
             }
             InfixExpression resolved = heightExpression.resolve(Map.of("x", x, "y", y, "pi", Math.PI, "e", Math.E));
@@ -114,7 +143,10 @@ public class Reader implements ConfigurationReader {
                 hole,
                 timescale,
                 player,
-                lake
+                lake == null ? Set.of() : Set.of(lake),
+                field,
+                tickRate,
+                refreshRate
         );
     }
 }

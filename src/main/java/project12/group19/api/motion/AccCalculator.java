@@ -1,7 +1,6 @@
 package project12.group19.api.motion;
 
 import project12.group19.api.geometry.space.HeightProfile;
-import project12.group19.math.DerivativeEstimator;
 
 public class AccCalculator {
 
@@ -27,7 +26,7 @@ public class AccCalculator {
 
         if (!(StopCondition.isVelocity0(motion, scale)) ){
 
-            accX = (-1) * g * (dhdx) - (f.getDynamicCoefficient() * g * motion.getXSpeed()) / Math.sqrt(Math.pow(motion.getXSpeed(), 2) + Math.pow(motion.getYSpeed(), 2));
+            accX = (-1) * g * (dhdx) - (f.getDynamicCoefficient() * g * motion.getXSpeed()) / motion.getAbsoluteSpeed();
         } else if (Math.abs(dh) > MOTION_ERROR) {
             accX = (-1) * g * (dhdx) - (f.getDynamicCoefficient() * g * dhdx / dh);
 
@@ -55,7 +54,7 @@ public class AccCalculator {
 
 
         if (!(StopCondition.isVelocity0(motion, scale))) {
-            accY = (-1) * g * (dhdy) - (f.getDynamicCoefficient() * g * motion.getYSpeed()) / Math.sqrt(Math.pow(motion.getXSpeed(), 2) + Math.pow(motion.getYSpeed(), 2));
+            accY = (-1) * g * (dhdy) - (f.getDynamicCoefficient() * g * motion.getYSpeed()) / motion.getAbsoluteSpeed();
 
         } else if (Math.abs(dh) > MOTION_ERROR) {
 

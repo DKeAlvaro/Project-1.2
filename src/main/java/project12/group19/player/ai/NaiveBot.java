@@ -16,10 +16,6 @@ public class NaiveBot implements Player {
 
     @Override
     public Optional<Hit> play(State state) {
-        if (!state.isStatic()) {
-            return Optional.empty();
-        }
-
         Hole target = state.getCourse().getHole();
         return calculator.shootThrough(state, PlanarCoordinate.create(target.getxHole(), target.getyHole()), target.getRadius());
     }
