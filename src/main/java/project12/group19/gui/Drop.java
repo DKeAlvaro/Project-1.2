@@ -211,8 +211,6 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
                             ff[count + 1], ff[count + 2]).setNor(0, 0, 1).setCol(null).setUV(0.0f, 0.0f);
                    // here assign Color:
 
-                    float z = heightFunction(ff[count],ff[count+1]);
-
                     count += 3;
                     MeshPartBuilder.VertexInfo vb = new MeshPartBuilder.VertexInfo().setPos(ff[count],
                             ff[count + 1], ff[count + 2]).setNor(0, 0, 1).setCol(null).setUV(0.0f, 0.0f);
@@ -228,10 +226,8 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
             x0++;
             y0 = -1 * range;
         }
-
         model = modelBuilder2.end();
         modelInstance = new ModelInstance(model, 0, 0, 0);
-
     }
 
 
