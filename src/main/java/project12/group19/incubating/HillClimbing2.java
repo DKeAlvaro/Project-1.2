@@ -24,7 +24,7 @@ public class HillClimbing2 {
     public static HeightProfile profile;
     public static Friction friction;
 
-    public static int numOfShots = 100;
+    public static int numOfShots = 300;
     public static Shoot[] shots = new Shoot[numOfShots];
 
     public static double stepSize = 0.1;
@@ -49,6 +49,7 @@ public class HillClimbing2 {
     }
 
     public Optional<Player.Hit> hillClimbing1(double startingX, double startingY) {
+        System.out.println("Calculating new shoot");
         int totalIterations = 0;
         double f = 0.5;
         int shotIterations;

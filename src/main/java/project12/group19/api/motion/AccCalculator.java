@@ -27,7 +27,7 @@ public class AccCalculator {
         if (!(StopCondition.isVelocity0(motion, scale)) ){
 
             accX = (-1) * g * (dhdx) - (f.getDynamicCoefficient() * g * motion.getXSpeed()) / Math.sqrt(Math.pow(motion.getXSpeed(), 2) + Math.pow(motion.getYSpeed(), 2));
-        } else if (Math.abs(dh) > MOTION_ERROR * scale) {
+        } else if (Math.abs(dh) > MOTION_ERROR * scale && dh > f.getStaticCoefficient()) {
             accX = (-1) * g * (dhdx) - (f.getDynamicCoefficient() * g * dhdx / dh);
 
 
@@ -56,7 +56,7 @@ public class AccCalculator {
         if (!(StopCondition.isVelocity0(motion, scale))) {
             accY = (-1) * g * (dhdy) - (f.getDynamicCoefficient() * g * motion.getYSpeed()) / Math.sqrt(Math.pow(motion.getXSpeed(), 2) + Math.pow(motion.getYSpeed(), 2));
 
-        } else if (Math.abs(dh) > MOTION_ERROR * scale) {
+        } else if (Math.abs(dh) > MOTION_ERROR * scale && dh > f.getStaticCoefficient()) {
 
             accY = (-1) * g * (dhdy) - (f.getDynamicCoefficient() * g * dhdy / dh);
 
