@@ -11,7 +11,7 @@ public class Derivative {
      * @return
      */
     public static double derivativeHX(HeightProfile heightProfile, double x, double y){
-        if(heightProfile.getHeight(x+ h,y) == heightProfile.getHeight(h, y) ){
+        if(heightProfile.getHeight(x+ h,y) == heightProfile.getHeight(x, y) ){
             return 0.0;
         }
 
@@ -25,7 +25,7 @@ public class Derivative {
      * @return
      */
     public static double derivativeHY(HeightProfile heightProfile, double x, double y){
-        if(heightProfile.getHeight(x,y+h) == heightProfile.getHeight(x, h) ){
+        if(heightProfile.getHeight(x,y+h) == heightProfile.getHeight(x, y) ){
             return 0.0;
         }
         return (heightProfile.getHeight(x, y+h) - heightProfile.getHeight(x,y))/h;

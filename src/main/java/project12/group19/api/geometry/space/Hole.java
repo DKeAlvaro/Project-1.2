@@ -1,5 +1,7 @@
 package project12.group19.api.geometry.space;
 
+import project12.group19.api.geometry.plane.PlanarCoordinate;
+
 public class Hole {
     private double xHole;
     private double yHole;
@@ -20,5 +22,8 @@ public class Hole {
     public double getRadius(){
         return radius;
     }
-    
+
+    public PlanarCoordinate getPosition() {
+        return PlanarCoordinate.create(xHole, yHole);
+    }
 }

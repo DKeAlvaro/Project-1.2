@@ -1,16 +1,11 @@
 package project12.group19.api.motion;
 
 import project12.group19.api.geometry.space.HeightProfile;
-import project12.group19.math.ode.Euler;
 import project12.group19.math.ode.ODESolver;
 
 import java.util.OptionalDouble;
 
 public class Solver implements MotionCalculator {
-    public static final double MOTION_ERROR = 1E-6;
-    private static final double h = 0.0000001;
-    private static final double g = 9.81;
-
     private final ODESolver solver;
     private final HeightProfile profile;
     private final Friction friction;
@@ -55,24 +50,4 @@ public class Solver implements MotionCalculator {
                 .getAsDouble();
         return new MotionState.Standard(xSpeed, ySpeed,x,y);
     }
- 
-
-   /* public static void main(String[]args){
-        long startTime = System.nanoTime();
-        //this was just for testing
-        MotionState motionState = new MotionState.Standard(2.0,0.0,0.0,0.0);
-        FrictionC friction = new FrictionC(0.1, 0.05);
-
-        double deltaT = 0.0000001;
-
-        HeightProfile heightProfile = (x, y) -> (1/20.0)* (Math.pow(x, 2)+ Math.pow(y,2));//0.1*x +1;//Math.sin((x - y) / 7);
-        Solver solver = new Solver(new Euler(), heightProfile, Friction.create(0.1, 0.05));
-        while(solver.isMoving(heightProfile, motionState, friction)){
-            motionState = solver.calculate(motionState, deltaT);
-        }
-        long endTime = System.nanoTime();
-        long duration = (long) ((endTime - startTime)/Math.pow(10, 6));
-        System.out.println(motionState.getXPosition() + " " + motionState.getYPosition());
-        System.out.println(".    time: "+ duration + " ms.");
-    }*/
 }

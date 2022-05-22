@@ -1,5 +1,7 @@
 package project12.group19.incubating;
 
+import project12.group19.api.geometry.plane.PlanarRectangle;
+
 public class WaterLake {
     private double startingX;
     private double startingY;
@@ -27,6 +29,14 @@ public class WaterLake {
 
     public double getFinishingY() {
         return finishingY;
+    }
+
+    public boolean contains(double x, double y) {
+        return startingX <= x && finishingX >= x && startingY <= y && finishingY >= y;
+    }
+
+    public PlanarRectangle toPlanarRectangle() {
+        return PlanarRectangle.create(startingX, startingY, finishingX - startingX, finishingY - startingY);
     }
 }
 

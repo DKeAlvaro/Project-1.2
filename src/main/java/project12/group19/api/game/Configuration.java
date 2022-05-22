@@ -19,8 +19,10 @@ public interface Configuration {
     Hole getHole();
     double getTimeScale();
     String getPlayer();
-    WaterLake getLake();
+    Set<WaterLake> getLakes();
     PlanarDimensions getDimensions();
+    int getDesiredTickRate();
+    int getDesiredRefreshRate();
 
     record Standard(
             HeightProfile heightProfile,
@@ -31,8 +33,10 @@ public interface Configuration {
             Hole hole,
             double timeScale,
             String player,
-            WaterLake lake,
-            PlanarDimensions dimensions
+            Set<WaterLake> lakes,
+            PlanarDimensions dimensions,
+            int tickRate,
+            int refreshRate
 
     ) implements Configuration {
         public Standard(
@@ -42,7 +46,7 @@ public interface Configuration {
                 Friction groundFriction,
                 Friction sandFriction,
                 Hole hole,
-                WaterLake lake,
+                Set<WaterLake> lakes,
                 PlanarDimensions dimensions
         ) {
             this(
@@ -54,8 +58,10 @@ public interface Configuration {
                     hole,
                     1,
                     null,
-                    lake,
-                    dimensions
+                    lakes,
+                    dimensions,
+                    60,
+                    60
             );
         }
         public Standard(
@@ -65,7 +71,7 @@ public interface Configuration {
                 Friction groundFriction,
                 Friction sandFriction,
                 Hole hole,
-                WaterLake lake
+                Set<WaterLake> lakes
         ) {
             this(
                     heightProfile,
@@ -74,7 +80,7 @@ public interface Configuration {
                     groundFriction,
                     sandFriction,
                     hole,
-                    lake,
+                    lakes,
                     PlanarDimensions.create(50, 50)
             );
         }
@@ -120,13 +126,23 @@ public interface Configuration {
         }
 
         @Override
-        public WaterLake getLake(){
-            return lake;
+        public Set<WaterLake> getLakes(){
+            return lakes;
         }
 
         @Override
         public PlanarDimensions getDimensions() {
             return dimensions;
+        }
+
+        @Override
+        public int getDesiredTickRate() {
+            return tickRate;
+        }
+
+        @Override
+        public int getDesiredRefreshRate() {
+            return refreshRate;
         }
     }
 }

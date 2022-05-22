@@ -1,16 +1,20 @@
 package project12.group19;
 
+import project12.group19.api.domain.Course;
+import project12.group19.api.domain.Item;
 import project12.group19.api.domain.Player;
 import project12.group19.api.engine.Setup;
 import project12.group19.api.game.Configuration;
+import project12.group19.api.game.Rules;
+import project12.group19.api.geometry.plane.PlanarRectangle;
 import project12.group19.api.motion.Solver;
 import project12.group19.api.ui.GUI;
 import project12.group19.engine.GameHandler;
+import project12.group19.engine.motion.StandardMotionHandler;
 import project12.group19.incubating.HitsReader;
 import project12.group19.incubating.Reader;
+import project12.group19.incubating.WaterLake;
 import project12.group19.math.ode.Euler;
-import project12.group19.math.ode.ODESolver;
-import project12.group19.math.ode.RK4;
 import project12.group19.player.FixedPlayer;
 import project12.group19.player.ai.HitCalculator;
 import project12.group19.player.ai.NaiveBot;
@@ -18,10 +22,8 @@ import project12.group19.player.ai.NaiveBot;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Entrypoint {
     public static final String DEFAULT_CONFIGURATION_FILE = "configuration.properties";
@@ -87,7 +89,7 @@ public class Entrypoint {
         Solver solver = new Solver(new Euler(), configuration.getHeightProfile(), configuration.getGroundFriction());
         Map<String, Player> players = new HashMap<>();
         players.put("human", gui.getController());
-        players.put("bot.naive", new NaiveBot(new HitCalculator.Directed(solver, configuration)));
+        players.put("bot.naive", new NaiveBot(new HitCalculator.Adjusting()));
         replay.map(FixedPlayer::new).ifPresent(player -> players.put("replay", player));
 
         String selection = Optional.ofNullable(configuration.getPlayer()).orElse("human");
@@ -100,7 +102,38 @@ public class Entrypoint {
             return response;
         };
 
-        Setup.Standard setup = new Setup.Standard(configuration, 60, 10, solver, loggingWrapper, List.of(gui::render));
+        Course course = new Course.Standard(
+                configuration.getHeightProfile(),
+                configuration.getGroundFriction(),
+                new Item.Standard("ball", configuration.getInitialMotion().getPosition()),
+                configuration.getObstacles(),
+                configuration.getLakes().stream().map(WaterLake::toPlanarRectangle).collect(Collectors.toSet()),
+                configuration.getHole()
+        );
+
+        PlanarRectangle field = PlanarRectangle.create(
+                -configuration.getDimensions().getWidth() / 2,
+                -configuration.getDimensions().getHeight() / 2,
+                configuration.getDimensions()
+        );
+
+        Rules rules = new Rules.Standard(
+                OptionalInt.of(3),
+                OptionalInt.empty(),
+                field,
+                true
+        );
+
+        Setup.Standard setup = new Setup.Standard(
+                configuration,
+                course,
+                rules,
+                configuration.getDesiredTickRate(),
+                configuration.getDesiredRefreshRate(),
+                new StandardMotionHandler(course, rules, solver),
+                loggingWrapper,
+                List.of(gui::render)
+        );
 
         new GameHandler().launch(setup);
 

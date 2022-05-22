@@ -1,9 +1,11 @@
 package project12.group19.api.engine;
 
+import project12.group19.api.domain.Course;
 import project12.group19.api.domain.Player;
 import project12.group19.api.domain.State;
 import project12.group19.api.game.Configuration;
-import project12.group19.api.motion.MotionCalculator;
+import project12.group19.api.game.Rules;
+import project12.group19.api.motion.MotionHandler;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -27,7 +29,7 @@ public interface Setup {
     /**
      * @return Calculator used to update ball position.
      */
-    MotionCalculator getMotionCalculator();
+    MotionHandler getMotionHandler();
     Player getPlayer();
 
     /**
@@ -35,12 +37,16 @@ public interface Setup {
      * each tick.
      */
     List<Consumer<State>> getListeners();
+    Course getCourse();
+    Rules getRules();
 
     record Standard(
             Configuration configuration,
+            Course course,
+            Rules rules,
             int desiredTickRate,
             int desiredRefreshRate,
-            MotionCalculator motionCalculator,
+            MotionHandler motionHandler,
             Player player,
             List<Consumer<State>> listeners
     ) implements Setup {
@@ -60,8 +66,8 @@ public interface Setup {
         }
 
         @Override
-        public MotionCalculator getMotionCalculator() {
-            return motionCalculator;
+        public MotionHandler getMotionHandler() {
+            return motionHandler;
         }
 
         @Override
@@ -72,6 +78,16 @@ public interface Setup {
         @Override
         public List<Consumer<State>> getListeners() {
             return listeners;
+        }
+
+        @Override
+        public Course getCourse() {
+            return course;
+        }
+
+        @Override
+        public Rules getRules() {
+            return rules;
         }
     }
 }

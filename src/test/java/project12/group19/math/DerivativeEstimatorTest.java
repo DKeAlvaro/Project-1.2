@@ -38,7 +38,7 @@ class DerivativeEstimatorTest {
     @MethodSource("degrees")
     public void testSineDerivative(int degrees) {
         double radians = Math.toRadians(degrees);
-        DerivativeEstimator.Subject subject = x -> OptionalDouble.of(Math.sin(x));
+        UnaryOperation subject = x -> OptionalDouble.of(Math.sin(x));
 
         OptionalDouble estimate = SUT.estimate(subject, radians);
         assertThat("Sine derivative is undefined", estimate.isPresent());
@@ -49,7 +49,7 @@ class DerivativeEstimatorTest {
     @MethodSource("degrees")
     public void testCosineDerivative(int degrees) {
         double radians = Math.toRadians(degrees);
-        DerivativeEstimator.Subject subject = x -> OptionalDouble.of(Math.cos(x));
+        UnaryOperation subject = x -> OptionalDouble.of(Math.cos(x));
 
         OptionalDouble estimate = SUT.estimate(subject, radians);
         assertThat("Cosine derivative is undefined", estimate.isPresent());
@@ -59,7 +59,7 @@ class DerivativeEstimatorTest {
     @ParameterizedTest
     @MethodSource("doubles")
     public void testSquareDerivative(double x) {
-        DerivativeEstimator.Subject subject = v -> OptionalDouble.of(v * v);
+        UnaryOperation subject = v -> OptionalDouble.of(v * v);
 
         OptionalDouble estimate = SUT.estimate(subject, x);
         assertThat("Parabola derivative is undefined", estimate.isPresent());

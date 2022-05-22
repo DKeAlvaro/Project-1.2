@@ -323,7 +323,7 @@ public class GUI implements Renderer {
     @Override
     public void render(State state) {
         MotionState ballState = state.getBallState();
-        if (!state.isStatic() && !state.isTerminal()) {
+        if (!state.isTerminal()) {
             statusPositionMessage.setText(String.format(
                     "x=%.3f\ny=%.3f\nz=%.3f",
                     ballState.getXPosition(),

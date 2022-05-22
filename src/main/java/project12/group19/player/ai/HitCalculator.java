@@ -4,8 +4,9 @@ import project12.group19.api.domain.Player;
 import project12.group19.api.domain.State;
 import project12.group19.api.game.Configuration;
 import project12.group19.api.geometry.plane.PlanarCoordinate;
+import project12.group19.api.geometry.space.Hole;
+import project12.group19.api.motion.MotionState;
 import project12.group19.api.motion.Solver;
-//import project12.group19.incubating.HillClimbing1;
 import project12.group19.incubating.HillClimbing2;
 
 import java.util.List;
@@ -109,6 +110,46 @@ public interface HitCalculator {
         private static double noisify(double value) {
             double multiplier = 1 - NOISE_PERCENTAGE * (2 * NOISE.nextDouble() - 1);
             return value * multiplier;
+        }
+    }
+
+    class Adjusting implements HitCalculator {
+        private static final double NOISE_PERCENTAGE = 0;
+        private static final Random NOISE = new Random();
+
+        private final double start;
+        private final double step;
+
+        private int counter;
+
+        public Adjusting(double start, double step) {
+            this.start = start;
+            this.step = step;
+        }
+
+        public Adjusting() {
+            this(1.0, 0.2);
+        }
+
+        @Override
+        public Optional<Player.Hit> shootAt(State state, PlanarCoordinate target, double tolerance) {
+            MotionState ball = state.getBallState();
+            Hole hole = state.getCourse().getHole();
+            double force = start * Math.pow(1 + step, counter);
+            counter++;
+            double xPath = hole.getxHole() - ball.getXPosition();
+            double yPath = hole.getyHole() - ball.getYPosition();
+            double angle = Math.atan2(yPath, xPath);
+            double xVelocity = noisify(Math.cos(angle) * force);
+            double yVelocity = noisify(Math.sin(angle) * force);
+            return Optional.of(Player.Hit.create(xVelocity, yVelocity));
+        }
+
+        private static double noisify(double value) {
+            double boundary = (NOISE.nextDouble() - 0.5) * 0.2;
+            double subject = Math.abs(value) > Math.abs(boundary) ? value : boundary;
+            double multiplier = 1 - NOISE_PERCENTAGE * (2 * NOISE.nextDouble() - 1);
+            return subject * multiplier;
         }
     }
 }

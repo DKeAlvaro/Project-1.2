@@ -15,10 +15,6 @@ public class FixedPlayer implements Player {
 
     @Override
     public Optional<Hit> play(State state) {
-        if (!state.isStatic() || state.isTerminal() || cursor >= hits.length) {
-            return Optional.empty();
-        }
-
         double[] hit = hits[cursor];
         cursor++;
         return Optional.of(Hit.create(hit[0], hit[1]));
