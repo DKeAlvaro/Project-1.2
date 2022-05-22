@@ -1,5 +1,6 @@
 package project12.group19.incubating;
 
+import org.jetbrains.annotations.NotNull;
 import project12.group19.api.domain.Player;
 import project12.group19.api.game.Configuration;
 import project12.group19.api.geometry.space.HeightProfile;
@@ -17,7 +18,7 @@ public class HillClimbing2 {
     public static double holeX;
     public static double holeY;
     public static double holeR;
-    public static double ballR = 0.5;
+
     public static int ruleBasedIterations = 0;
 
     public static HeightProfile profile;
@@ -25,9 +26,8 @@ public class HillClimbing2 {
 
     public static int numOfShots = 100;
     public static Shoot[] shots = new Shoot[numOfShots];
-    public static Shoot[] initialSHots = new Shoot[numOfShots]; //array of shots to compare with improved shots
 
-    public static double stepSize = 0.05;
+    public static double stepSize = 0.1;
 
     public HillClimbing2(Solver solver, Configuration configuration){
         HillClimbing2.solver = solver;
@@ -39,30 +39,6 @@ public class HillClimbing2 {
         HillClimbing2.configuration = configuration;
     }
 
-    public Optional<Player.Hit> bruteForce(double startingX, double startingY) {
-        Shoot currentShot;
-        int iterations = 0;
-        double variation = 5;
-        System.out.println("Searching for shoot...");
-
-
-        for (double x = 0.1; x < 15 ; x+= 0.1){
-            for(double y = 0.1; y < 15; y+= 0.1){
-                currentShot = new Shoot(x, y, startingX, startingY);
-                iterations++;
-                //System.out.println(iterations);
-                System.out.println("X: "+x+" Y: "+y);
-                if(currentShot.inHole()){
-                    System.out.println("Solution Found in "+iterations+" iterations");
-                    return Optional.of(Player.Hit.create(currentShot.getxDir(), currentShot.getYDir()));
-                }
-            }
-        }
-        System.out.println("No solution :(");
-        double f = 0.5;
-        return Optional.of(Player.Hit.create((holeX-startingX) * f, (holeY-startingY) * f));
-    }
-
     public Optional<Player.Hit> StraightShot(double startingX, double startingY) {
         double f = 0.5;
         ruleBasedIterations++;
@@ -72,14 +48,12 @@ public class HillClimbing2 {
         return Optional.of(Player.Hit.create((holeX-startingX) * f, (holeX-startingX) * f));
     }
 
-        public Optional<Player.Hit> hillClimbing1(double startingX, double startingY) {
+    public Optional<Player.Hit> hillClimbing1(double startingX, double startingY) {
         int totalIterations = 0;
         double f = 0.5;
-        int iterations;
+        int shotIterations;
         double noiseX;
         double noiseY;
-            System.out.println("Hole r: "+ holeR);
-
 
         shots[0] = new Shoot((holeX-startingX) * f, (holeY-startingY) * f, startingX, startingY);
 
@@ -105,23 +79,22 @@ public class HillClimbing2 {
             }
             System.out.println("Shot "+i+" Starting conditions: xDir: " +shots[i].getxDir()+" yDir: " +shots[i].getYDir());
 
-            iterations = 0;
-            initialSHots[i] = new Shoot(shots[i].getxDir(), shots[i].getYDir(), startingX, startingY);
-            while (!hasConverged(shots[i]) && iterations < 100 && !shots[i].inWater() || iterations ==0) {
-                totalIterations++;
-                if(!lookForBetterShot(shots[i]).inWater()){
-                    shots[i] = lookForBetterShot(shots[i]);
-                }
-                System.out.println("New shot " + i + ". Distance to hole: " + shots[i].getDistanceToHole()+" xDir "+ shots[i].getxDir()+"yDir "+ shots[i].getYDir());
-                iterations++;
+            shotIterations = 0;
+            while (!hasConverged(shots[i]) && shotIterations < 100 && !shots[i].inWater() || shotIterations == 0) {
                 if (shots[i].inHole() && !shots[i].inWater()) {
                     System.out.println();
-                    System.out.println("Final shot xDir: " + shots[i].getxDir() + " yDir: " + shots[i].getYDir());
+                    System.out.println("Final shot xDir: " + shots[i].getxDir() + " yDir: " + shots[i].getYDir() +" distance to hole: "+shots[i].getDistanceToHole());
                     System.out.println("Straight shot xDir: " + (holeX-startingX) * f + " yDir: " + (holeY-startingY) * f);
                     System.out.println("Total iterations: "+ totalIterations);
                     return Optional.of(Player.Hit.create(shots[i].getxDir(), shots[i].getYDir()));
                 }
 
+                if(!lookForBetterShot(shots[i]).inWater()){
+                    shots[i] = lookForBetterShot(shots[i]);
+                }
+                System.out.println("New shot " + i + ". Distance to hole: " + shots[i].getDistanceToHole()+" xDir "+ shots[i].getxDir()+"yDir "+ shots[i].getYDir());
+                shotIterations++;
+                totalIterations++;
             }
         }
         System.out.println("Sorting the shots...");
@@ -145,7 +118,7 @@ public class HillClimbing2 {
         double deltaT = 0.4;
         double newX;
         double newY;
-        if(Math.abs(shoot.getFinalX()-holeX) < holeR*1.5){
+        if(Math.abs(shoot.getFinalX()-holeX) < holeR){
             newX = shoot.getxDir();
         } else if(shoot.getFinalX()>holeX){
             newX = shoot.getxDir() - deltaT;
@@ -153,7 +126,7 @@ public class HillClimbing2 {
             newX = shoot.getxDir() + deltaT;
         }
 
-        if(Math.abs(shoot.getFinalY()-holeY) < holeR*1.5){
+        if(Math.abs(shoot.getFinalY()-holeY) < holeR){
             newY = shoot.getYDir();
         } else if(shoot.getFinalY()>holeY){
             newY = shoot.getYDir() - deltaT;
@@ -172,7 +145,7 @@ public class HillClimbing2 {
         return Math.sqrt(Math.pow((finalX - startingX), 2) + Math.pow((finalY - startingY), 2));
     }
 
-    public static void getShotDistanceToHole(Friction friction, HeightProfile profile, MotionState current, Shoot shoot) {
+    public static void getShotDistanceToHole(Friction friction, HeightProfile profile, @NotNull MotionState current, Shoot shoot) {
         double minDistance = getDistance(holeX, current.getXPosition(), holeY, current.getYPosition());
 
         while (StopCondition.isMoving(profile, current, friction, stepSize)) {
@@ -189,6 +162,7 @@ public class HillClimbing2 {
             }
             if(profile.getHeight(current.getXPosition(), current.getYPosition()) < 0) {
                 shoot.setInWater();
+                break;
             }
         }
         if(shoot.inWater()){
@@ -198,4 +172,9 @@ public class HillClimbing2 {
 
     }
 
+    public static Optional<Player.Hit> bruteForce(double startingX, double stratingY){
+
+        //for(double)
+        return Optional.empty();
+    }
 }
