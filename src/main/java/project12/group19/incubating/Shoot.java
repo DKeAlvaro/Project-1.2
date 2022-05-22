@@ -11,13 +11,10 @@ public class Shoot {
     private final double startingY;
     private double finalX;
     private double finalY;
+    private boolean inHole;
 
     private boolean inWater = false;
-
     private double distanceToHole;
-
-    public static double holeX = HillClimbing2.holeX;
-    public static double holeY = HillClimbing2.holeY;
 
     public static Solver solver = HillClimbing2.solver;
 
@@ -26,6 +23,7 @@ public class Shoot {
         this.yDir = yDir;
         this.startingX = startingX;
         this.startingY = startingY;
+        this.inHole = false;
 
         MotionState starting = new MotionState.Standard(xDir, yDir, startingX, startingY);
         getShotDistanceToHole(friction, profile, starting, this);
@@ -42,7 +40,11 @@ public class Shoot {
         return distanceToHole;
     }
     public boolean inHole(){
-        return distanceToHole < ballR;
+        return inHole;
+    }
+
+    public void setInHole() {
+        this.inHole = true;
     }
 
     public void setDistanceToHole(double distanceToHole) {
@@ -76,7 +78,6 @@ public class Shoot {
         return inWater;
     }
     public void setInWater(){
-        this.setDistanceToHole(1000);
         this.inWater = true;
     }
 }

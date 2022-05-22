@@ -91,19 +91,10 @@ public interface HitCalculator {
 
         @Override
         public Optional<Player.Hit> shootAt(State state, PlanarCoordinate target, double tolerance) {
-            /*
-            MotionState ball = state.getBallState();
-            Hole hole = state.getCourse().getHole();
-            double xPath = hole.getxHole() - ball.getXPosition();
-            double yPath = hole.getyHole() - ball.getYPosition();
-            double angle = Math.atan2(yPath, xPath);
-            double xVelocity = noisify(Math.cos(angle) * force);
-            double yVelocity = noisify(Math.sin(angle) * force);
-            return Optional.of(Player.Hit.create(xVelocity, yVelocity));
-            */
 
-            HillClimbing2 hillClimbing2 = new HillClimbing2(solver, configuration);
-            return hillClimbing2.hillClimbing1(state.getBallState().getXPosition(), state.getBallState().getYPosition());
+            //return ruleBased(state);
+            return hillCLimbing(solver, configuration, state);
+
         }
 
 
@@ -111,6 +102,25 @@ public interface HitCalculator {
             double multiplier = 1 - NOISE_PERCENTAGE * (2 * NOISE.nextDouble() - 1);
             return value * multiplier;
         }
+
+        private static Optional<Player.Hit> ruleBased(State state){
+            MotionState ball = state.getBallState();
+            Hole hole = state.getCourse().getHole();
+            double force =HillClimbing2.getDistance(hole.getxHole(), ball.getXPosition(), hole.getyHole(), ball.getYPosition());
+            double xPath = hole.getxHole() - ball.getXPosition();
+            double yPath = hole.getyHole() - ball.getYPosition();
+            double angle = Math.atan2(yPath, xPath);
+            double xVelocity = noisify(Math.cos(angle) * force);
+            double yVelocity = noisify(Math.sin(angle) * force);
+            return Optional.of(Player.Hit.create(xVelocity, yVelocity));
+
+        }
+        private static Optional<Player.Hit> hillCLimbing(Solver solver, Configuration configuration, State state){
+            HillClimbing2 hillClimbing2 = new HillClimbing2(solver, configuration);
+            System.out.println();
+            return hillClimbing2.hillClimbing1(state.getBallState().getXPosition(), state.getBallState().getYPosition());
+        }
+
     }
 
     class Adjusting implements HitCalculator {

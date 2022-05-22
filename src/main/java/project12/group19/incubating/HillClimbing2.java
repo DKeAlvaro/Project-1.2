@@ -16,7 +16,9 @@ public class HillClimbing2 {
 
     public static double holeX;
     public static double holeY;
+    public static double holeR;
     public static double ballR = 0.5;
+    public static int ruleBasedIterations = 0;
 
     public static HeightProfile profile;
     public static Friction friction;
@@ -33,6 +35,7 @@ public class HillClimbing2 {
         HillClimbing2.friction = configuration.getGroundFriction();
         HillClimbing2.holeX = configuration.getHole().getxHole();
         HillClimbing2.holeY = configuration.getHole().getyHole();
+        HillClimbing2.holeR = configuration.getHole().getRadius();
         HillClimbing2.configuration = configuration;
     }
 
@@ -61,43 +64,61 @@ public class HillClimbing2 {
     }
 
     public Optional<Player.Hit> StraightShot(double startingX, double startingY) {
-        double f = 0.3;
-        return Optional.of(Player.Hit.create((holeX-startingX) * f, (holeY-startingY) * f));
+        double f = 0.5;
+        ruleBasedIterations++;
+        if(new Shoot((holeX-startingX) * f, (holeX-startingX) * f, startingX, startingY).inHole()){
+            System.out.println("Iterations needed "+ ruleBasedIterations);
+        }
+        return Optional.of(Player.Hit.create((holeX-startingX) * f, (holeX-startingX) * f));
     }
 
-    public Optional<Player.Hit> hillClimbing1(double startingX, double startingY) {
+        public Optional<Player.Hit> hillClimbing1(double startingX, double startingY) {
+        int totalIterations = 0;
         double f = 0.5;
         int iterations;
         double noiseX;
         double noiseY;
+            System.out.println("Hole r: "+ holeR);
 
 
         shots[0] = new Shoot((holeX-startingX) * f, (holeY-startingY) * f, startingX, startingY);
 
         for (int i = 0; i < numOfShots; i++){
-            System.out.println("Shoot Nº " + i);
+            totalIterations++;
+            System.out.println("Shoot " + i);
 
-            noiseX = Math.random() * getDistance(holeX, startingX, holeY, startingY);
-            noiseY = Math.random() * getDistance(holeX, startingX, holeY, startingY);
             if(i > 0){
-                shots[i] = new Shoot((holeX-startingX) * f + noiseX, (holeY-startingY) * f + noiseY, startingX, startingY);
+                if(Math.random()<0.5){
+                    noiseX = Math.random() * getDistance(holeX, startingX, holeY, startingY);
+                    noiseY = Math.random() * getDistance(holeX, startingX, holeY, startingY);
+                }else{
+                    noiseX = (Math.random() * 10)-5;
+                    noiseY = (Math.random() * 10)-5;
+                }
+                if(Math.random()<0.5) {
+                    shots[i] = new Shoot((holeX - startingX) * f + noiseX, (holeY - startingY) * f + noiseY, startingX, startingY);
+                }else {
+                    shots[i] = new Shoot((holeX - startingX) * f - noiseX, (holeY - startingY) * f - noiseY, startingX, startingY);
+
+                }
                 System.out.println("Noise X: "+ noiseX+ " Noise Y: "+ noiseY);
             }
-            System.out.println("Shot Nª "+i+" Starting conditions: xDir: " +shots[i].getxDir()+" yDir: " +shots[i].getYDir());
+            System.out.println("Shot "+i+" Starting conditions: xDir: " +shots[i].getxDir()+" yDir: " +shots[i].getYDir());
 
             iterations = 0;
             initialSHots[i] = new Shoot(shots[i].getxDir(), shots[i].getYDir(), startingX, startingY);
             while (!hasConverged(shots[i]) && iterations < 100 && !shots[i].inWater() || iterations ==0) {
+                totalIterations++;
                 if(!lookForBetterShot(shots[i]).inWater()){
                     shots[i] = lookForBetterShot(shots[i]);
                 }
-                System.out.println("Improvement " + iterations + " in shot nº " + i + ". Distance to hole: " + shots[i].getDistanceToHole());
+                System.out.println("New shot " + i + ". Distance to hole: " + shots[i].getDistanceToHole()+" xDir "+ shots[i].getxDir()+"yDir "+ shots[i].getYDir());
                 iterations++;
-                if (shots[i].inHole()) {
+                if (shots[i].inHole() && !shots[i].inWater()) {
                     System.out.println();
-                    System.out.println("Initial shot xDir: "+initialSHots[i].getxDir() + " yDir: "+initialSHots[i].getYDir());
                     System.out.println("Final shot xDir: " + shots[i].getxDir() + " yDir: " + shots[i].getYDir());
                     System.out.println("Straight shot xDir: " + (holeX-startingX) * f + " yDir: " + (holeY-startingY) * f);
+                    System.out.println("Total iterations: "+ totalIterations);
                     return Optional.of(Player.Hit.create(shots[i].getxDir(), shots[i].getYDir()));
                 }
 
@@ -106,20 +127,25 @@ public class HillClimbing2 {
         System.out.println("Sorting the shots...");
         sortShots(shots);
         System.out.println("Shots sorted!");
+        int i = 0;
         for (Shoot shoot : shots){
-            System.out.println(shoot.getDistanceToHole());
+            System.out.println("Distance to hole: "+shoot.getDistanceToHole()+ " xDir: " + shoot.getxDir()+ " yDir: "+shoot.getYDir());
+            if (shoot.getDistanceToHole() != 0 && shoot.getDistanceToHole() != 1000){
+                System.out.println("Total iterations: "+ totalIterations);
+                return Optional.of(Player.Hit.create(shots[i].getxDir(), shots[i].getYDir()));
+            }
+            i++;
         }
         return Optional.of(Player.Hit.create(shots[0].getxDir(), shots[0].getYDir()));
     }
     public static boolean hasConverged(Shoot shoot){
-        return shoot.getDistanceToHole() <= lookForBetterShot(shoot).getDistanceToHole();
+        return shoot.getDistanceToHole() <= lookForBetterShot(shoot).getDistanceToHole() || lookForBetterShot(shoot).inWater();
     }
     public static Shoot lookForBetterShot(Shoot shoot){
         double deltaT = 0.4;
         double newX;
         double newY;
-
-        if(Math.abs(shoot.getFinalX()-holeX) < ballR){
+        if(Math.abs(shoot.getFinalX()-holeX) < holeR*1.5){
             newX = shoot.getxDir();
         } else if(shoot.getFinalX()>holeX){
             newX = shoot.getxDir() - deltaT;
@@ -127,7 +153,7 @@ public class HillClimbing2 {
             newX = shoot.getxDir() + deltaT;
         }
 
-        if(Math.abs(shoot.getFinalY()-holeY) < ballR){
+        if(Math.abs(shoot.getFinalY()-holeY) < holeR*1.5){
             newY = shoot.getYDir();
         } else if(shoot.getFinalY()>holeY){
             newY = shoot.getYDir() - deltaT;
@@ -156,12 +182,17 @@ public class HillClimbing2 {
                 shoot.setDistanceToHole(getDistance(holeX, current.getXPosition(), holeY, current.getYPosition()));
                 shoot.setFinalX(current.getXPosition());
                 shoot.setFinalY(current.getYPosition());
+                if(getDistance(holeX, current.getXPosition(), holeY, current.getYPosition()) < holeR){
+                    shoot.setInHole();
+                    break;
+                }
             }
-            if(profile.getHeight(current.getXPosition(), current.getYPosition()) < 0){
+            if(profile.getHeight(current.getXPosition(), current.getYPosition()) < 0) {
                 shoot.setInWater();
             }
         }
         if(shoot.inWater()){
+            shoot.setDistanceToHole(1000);
             System.out.println("Shot got into the water! ");
         }
 
