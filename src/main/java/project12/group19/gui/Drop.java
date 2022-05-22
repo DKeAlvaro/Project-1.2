@@ -18,8 +18,10 @@ import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
+import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
@@ -71,6 +73,10 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
     public PerspectiveCamera camera;
     public CameraInputController camController;
     Environment environment;
+
+
+    DirectionalShadowLight shadowLight;
+    ModelBatch shadowBatch;
     ModelBatch modelbatch;
     Model model, ball, hole, water;
     Model wall;
@@ -96,12 +102,13 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
 
     Texture texture;
     Texture grass;
-//	float[] ff;
+    //	float[] ff;
     float[] ballLocation;
     float range, accuracy;
 
-	Renderable renderable;
-	NodePart blockPart;
+    Renderable renderable;
+    NodePart blockPart;
+
     private final Configuration configuration;
     private final AtomicReference<MotionState> ballState = new AtomicReference<>();
 
@@ -118,7 +125,7 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
         font = new BitmapFont();
 
         camera = new PerspectiveCamera(0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        camera.position.set(0f, 0f, 30f);
+        camera.position.set(30f, 10f, 50f);
         camera.lookAt(0f, 0f, 0f);
         camera.near = 1f;
         camera.far = 100f;
@@ -139,30 +146,40 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.8f, 0.8f, 0.8f, 0.5f));
         environment.add(dLight);
+        // here you can adjust the shadow:
+        environment.add((shadowLight = new DirectionalShadowLight(500, 500, 60f, 60f, .05f, 100f))
+                .set(1f, 1f, 1f, 55.0f, 0f, 5f));
+
+        environment.shadowMap = shadowLight;
+
+        shadowBatch = new ModelBatch(new DepthShaderProvider());
 
         modelBuilder = new ModelBuilder();
 
-        hole = modelBuilder.createCylinder(1,0.1f,1,100,new Material(ColorAttribute.createDiffuse(Color.BLACK)),
+        float holeSize = (float) configuration.getHole().getRadius() * 2;
+        hole = modelBuilder.createCylinder(holeSize,0.5f,holeSize,100,new Material(ColorAttribute.createDiffuse(Color.BLACK)),
                 VertexAttributes.Usage.Position|VertexAttributes.Usage.Normal);
         //hole.set;//
 
-        water = modelBuilder.createBox(100,100,1,new Material(TextureAttribute.createDiffuse(texture)),
+        float width = (float) configuration.getDimensions().getWidth();
+        float height = (float) configuration.getDimensions().getHeight();
+        water = modelBuilder.createBox(width,height,1,new Material(TextureAttribute.createDiffuse(texture)),
                 VertexAttributes.Usage.Position|VertexAttributes.Usage.TextureCoordinates|VertexAttributes.Usage.Normal);
-        wall = modelBuilder.createBox(100,100,15,new Material(ColorAttribute.createDiffuse(new Color(155/255f,118/255f,83/255f,1))),
+        wall = modelBuilder.createBox(width,height,15,new Material(ColorAttribute.createDiffuse(new Color(155/255f,118/255f,83/255f,1))),
                 VertexAttributes.Usage.Position|VertexAttributes.Usage.Normal);
-        ball = modelBuilder.createSphere(0.1f, 0.1f, 0.1f, 100, 100, new Material(ColorAttribute.createDiffuse(Color.WHITE)),
+        ball = modelBuilder.createSphere(0.3f, 0.3f, 0.3f, 100, 100, new Material(ColorAttribute.createDiffuse(Color.WHITE)),
                 VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
         Coor = modelBuilder.createXYZCoordinates(20, new Material(ColorAttribute.createDiffuse(Color.GRAY)),
                 VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
         ballLocation = new float[3];
-        ballLocation[0] = 5f;
-        ballLocation[1] = 6f;
-        ballLocation[2] = heightFunction(5, 6);
+        ballLocation[0] = (float) configuration.getInitialMotion().getXPosition();
+        ballLocation[1] = (float) configuration.getInitialMotion().getYPosition();
+        ballLocation[2] = heightFunction(ballLocation[0], ballLocation[1]);
 
 
         ballModel = new ModelInstance(ball, ballLocation[0], ballLocation[1], ballLocation[2]);
         modelInstance3 = new ModelInstance(Coor, 0, 0, 0);
-        setHoleLoaction(4.7f,4.7f);
+        setHoleLocation((float) configuration.getHole().getxHole(), (float) configuration.getHole().getyHole());
        // modelInstance4 = new ModelInstance(hole, 0, 0, heightFunction(4, 4) + 0.001f);
         modelInstance5 = new ModelInstance(water,0,0,-1);
         modelInstance6 = new ModelInstance(wall,0,0,-10);
@@ -181,10 +198,8 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
             ballModel = new ModelInstance(ball, x, y, z);
         }
     }
-    public void setHoleLoaction (float x, float y){
-        modelInstance4 = new ModelInstance(hole, x, y, heightFunction(x, y) + 0.1f+0.3f);
-        Vector3 direction = new Vector3(0,0,10);
-        Vector3 up = new Vector3(0,0,10);
+    public void setHoleLocation(float x, float y) {
+        modelInstance4 = new ModelInstance(hole, x, y, heightFunction(x, y));
 
         modelInstance4.transform.rotate(1000,0,0,90);
     }
@@ -196,7 +211,9 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
 
         Material terrain = new Material(TextureAttribute.createDiffuse(grass));
 
-        range = 50f;
+        // range = 50f;
+        // TODO: use both width and height
+        range = (float) (configuration.getDimensions().getWidth() / 2);
         accuracy = 0.2f;
         float x0 = -1 * range, y0 = -1 * range;
 
@@ -243,11 +260,31 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
 
     @Override
     public void render() {
+        shadowLight.begin(camera);
+        // shadowBatch.
+        shadowBatch.begin(shadowLight.getCamera());
+
+        shadowBatch.render(ballModel);
+        shadowBatch.render(modelInstance);
+        // modelbatch,render(font,environment);
+
+        //    shadowBatch.render(modelInstance3);     //coor
+        shadowBatch.render(modelInstance4);     //hole
+        shadowBatch.render(modelInstance5);     //water
+        shadowBatch.render(modelInstance6);      //wall
+
+        camera.update();
+        camController.update();
+
+        shadowBatch.end();
+        shadowLight.end();
+
+
         Optional.ofNullable(ballState.get()).ifPresent(state -> {
             float x = (float) state.getXPosition();
             float y = (float) state.getYPosition();
             float z = heightFunction(x, y);
-            setBallLocation(x, y, z+0.4f);
+            setBallLocation(x, y, z + 0.4f);
             BallInfo = "BallLocation  \nX: "+ x+"\nY: "+y+"\nZ: "+z;
         });
 
