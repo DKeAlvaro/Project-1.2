@@ -62,7 +62,7 @@ test {
     useJUnitPlatform()
 }
 
-project.ext.mainClassName = "project12.group19.gdx.DesktopLauncher"
+project.ext.mainClassName = "project12.group19.Entrypoint"
 project.ext.assetsDir = new File("src/main/resources")
 
 import org.gradle.internal.os.OperatingSystem

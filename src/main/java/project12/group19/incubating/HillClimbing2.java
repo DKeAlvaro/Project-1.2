@@ -65,7 +65,7 @@ public class HillClimbing2 {
         return Optional.of(Player.Hit.create((holeX-startingX) * f, (holeY-startingY) * f));
     }
 
-        public Optional<Player.Hit> hillClimbing1(double startingX, double startingY) {
+    public Optional<Player.Hit> hillClimbing1(double startingX, double startingY) {
         double f = 0.5;
         int iterations;
         double noiseX;

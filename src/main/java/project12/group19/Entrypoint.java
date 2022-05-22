@@ -1,29 +1,18 @@
 package project12.group19;
 
-import project12.group19.api.domain.Course;
-import project12.group19.api.domain.Item;
-import project12.group19.api.domain.Player;
-import project12.group19.api.engine.Setup;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import project12.group19.api.game.Configuration;
-import project12.group19.api.game.Rules;
-import project12.group19.api.geometry.plane.PlanarRectangle;
-import project12.group19.api.motion.Solver;
 import project12.group19.api.ui.GUI;
-import project12.group19.engine.GameHandler;
-import project12.group19.engine.motion.StandardMotionHandler;
+import project12.group19.api.ui.Renderer;
+import project12.group19.gui.Drop;
 import project12.group19.incubating.HitsReader;
 import project12.group19.incubating.Reader;
-import project12.group19.incubating.WaterLake;
-import project12.group19.math.ode.Euler;
-import project12.group19.player.FixedPlayer;
-import project12.group19.player.ai.HitCalculator;
-import project12.group19.player.ai.NaiveBot;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 public class Entrypoint {
     public static final String DEFAULT_CONFIGURATION_FILE = "configuration.properties";
@@ -60,7 +49,8 @@ public class Entrypoint {
         return Optional.empty();
     }
 
-    private static GUI createUI(Configuration configuration, boolean showControls) {
+    private static Renderer createUI(Configuration configuration, boolean showControls, boolean use3d) {
+
         return new GUI(
                 configuration.getHeightProfile(),
                 GUI.TRANSLATOR.toPixelX(configuration.getHole().getxHole()),
@@ -83,60 +73,13 @@ public class Entrypoint {
         System.out.println("Running...");
         System.out.println();
 
-        Optional<double[][]> replay = resolveReplay(args);
         Configuration configuration = resolveConfiguration(args);
-        GUI gui = createUI(configuration, replay.isEmpty());
-        Solver solver = new Solver(new Euler(), configuration.getHeightProfile(), configuration.getGroundFriction());
-        Map<String, Player> players = new HashMap<>();
-        players.put("human", gui.getController());
-        players.put("bot.naive", new NaiveBot(new HitCalculator.Adjusting()));
-        replay.map(FixedPlayer::new).ifPresent(player -> players.put("replay", player));
 
-        String selection = Optional.ofNullable(configuration.getPlayer()).orElse("human");
-        Player player = Optional.ofNullable(players.get(selection))
-                .orElseThrow(() -> new IllegalArgumentException("Unknown player type: " + selection));
-
-        Player loggingWrapper = state -> {
-            Optional<Player.Hit> response = player.play(state);
-            response.ifPresent(hit -> System.out.println("Hit was made: " + hit));
-            return response;
-        };
-
-        Course course = new Course.Standard(
-                configuration.getHeightProfile(),
-                configuration.getGroundFriction(),
-                new Item.Standard("ball", configuration.getInitialMotion().getPosition()),
-                configuration.getObstacles(),
-                configuration.getLakes().stream().map(WaterLake::toPlanarRectangle).collect(Collectors.toSet()),
-                configuration.getHole()
-        );
-
-        PlanarRectangle field = PlanarRectangle.create(
-                -configuration.getDimensions().getWidth() / 2,
-                -configuration.getDimensions().getHeight() / 2,
-                configuration.getDimensions()
-        );
-
-        Rules rules = new Rules.Standard(
-                OptionalInt.of(3),
-                OptionalInt.empty(),
-                field,
-                true
-        );
-
-        Setup.Standard setup = new Setup.Standard(
-                configuration,
-                course,
-                rules,
-                configuration.getDesiredTickRate(),
-                configuration.getDesiredRefreshRate(),
-                new StandardMotionHandler(course, rules, solver),
-                loggingWrapper,
-                List.of(gui::render)
-        );
-
-        new GameHandler().launch(setup);
-
-        System.out.println("That's all, folks!");
+        Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+        config.setForegroundFPS(60);
+        config.setTitle("Project 1-2 Putting / Group 19");
+        config.setWindowedMode(1000, 900);
+        config.useVsync(true);
+        new Lwjgl3Application(new Drop(configuration), config);
     }
 }
