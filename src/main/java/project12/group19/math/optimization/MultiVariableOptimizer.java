@@ -2,7 +2,7 @@ package project12.group19.math.optimization;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.DoubleFunction;
+import java.util.function.ToDoubleFunction;
 
 /**
  * This interface describes an optimizer of input for function, such as
@@ -34,7 +34,7 @@ public interface MultiVariableOptimizer {
      */
     Optional<double[]> optimize(
             double[] parameters,
-            DoubleFunction<double[]> function,
+            ToDoubleFunction<double[]> function,
             double goal,
             List<Round> history,
             double precision
