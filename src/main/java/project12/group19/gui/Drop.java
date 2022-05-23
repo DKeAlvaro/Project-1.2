@@ -60,7 +60,7 @@ import java.util.stream.Collectors;
 public class Drop extends ApplicationAdapter implements ApplicationListener {
     private static final NumberFormat DECIMAL_PRINT_FORMAT = new DecimalFormat("#.000");
     private static final String SOLVER_SELECTION_MENU = "Select solver:\n1.Euler\n2.Runge-Kutta 2nd Order\n3.Runge-Kutta 4th Order";
-    private static final String BOT_SELECTION_MENU = "Press keys:\nR: Rule-based Bot\nB: AI Bot";
+    private static final String BOT_SELECTION_MENU = "Press keys:\nR: Rule-based Bot\nB: Hill-Climbing Bot";
     private static final String LAUNCH_MENU = "Press P to continue";
 
     private static final Map<Integer, ODESolver> SOLVERS = Map.of(
@@ -438,20 +438,20 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
                             .append(", ")
                             .append(DECIMAL_PRINT_FORMAT.format(round.getHit().getYVelocity()))
                             .append("} -> ");
+
+                    if (round.getTerminationReason() != null) {
+                        info
+                                .append(round.getTerminationReason())
+                                .append(" at {")
+                                .append(DECIMAL_PRINT_FORMAT.format(round.getEndingPosition().getX()))
+                                .append(", ")
+                                .append(DECIMAL_PRINT_FORMAT.format(round.getEndingPosition().getY()))
+                                .append('}');
+                    } else {
+                        info.append("Waiting for round end...");
+                    }
                 } else {
                     info.append("Waiting for hit...");
-                }
-
-                if (round.getTerminationReason() != null) {
-                    info
-                            .append(round.getTerminationReason())
-                            .append(" at {")
-                            .append(DECIMAL_PRINT_FORMAT.format(round.getEndingPosition().getX()))
-                            .append(", ")
-                            .append(DECIMAL_PRINT_FORMAT.format(round.getEndingPosition().getY()))
-                            .append('}');
-                } else {
-                    info.append("Waiting for round end...");
                 }
 
                 info.append("\n");
