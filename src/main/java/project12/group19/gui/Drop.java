@@ -28,11 +28,12 @@ import com.badlogic.gdx.math.Vector3;
 import project12.group19.api.domain.Course;
 import project12.group19.api.domain.Item;
 import project12.group19.api.domain.Player;
+import project12.group19.api.domain.State;
 import project12.group19.api.engine.Setup;
 import project12.group19.api.game.Configuration;
 import project12.group19.api.game.Rules;
+import project12.group19.api.game.state.Round;
 import project12.group19.api.geometry.plane.PlanarRectangle;
-import project12.group19.api.motion.MotionState;
 import project12.group19.api.motion.Solver;
 import project12.group19.engine.GameHandler;
 import project12.group19.engine.motion.StandardMotionHandler;
@@ -45,6 +46,8 @@ import project12.group19.math.ode.RK4;
 import project12.group19.player.ai.HitCalculator;
 import project12.group19.player.ai.NaiveBot;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -55,6 +58,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class Drop extends ApplicationAdapter implements ApplicationListener {
+    private static final NumberFormat DECIMAL_PRINT_FORMAT = new DecimalFormat("#.000");
     private static final String SOLVER_SELECTION_MENU = "Select solver:\n1.Euler\n2.Runge-Kutta 2nd Order\n3.Runge-Kutta 4th Order";
     private static final String BOT_SELECTION_MENU = "Press keys:\nR: Rule-based Bot\nB: AI Bot";
     private static final String LAUNCH_MENU = "Press P to continue";
@@ -93,8 +97,7 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
     SpriteBatch spriteBatch;
     BitmapFont font;
     CharSequence menu = SOLVER_SELECTION_MENU;
-    CharSequence BallInfo ="BallLocation X: \nY: \n Z: ";
-    boolean showBallInfo = false;
+    boolean showGameInfo = false;
 
 
     MeshPartBuilder mb1;
@@ -104,13 +107,15 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
     Texture grass;
     //	float[] ff;
     float[] ballLocation;
+    double velocityX;
+    double velocityY;
     float range, accuracy;
 
     Renderable renderable;
     NodePart blockPart;
 
     private final Configuration configuration;
-    private final AtomicReference<MotionState> ballState = new AtomicReference<>();
+    private final AtomicReference<State> gameState = new AtomicReference<>();
 
     public Drop(Configuration configuration) {
         this.configuration = configuration;
@@ -159,7 +164,6 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
         float holeSize = (float) configuration.getHole().getRadius() * 2;
         hole = modelBuilder.createCylinder(holeSize,0.5f,holeSize,100,new Material(ColorAttribute.createDiffuse(Color.BLACK)),
                 VertexAttributes.Usage.Position|VertexAttributes.Usage.Normal);
-        //hole.set;//
 
         float width = (float) configuration.getDimensions().getWidth();
         float height = (float) configuration.getDimensions().getHeight();
@@ -180,7 +184,6 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
         ballModel = new ModelInstance(ball, ballLocation[0], ballLocation[1], ballLocation[2]);
         modelInstance3 = new ModelInstance(Coor, 0, 0, 0);
         setHoleLocation((float) configuration.getHole().getxHole(), (float) configuration.getHole().getyHole());
-       // modelInstance4 = new ModelInstance(hole, 0, 0, heightFunction(4, 4) + 0.001f);
         modelInstance5 = new ModelInstance(water,0,0,-1);
         modelInstance6 = new ModelInstance(wall,0,0,-10);
 		blockPart = hole.nodes.get(0).parts.get(0);
@@ -189,7 +192,6 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
 		blockPart.setRenderable(renderable);
 		renderable.environment = null;
 		renderable.worldTransform.idt();
-//		camera.lookAt(ballLocation[0],ballLocation[1],ballLocation[2]);
     }
 
     public void setBallLocation(float x, float y, float z) {
@@ -211,7 +213,6 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
 
         Material terrain = new Material(TextureAttribute.createDiffuse(grass));
 
-        // range = 50f;
         // TODO: use both width and height
         range = (float) (configuration.getDimensions().getWidth() / 2);
         accuracy = 0.2f;
@@ -261,14 +262,10 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
     @Override
     public void render() {
         shadowLight.begin(camera);
-        // shadowBatch.
         shadowBatch.begin(shadowLight.getCamera());
 
         shadowBatch.render(ballModel);
         shadowBatch.render(modelInstance);
-        // modelbatch,render(font,environment);
-
-        //    shadowBatch.render(modelInstance3);     //coor
         shadowBatch.render(modelInstance4);     //hole
         shadowBatch.render(modelInstance5);     //water
         shadowBatch.render(modelInstance6);      //wall
@@ -280,12 +277,11 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
         shadowLight.end();
 
 
-        Optional.ofNullable(ballState.get()).ifPresent(state -> {
+        Optional.ofNullable(gameState.get()).map(State::getBallState).ifPresent(state -> {
             float x = (float) state.getXPosition();
             float y = (float) state.getYPosition();
             float z = heightFunction(x, y);
             setBallLocation(x, y, z + 0.4f);
-            BallInfo = "BallLocation  \nX: "+ x+"\nY: "+y+"\nZ: "+z;
         });
 
         if (solver == null) {
@@ -351,7 +347,7 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
                             configuration.getDesiredRefreshRate(),
                             new StandardMotionHandler(course, rules, solver),
                             bot,
-                            List.of(state -> ballState.set(state.getBallState()))
+                            List.of(gameState::set)
                     );
 
                     new GameHandler().launch(setup);
@@ -360,19 +356,16 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
                 });
             }
         } else {
-            showBallInfo = true;
+            showGameInfo = true;
         }
 
         modelbatch.begin(camera);
         Gdx.gl.glClearColor(0f, 0.28f, 0.5f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         camController.update();
-        //Gdx.gl.glViewport(0,0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-       // modelbatch,render(font,environment);
         modelbatch.render(modelInstance, environment);      //terrain
         modelbatch.render(ballModel, environment);          //ball
-  //      modelbatch.render(modelInstance3, environment);     //coor
         modelbatch.render(modelInstance4, environment);     //hole
         modelbatch.render(modelInstance5, environment);     //water
         modelbatch.render(modelInstance6,environment);      //wall
@@ -385,9 +378,9 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
 
         font.setColor(Color.RED);
 
-        if (showBallInfo) {
+        if (showGameInfo) {
             font.getData().setScale(1.3f);
-            font.draw(spriteBatch, BallInfo, 20, 880);
+            font.draw(spriteBatch, getGameInfo(), 20, 880);
         } else {
             font.getData().setScale(1.5f);
             font.draw(spriteBatch, menu, 20, 880);
@@ -396,9 +389,80 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
 
     }
 
-    @Override
-    public void dispose() {
+    private String getGameInfo() {
+        State state = gameState.get();
+
+        if (state == null) {
+            return "";
+        }
+
+        OptionalInt allowedFouls = state.getRules().getAllowedFouls();
+        String maxFouls = allowedFouls.isPresent() ? Integer.toString(allowedFouls.getAsInt()) : "[no limit]";
+        StringBuilder info = new StringBuilder()
+                .append("Rounds: ").append(state.getRounds().size()).append("\n")
+                .append("Fouls: ").append(state.getFouls())
+                .append(" (max: ").append(maxFouls).append(")\n");
+
+        switch (state.getGameStatus()) {
+            case ONGOING -> {
+                info
+                        .append("Position:\n")
+                        .append("x: ").append(DECIMAL_PRINT_FORMAT.format(ballLocation[0])).append("\n")
+                        .append("y: ").append(DECIMAL_PRINT_FORMAT.format(ballLocation[1])).append("\n")
+                        .append("z: ").append(DECIMAL_PRINT_FORMAT.format(ballLocation[2])).append("\n")
+                        .append("Velocity:\n")
+                        .append("vx: ").append(DECIMAL_PRINT_FORMAT.format(velocityX)).append("\n")
+                        .append("vy: ").append(DECIMAL_PRINT_FORMAT.format(velocityY)).append("\n");
+            }
+            case WON -> info.append("Game won!\n");
+            case LOST -> info.append("Too many fouls, game lost!\n");
+        }
+
+        List<Round> history = state.getRounds().stream()
+                .skip(Math.max(0, state.getRounds().size() - 3))
+                .toList();
+
+        if (!history.isEmpty()) {
+            info.append("History (up to 3 last rounds):\n");
+            for (Round round : history) {
+                info.append("Round #").append(round.getIndex()).append(": ");
+
+                if (round.getHit() != null) {
+                    info
+                            .append('{')
+                            .append(DECIMAL_PRINT_FORMAT.format(round.getStartingPosition().getX()))
+                            .append(", ")
+                            .append(DECIMAL_PRINT_FORMAT.format(round.getStartingPosition().getY()))
+                            .append("} + Hit {")
+                            .append(DECIMAL_PRINT_FORMAT.format(round.getHit().getXVelocity()))
+                            .append(", ")
+                            .append(DECIMAL_PRINT_FORMAT.format(round.getHit().getYVelocity()))
+                            .append("} -> ");
+                } else {
+                    info.append("Waiting for hit...");
+                }
+
+                if (round.getTerminationReason() != null) {
+                    info
+                            .append(round.getTerminationReason())
+                            .append(" at {")
+                            .append(DECIMAL_PRINT_FORMAT.format(round.getEndingPosition().getX()))
+                            .append(", ")
+                            .append(DECIMAL_PRINT_FORMAT.format(round.getEndingPosition().getY()))
+                            .append('}');
+                } else {
+                    info.append("Waiting for round end...");
+                }
+
+                info.append("\n");
+            }
+        }
+
+        return info.toString();
     }
+
+    @Override
+    public void dispose() {}
 
     public float[] verticeList(float xStart, float yStart, float xEnd, float yEnd, float accuracy) {
         float[] ff = new float[(int) (3600)];
@@ -471,83 +535,4 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
     public float heightFunction(float x, float y) {
         return (float) configuration.getHeightProfile().getHeight(x, y);
     }
-/*
-	@Override
-	public boolean keyDown(int keycode) {
-
-
-		//in the real world , do not creat NEW variable over and over,
-		// a temporary static member instead;
-		if(keycode == Input.Keys.LEFT)
-			camera.rotateAround(new Vector3(0f,0f,0f),new Vector3(0f,1f,0f),10f );
-
-		if(keycode == Input.Keys.RIGHT)
-			camera.rotateAround(new Vector3(0f,0f,0f),new Vector3(0f,1f,0f),-10f );
-
-		if(keycode == Input.Keys.UP)
-			camera.rotateAround(new Vector3(0f,0f,0f),new Vector3(1f,0f,0f),10f );
-		if(keycode == Input.Keys.DOWN)
-			camera.rotateAround(new Vector3(0f,0f,0f),new Vector3(1f,0f,0f),-10f );
-		return true;
-	}
-
-	@Override
-	public boolean keyUp(int keycode) {
-		return false;
-	}
-
-	@Override
-	public boolean keyTyped(char character) {
-		if (character == 'a' || character == 'A') {
-			camera.position.set(camera.position.x - 1, camera.position.y, camera.position.z);
-		}
-		if (character == 'd' || character == 'D') {
-			camera.position.set(camera.position.x + 1, camera.position.y, camera.position.z);
-		}
-		if (character == 'w' || character == 'W') {
-			camera.position.set(camera.position.x, camera.position.y + 1, camera.position.z);
-		}
-		if (character == 's' || character == 'S') {
-			camera.position.set(camera.position.x, camera.position.y - 1, camera.position.z);
-		}
-		if (character == 'q' || character == 'Q') {
-			camera.position.set(camera.position.x, camera.position.y , camera.position.z-1);
-		}
-		if (character == 'e' || character == 'E') {
-			camera.position.set(camera.position.x, camera.position.y , camera.position.z+1);
-		}
-		return true;
-	}
-
-	@Override
-	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		//Vector3 Vball = ball.
-		//camera.lookAt(ball);
-
-		return true;
-	}
-
-	@Override
-	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		return false;
-	}
-
-	@Override
-	public boolean touchDragged(int screenX, int screenY, int pointer) {
-		//camera.position.set(screenX,screenY,(screenX*screenX+screenY*screenY)/10+5);
-		//camera.lookAt(screenX,screenY,(screenX*screenX+screenY*screenY)/10);
-		return true;
-	}
-
-	@Override
-	public boolean mouseMoved(int screenX, int screenY) {
-		return false;
-	}
-
-	@Override
-	public boolean scrolled(float amountX, float amountY) {
-		return false;
-	}
-	*/
-
 }
