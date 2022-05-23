@@ -25,7 +25,7 @@ public class HitsReader {
         while ((st = br.readLine()) != null) {
             lines++;
         }
-        double hits[][] = new double[lines][2]; // storing the hits in a 2d array (x & y positions)
+        double[][] hits = new double[lines][2]; // storing the hits in a 2d array (x & y positions)
 
         BufferedReader fr = new BufferedReader(new FileReader(file));
 

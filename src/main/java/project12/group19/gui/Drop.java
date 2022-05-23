@@ -1,11 +1,4 @@
-package project12.group19.gui;//package com.badlogic.drop;
-//todo: connect to physical engine.
-// go to line 224, there're 5 if statements,
-// we need to connect different physical engine& Bot depends on the users choics,
-// first user chooses bot, then user chooses physical engine,
-// Try to run the program you can see the red color guidance,
-// If the user want to change the choice afterwards, we need to restart.
-
+package project12.group19.gui;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.ApplicationListener;
@@ -105,7 +98,6 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
 
     Texture texture;
     Texture grass;
-    //	float[] ff;
     float[] ballLocation;
     double velocityX;
     double velocityY;
@@ -123,8 +115,8 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
 
     @Override
     public void create() {
-        texture = new Texture("water002.jpeg");
-        grass = new Texture("img.png");
+        texture = new Texture("water-texture.jpg");
+        grass = new Texture("grass-texture.png");
 
         spriteBatch = new SpriteBatch();
         font = new BitmapFont();

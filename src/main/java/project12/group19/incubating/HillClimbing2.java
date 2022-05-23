@@ -170,12 +170,5 @@ public class HillClimbing2 {
             shoot.setDistanceToHole(1000);
             System.out.println("Shot got into the water! ");
         }
-
-    }
-
-    public static Optional<Player.Hit> bruteForce(double startingX, double stratingY){
-
-        //for(double)
-        return Optional.empty();
     }
 }

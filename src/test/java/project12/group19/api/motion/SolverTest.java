@@ -25,10 +25,7 @@ class SolverTest {
     public static Stream<Arguments> testInputs() {
         return Stream.of(
                 // function, starting x, starting y, initial velocity x, initial velocity y, static friction, dynamic friction
-                //Arguments.of("0.1*x+1", 0.0, 0.0, 2.0, 0.0, 0.2, 0.05)
                 Arguments.of("e^(0 - ((x^2+y^2)/40)", -1.0, -0.5, 3.0, 0.0, 0.2, 0.1)
-
-
         );
     }
 
@@ -56,7 +53,7 @@ class SolverTest {
         StopCondition condition = new StopCondition();
         System.out.println("Solver, step size, terminal x, terminal y");
         try {
-            File file = new File("testing2.txt");//file name here
+            File file = new File("testing2.txt");
             FileWriter writer = new FileWriter(file);
             BufferedWriter bWriter = new BufferedWriter(writer);
             PrintWriter pWriter = new PrintWriter(bWriter);
@@ -74,8 +71,7 @@ class SolverTest {
                     long stopTime = System.nanoTime();
                     long timeElapsed = stopTime - startTime;
                     String solverName = delegate.getClass().getSimpleName();
-                   // System.out.println(solverName + ",10E-" + i + "," + state.getXPosition() + "," + state.getYPosition()+ ","+ timeElapsed);
-                    pWriter.println(solverName + ",10E-" + i + "," + state.getXPosition() + "," + state.getYPosition()+ ","+ timeElapsed);//print to a file here
+                    pWriter.println(solverName + ",10E-" + i + "," + state.getXPosition() + "," + state.getYPosition()+ ","+ timeElapsed);
 
 
                     pWriter.flush();

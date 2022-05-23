@@ -19,7 +19,7 @@ public class RK2Solver implements MotionCalculator {
 
         double deltaT = 0.0001;
 
-        HeightProfile heightProfile = (x, y) -> (0.1*x +1);//Math.sin((x - y) / 7);
+        HeightProfile heightProfile = (x, y) -> (0.1*x +1);
         while(solver.isMoving(heightProfile, motionState, friction, deltaT)){
             motionState = solver.calculate(motionState, deltaT);
 
@@ -97,7 +97,7 @@ public class RK2Solver implements MotionCalculator {
         }
     }
     /**
-     * Computes the accelreation in direction X and Y, taking into account if Vx and Vy are both 0 or not
+     * Computes the acceleation in direction X and Y, taking into account if Vx and Vy are both 0 or not
      * @param motion Motion State
      * @param f friction FrictionC
      * @param deltaT
