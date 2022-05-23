@@ -82,6 +82,10 @@ and so on. By default, it looks for configuration.properties.
     x = 3.5, y = 6.5
     ```
 
+The configuration file (`configuration.properties`) is mandatory, but 
+one can be obtained just by copying `configuration.properties.dist` in
+the project directory.
+
 After the launch GUI will be presented, where someone has to select
 solver and bot through the menu. For unknown reasons on Windows 
 machines the menu is not displayed, so following selection has to be 
