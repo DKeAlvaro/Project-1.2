@@ -19,12 +19,10 @@ public class HillClimbing2 {
     public static double holeY;
     public static double holeR;
 
-    public static int ruleBasedIterations = 0;
-
     public static HeightProfile profile;
     public static Friction friction;
 
-    public static int numOfShots = 300;
+    public static int numOfShots = 20;
     public static Shoot[] shots = new Shoot[numOfShots];
 
     public static double stepSize = 0.1;
@@ -39,20 +37,13 @@ public class HillClimbing2 {
         HillClimbing2.configuration = configuration;
     }
 
-    public Optional<Player.Hit> StraightShot(double startingX, double startingY) {
-        double f = 0.5;
-        ruleBasedIterations++;
-        if(new Shoot((holeX-startingX) * f, (holeX-startingX) * f, startingX, startingY).inHole()){
-            System.out.println("Iterations needed "+ ruleBasedIterations);
-        }
-        return Optional.of(Player.Hit.create((holeX-startingX) * f, (holeX-startingX) * f));
-    }
-
     public Optional<Player.Hit> hillClimbing1(double startingX, double startingY) {
         System.out.println("Calculating new shoot");
         int totalIterations = 0;
-        double f = 0.5;
+        double f = 0.4;
         int shotIterations;
+        double maxNoise = getDistance(holeX, startingX, holeY, startingY) / 3.5355;
+        System.out.println("Max noise: "+ maxNoise);
         double noiseX;
         double noiseY;
 
@@ -61,28 +52,17 @@ public class HillClimbing2 {
         for (int i = 0; i < numOfShots; i++){
             totalIterations++;
             System.out.println("Shoot " + i);
-
             if(i > 0){
-                if(Math.random()<0.5){
-                    noiseX = Math.random() * getDistance(holeX, startingX, holeY, startingY);
-                    noiseY = Math.random() * getDistance(holeX, startingX, holeY, startingY);
-                }else{
-                    noiseX = (Math.random() * 10)-5;
-                    noiseY = (Math.random() * 10)-5;
-                }
-                if(Math.random()<0.5) {
-                    shots[i] = new Shoot((holeX - startingX) * f + noiseX, (holeY - startingY) * f + noiseY, startingX, startingY);
-                }else {
-                    shots[i] = new Shoot((holeX - startingX) * f - noiseX, (holeY - startingY) * f - noiseY, startingX, startingY);
-
-                }
+                noiseX = Math.random()*maxNoise * 2 - maxNoise;
+                noiseY = Math.random()*maxNoise * 2 - maxNoise;
+                shots[i] = new Shoot((holeX-startingX) * f - noiseX, (holeY-startingY) * f - noiseY, startingX, startingY);
                 System.out.println("Noise X: "+ noiseX+ " Noise Y: "+ noiseY);
             }
             System.out.println("Shot "+i+" Starting conditions: xDir: " +shots[i].getxDir()+" yDir: " +shots[i].getYDir());
 
             shotIterations = 0;
             while (!hasConverged(shots[i]) && shotIterations < 100 && !shots[i].inWater() || shotIterations == 0) {
-                if (shots[i].inHole() && !shots[i].inWater()) {
+                if (shots[i].inHole() ) {
                     System.out.println();
                     System.out.println("Final shot xDir: " + shots[i].getxDir() + " yDir: " + shots[i].getYDir() +" distance to hole: "+shots[i].getDistanceToHole());
                     System.out.println("Straight shot xDir: " + (holeX-startingX) * f + " yDir: " + (holeY-startingY) * f);
@@ -116,20 +96,20 @@ public class HillClimbing2 {
         return shoot.getDistanceToHole() <= lookForBetterShot(shoot).getDistanceToHole() || lookForBetterShot(shoot).inWater();
     }
     public static Shoot lookForBetterShot(Shoot shoot){
-        double deltaT = 0.4;
+        double deltaT = 0.1;
         double newX;
         double newY;
-        if(Math.abs(shoot.getFinalX()-holeX) < holeR){
+        if(Math.abs(shoot.getClosestX()-holeX) < holeR){
             newX = shoot.getxDir();
-        } else if(shoot.getFinalX()>holeX){
+        } else if(shoot.getClosestX()>holeX){
             newX = shoot.getxDir() - deltaT;
         } else{
             newX = shoot.getxDir() + deltaT;
         }
 
-        if(Math.abs(shoot.getFinalY()-holeY) < holeR){
+        if(Math.abs(shoot.getClosestY()-holeY) < holeR){
             newY = shoot.getYDir();
-        } else if(shoot.getFinalY()>holeY){
+        } else if(shoot.getClosestY()>holeY){
             newY = shoot.getYDir() - deltaT;
         } else{
             newY = shoot.getYDir() + deltaT;
@@ -149,19 +129,22 @@ public class HillClimbing2 {
     public static void getShotDistanceToHole(Friction friction, HeightProfile profile, @NotNull MotionState current, Shoot shoot) {
         double minDistance = getDistance(holeX, current.getXPosition(), holeY, current.getYPosition());
 
-        while (StopCondition.isMoving(profile, current, friction, stepSize)) {
+        while (StopCondition.isMoving(profile, current, friction, stepSize) && !shoot.inHole()) {
             current = solver.calculate(current, stepSize);
             if(getDistance(holeX, current.getXPosition(), holeY, current.getYPosition()) < minDistance){
                 minDistance = getDistance(holeX, current.getXPosition(), holeY, current.getYPosition());
                 shoot.setDistanceToHole(getDistance(holeX, current.getXPosition(), holeY, current.getYPosition()));
-                shoot.setFinalX(current.getXPosition());
-                shoot.setFinalY(current.getYPosition());
-                if(getDistance(holeX, current.getXPosition(), holeY, current.getYPosition()) < holeR){
+                shoot.setClosestX(current.getXPosition());
+                shoot.setClosestY(current.getYPosition());
+                if(getDistance(holeX, current.getXPosition(), holeY, current.getYPosition()) < holeR*1.25 && !shoot.inWater()){
                     shoot.setInHole();
-                    break;
+                    shoot.setDistanceToHole(getDistance(holeX, current.getXPosition(), holeY, current.getYPosition()));
+                    shoot.setClosestX(current.getXPosition());
+                    shoot.setClosestY(current.getYPosition());
                 }
             }
-            if(profile.getHeight(current.getXPosition(), current.getYPosition()) < 0) {
+
+            if(profile.getHeight(current.getXPosition(), current.getYPosition()) < 0 && !shoot.inHole()) {
                 shoot.setInWater();
                 break;
             }
@@ -171,11 +154,5 @@ public class HillClimbing2 {
             System.out.println("Shot got into the water! ");
         }
 
-    }
-
-    public static Optional<Player.Hit> bruteForce(double startingX, double stratingY){
-
-        //for(double)
-        return Optional.empty();
     }
 }

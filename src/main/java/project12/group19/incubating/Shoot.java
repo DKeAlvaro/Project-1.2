@@ -9,8 +9,8 @@ public class Shoot {
     private final double yDir;
     private final double startingX;
     private final double startingY;
-    private double finalX;
-    private double finalY;
+    private double closestX;
+    private double closestY;
     private boolean inHole;
 
     private boolean inWater = false;
@@ -45,25 +45,26 @@ public class Shoot {
 
     public void setInHole() {
         this.inHole = true;
+        //this.inWater = false;
     }
 
     public void setDistanceToHole(double distanceToHole) {
         this.distanceToHole = distanceToHole;
     }
 
-    public void setFinalX(double finalX) {
-        this.finalX = finalX;
+    public void setClosestX(double closestX) {
+        this.closestX = closestX;
     }
 
-    public void setFinalY(double finalY) {
-        this.finalY = finalY;
+    public void setClosestY(double closestY) {
+        this.closestY = closestY;
     }
 
-    public double getFinalX() {
-        return finalX;
+    public double getClosestX() {
+        return closestX;
     }
-    public double getFinalY() {
-        return finalY;
+    public double getClosestY() {
+        return closestY;
     }
 
     public double getStartingX() {
@@ -78,6 +79,7 @@ public class Shoot {
         return inWater;
     }
     public void setInWater(){
+        this.distanceToHole = 1000;
         this.inWater = true;
     }
 }
