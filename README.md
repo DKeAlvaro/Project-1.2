@@ -58,7 +58,7 @@ project -> reload gradle project.
 
 The project is built by [gradle](https://gradle.org/).
 
-To build the project, simply invoke `./gradlew jar`. This will compile 
+To build the project, simply invoke `./gradlew dist`. This will compile 
 the project and create an executable JAR file 
 `build/libs/project12.group19.putting-1.0.0.jar`.
 
@@ -82,3 +82,15 @@ and so on. By default, it looks for configuration.properties.
     x = 3.5, y = 6.5
     ```
 
+The configuration file (`configuration.properties`) is mandatory, but 
+one can be obtained just by copying `configuration.properties.dist` in
+the project directory.
+
+After the launch GUI will be presented, where someone has to select
+solver and bot through the menu. For unknown reasons on Windows 
+machines the menu is not displayed, so following selection has to be 
+made:
+
+- Press 1, 2 or 3 for Euler, RK2 or RK4 solvers accordingly
+- Press R for rule-based or B for hill-climbing bot
+- Press P to launch the configuration

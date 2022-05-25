@@ -91,12 +91,8 @@ public interface HitCalculator {
 
         @Override
         public Optional<Player.Hit> shootAt(State state, PlanarCoordinate target, double tolerance) {
-
-            //return ruleBased(state);
             return hillCLimbing(solver, configuration, state);
-
         }
-
 
         private static double noisify(double value) {
             double multiplier = 1 - NOISE_PERCENTAGE * (2 * NOISE.nextDouble() - 1);

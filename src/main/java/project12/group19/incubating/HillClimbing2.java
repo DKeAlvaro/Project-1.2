@@ -153,6 +153,5 @@ public class HillClimbing2 {
             shoot.setDistanceToHole(1000);
             System.out.println("Shot got into the water! ");
         }
-
     }
 }

@@ -145,7 +145,6 @@ public class GUI implements Renderer {
         hit.setBackground(Color.white);
         hit.setOpaque(true);
         hit.setFocusable(false);
-//        hit.addActionListener(e -> hitBall());
         hit.addActionListener(e -> {
             transmitter.record(Player.Hit.create(
                     Double.parseDouble(fieldx.getText()),
@@ -159,10 +158,6 @@ public class GUI implements Renderer {
         restart.setOpaque(true);
         restart.setFont(f1);
         restart.setFocusable(false);
-//        restart.addActionListener(e -> {
-//            ballLabel.setLocation(initialX, initialY);
-//            grassCom.repaint();
-//        });
 
         // Setting the user-friendly Panel
         panel.setBounds(600, 0, 300, 600);
@@ -177,7 +172,6 @@ public class GUI implements Renderer {
 
         support.add(field, Integer.valueOf(0));
         support.add(ballLabel, Integer.valueOf(1));
-//        support.add(infoPosition, Integer.valueOf(2));
 
         // Adding Objects to the user-friendly Panel
         panel.add(fieldx);
@@ -191,7 +185,6 @@ public class GUI implements Renderer {
         panel.add(statusPositionLabel);
         panel.add(statusPositionMessage);
         panel.add(statusGameState);
-        //panel.add(restart);
 
         // Setting the Frame and adding Panels to it
         frame.setSize(900, 628);
@@ -203,23 +196,6 @@ public class GUI implements Renderer {
         frame.setResizable(false);
         frame.setLayout(null);
         frame.setVisible(true);
-
-//        // Configuring the locations of ball and target
-//        ballX = initialX;
-//        ballY = initialY;
-//        ballZ = initialZ;
-//
-//        System.out.println(" after constructor call: " + ballX + " " + ballY);
-//
-//        ballX = GrassComponent.coorToSwingX(initialX)-20;
-//        ballY = GrassComponent.coorToSwingX(initialY)-20;
-//
-//        System.out.println("after transformation: " + ballX + " " + ballY);
-//
-//        this.targetX = targetX;
-//        this.targetY = targetX;
-//        this.targetR = targetR;
-
     }
 
     /**
