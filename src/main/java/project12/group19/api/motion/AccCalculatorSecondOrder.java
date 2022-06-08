@@ -2,11 +2,10 @@ package project12.group19.api.motion;
 
 import project12.group19.api.geometry.space.HeightProfile;
 
-public class AccCalculator implements AccelerationCalc{
-
+public class AccCalculatorSecondOrder implements AccelerationCalc{
     public static final double MOTION_ERROR = 1E-6;
     private static final double g = 9.81;
-    public AccCalculator(){
+    public AccCalculatorSecondOrder(){
 
     }
 
@@ -21,14 +20,16 @@ public class AccCalculator implements AccelerationCalc{
         double accX;
         double dhdx = Derivative.derivativeHX(profile, motion.getXPosition(), motion.getYPosition());
         double dhdy = Derivative.derivativeHY(profile, motion.getXPosition(), motion.getYPosition());
-        double dh = Math.sqrt(Math.pow(dhdx, 2)+ Math.pow(dhdy, 2));
+        double der2 = Math.pow(dhdx, 2)+ Math.pow(dhdy, 2); //sum of squared derivatives dhdx and dhdy
+        double dh = Math.sqrt(der2);
 
 
 
         if (!(StopCondition.isVelocity0(motion, scale)) ){
 
-            accX = (-1) * g * (dhdx) - (f.getDynamicCoefficient() * g * motion.getXSpeed()) /
-                    Math.sqrt(Math.pow(motion.getXSpeed(), 2) + Math.pow(motion.getYSpeed(), 2));
+            accX = (-1) * g * (dhdx)/(1+ der2) - (f.getDynamicCoefficient() * g * motion.getXSpeed()) /
+                    (Math.sqrt(Math.pow(motion.getXSpeed(), 2) + Math.pow(motion.getYSpeed(), 2)+
+                            Math.pow(dhdx* motion.getXSpeed()+dhdy* motion.getYSpeed(), 2) *Math.sqrt(1+ der2)));
         } else if (Math.abs(dh) > MOTION_ERROR * scale && dh > f.getStaticCoefficient()) {
             accX = (-1) * g * (dhdx) - (f.getDynamicCoefficient() * g * dhdx / dh);
 
@@ -52,12 +53,14 @@ public class AccCalculator implements AccelerationCalc{
         double accY;
         double dhdx = Derivative.derivativeHX(profile, motion.getXPosition(), motion.getYPosition());
         double dhdy = Derivative.derivativeHY(profile, motion.getXPosition(), motion.getYPosition());
-        double dh = Math.sqrt(Math.pow(dhdx, 2)+ Math.pow(dhdy, 2));
+        double der2 = Math.pow(dhdx, 2)+ Math.pow(dhdy, 2); //sum of squared derivatives dhdx and dhdy
+        double dh = Math.sqrt(der2);
 
 
         if (!(StopCondition.isVelocity0(motion, scale))) {
-            accY = (-1) * g * (dhdy)- (f.getDynamicCoefficient() * g * motion.getYSpeed()) /
-                    Math.sqrt(Math.pow(motion.getXSpeed(), 2) + Math.pow(motion.getYSpeed(), 2));
+            accY = ((-1) * g * (dhdy)/(1+ der2) )- (f.getDynamicCoefficient() * g * motion.getYSpeed()) /
+                    (Math.sqrt(Math.pow(motion.getXSpeed(), 2) + Math.pow(motion.getYSpeed(), 2)+
+                            Math.pow(dhdx* motion.getXSpeed()+dhdy* motion.getYSpeed(), 2) *Math.sqrt(1+ der2)));
 
         } else if (Math.abs(dh) > MOTION_ERROR * scale && dh > f.getStaticCoefficient()) {
 
