@@ -1,6 +1,19 @@
 package project12.group19.api.geometry.plane;
 
-public interface PlanarRectangle extends PlanarPositioned, PlanarDimensioned {
+/**
+ * TODO: either convert to inner record of {@link PlanarShape} or extract
+ * {@link project12.group19.api.geometry.plane.PlanarShape.Point}
+ * from there
+ */
+public interface PlanarRectangle extends PlanarShape {
+    default boolean includes(double x, double y) {
+        return isInBoundingBox(x, y);
+    }
+
+    default PlanarCoordinate getCenter() {
+        return PlanarCoordinate.create(getX() + (getWidth() / 2), getY() + (getHeight() / 2));
+    }
+
     static PlanarRectangle create(PlanarCoordinate coordinate, PlanarDimensions dimensions) {
         return new Standard(coordinate, dimensions);
     }
@@ -15,12 +28,6 @@ public interface PlanarRectangle extends PlanarPositioned, PlanarDimensioned {
 
     static PlanarRectangle create(PlanarCoordinate coordinate, double width, double height) {
         return create(coordinate, PlanarDimensions.create(width, height));
-    }
-
-    default boolean includes(PlanarCoordinate position) {
-        boolean inY = position.getY() >= getY() && position.getY() <= getY() + getHeight();
-        boolean inX = position.getX() >= getX() && position.getX() <= getX() + getWidth();
-        return inY && inX;
     }
 
     record Standard(
