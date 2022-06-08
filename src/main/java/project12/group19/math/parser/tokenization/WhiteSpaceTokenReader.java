@@ -1,8 +1,10 @@
 package project12.group19.math.parser.tokenization;
 
+import java.util.List;
+
 public class WhiteSpaceTokenReader implements TokenReader<String> {
     @Override
-    public Token<String> read(String input, int offset) {
+    public Token<String> read(String input, int offset, List<Token<?>> preceding) {
         int length = 0;
         while (input.length() > offset + length && Character.isWhitespace(input.charAt(offset + length))) {
             length++;

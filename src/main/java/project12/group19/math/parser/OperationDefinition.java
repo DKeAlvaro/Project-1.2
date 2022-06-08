@@ -61,6 +61,27 @@ public interface OperationDefinition {
                 Set.of("logarithm", "Math.log", "Math.logarithm")
         );
 
+        public static final OperationDefinition NATURAL_LOGARITHM = new Standard(
+                "ln",
+                1,
+                arguments -> arguments[0] <= 0 ? OptionalDouble.empty() : OptionalDouble.of(Math.log(arguments[0])),
+                Set.of("Math.ln")
+        );
+
+        public static final OperationDefinition BASE_TEN_LOGARITHM = new Standard(
+                "log10",
+                1,
+                arguments -> arguments[0] <= 0 ? OptionalDouble.empty() : OptionalDouble.of(Math.log10(arguments[0])),
+                Set.of("Math.log10")
+        );
+
+        public static final OperationDefinition BASE_TWO_LOGARITHM = new Standard(
+                "log2",
+                1,
+                arguments -> arguments[0] <= 0 ? OptionalDouble.empty() : OptionalDouble.of(Math.log(arguments[0]) / Math.log(2)),
+                Set.of("Math.log2")
+        );
+
         @Override
         public String getName() {
             return name;
