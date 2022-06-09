@@ -20,27 +20,33 @@ public class TestingClass {
     }
     public MotionState getFinalPosition(){
 
-        while(StopCondition.isMoving(profile, motion, friction, stepSize)){
-
+        while(StopCondition.isMoving(profile, motion, friction, stepSize) && !(motion.getXSpeed() <=0)){
             motion = solver.calculate(motion, stepSize);
 
         }
-        System.out.println("X position " + motion.getXPosition() + " Y position " + motion.getYPosition());
+
+        System.out.println("X position " + motion.getXPosition() + "   Y position " + motion.getYPosition());
         return motion;
 
     }
 
     public static void main(String[] args) {
         Friction f = Friction.create(0.2, 0.05);
-        MotionState ms = new MotionState.Standard(2.0, 0.0, 0.0, 0.0  );
-        HeightProfile h = (x,y) ->{
-            return  0.1 *x +1;
-        } ;
+        MotionState ms = new MotionState.Standard(5.0, 0.0, 0.0, 0.0  );
         ODESolver ode = new RK4();
-        Solver s = new Solver(ode, h, f);
 
-        TestingClass test = new TestingClass(f,ms,h,0.000001, s);
-        test.getFinalPosition();
+        for (double i=0; i<=1.02; i+=0.05) {
+
+            double a = i;
+            System.out.println("Slope: " + a);
+            HeightProfile h = (x,y) ->{
+                return  a *x +1;
+            } ;
+            Solver s = new Solver(ode, h, f);
+            TestingClass test = new TestingClass(f,ms,h,0.001, s);
+
+            test.getFinalPosition();
+       }
     }
 
 }
