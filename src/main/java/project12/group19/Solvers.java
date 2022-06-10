@@ -14,8 +14,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Solvers {
-    private static final List<ODESolver> SOLVERS = List.of(new Euler(), new RK4(), new RK2(), new InlineRK2());
-    private static final List<Double> STEPS = IntStream.range(1, 8).mapToObj(power -> Math.pow(0.1, power)).toList();
+    private static final List<ODESolver> SOLVERS = List.of(new Euler(), new RK4(), new RK2());
+    private static final List<Double> STEPS = List.of(0.1, 0.04, 0.07, 0.01, 0.003,0.007, 0.001, 0.0003, 0.0007, 0.0001, 0.00001, 0.000001, 0.00000001);
 
     private record Round(
             String solver,
@@ -83,9 +83,12 @@ public class Solvers {
 
 //        ToDoubleFunction<Double> exact = t -> Math.pow(t, 5) / 5;
 //        BinaryOperation derivative = (t, y) -> OptionalDouble.of(Math.pow(t, 4));
-        ToDoubleFunction<Double> exact = t -> 10 * Math.exp(1) + 50;
-        BinaryOperation derivative = (t, y) -> OptionalDouble.of(0.1 * y - 5);
-        run(60, 0, 10, derivative, exact.applyAsDouble(10.0)).forEach(round ->
+
+        ToDoubleFunction<Double> exact = t -> 0.1 * Math.exp(0.5*t) + 8; //correct
+
+        BinaryOperation derivative = (t, y) -> OptionalDouble.of(0.5 * y - 4);
+
+        run(8.1, 0, 10, derivative, exact.applyAsDouble(10.0)).forEach(round ->
                 System.out.printf("%s: step=%.7f result=%.12f relative error=%.18f\n", round.solver, round.step, round.estimation, round.relativeError)
         );
     }
@@ -101,7 +104,7 @@ public class Solvers {
         }
 
         private double derivative(double value) {
-            return 0.1 * value - 5;
+            return 0.5 * value - 4;
         }
     }
 }

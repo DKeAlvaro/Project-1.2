@@ -2,6 +2,7 @@ package project12.group19.incubating;
 
 import project12.group19.api.domain.Item;
 import project12.group19.api.game.Configuration;
+import project12.group19.api.geometry.plane.PlanarDimensions;
 import project12.group19.api.geometry.space.HeightProfile;
 import project12.group19.api.geometry.space.Hole;
 import project12.group19.api.motion.Friction;
@@ -114,7 +115,8 @@ public class Reader implements ConfigurationReader {
                 hole,
                 timescale,
                 player,
-                lake
+                lake,
+                new PlanarDimensions.Standard(0, 0)
         );
     }
 }
