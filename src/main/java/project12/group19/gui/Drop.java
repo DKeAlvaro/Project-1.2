@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.assets.loaders.ModelLoader;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -12,6 +13,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
+import com.badlogic.gdx.graphics.g3d.loader.ObjLoader;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
@@ -41,10 +43,7 @@ import project12.group19.player.ai.NaiveBot;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
@@ -79,7 +78,7 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
     Model wall;
 
     Model Coor;
-    ModelBuilder modelBuilder, modelBuilder2;
+    ModelBuilder modelBuilder, modelBuilder2,modelBuilder3;
     ModelInstance modelInstance;
     ModelInstance ballModel;
     ModelInstance modelInstance3;
@@ -87,13 +86,28 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
     ModelInstance modelInstance5;
     ModelInstance modelInstance6;
 
+
+    //------Here are phase3 parts:
+    ModelInstance treeInstance;
+    Model treeModel;
+    ModelLoader modelLoader = new ObjLoader();
+    Model modeltree1;
+    Model modelLake;
+    Model modelSandPits;
+    ModelInstance lakeInstance;
+    ModelInstance sandpitsInstance;
+    float[] treeList;
+    float[] sandpitList;
+    Texture sandTexture;
+    Material sandpitMaterial;
+//-------------
     SpriteBatch spriteBatch;
     BitmapFont font;
     CharSequence menu = SOLVER_SELECTION_MENU;
     boolean showGameInfo = false;
 
 
-    MeshPartBuilder mb1;
+    MeshPartBuilder mb1,mb2;
     Material terrain;
 
     Texture texture;
@@ -117,7 +131,17 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
     public void create() {
         texture = new Texture("water-texture.jpg");
         grass = new Texture("grass-texture.png");
+// ------------------------Here phase3 code starts------------------------
+        sandTexture = new Texture("sandpitTexture.jpg");
+        Material sandpitMaterial = new Material(TextureAttribute.createDiffuse(sandTexture));
 
+        modeltree1 = modelLoader.loadModel(Gdx.files.internal("Lowpoly_tree_sample.obj"));
+        treeInstance = new ModelInstance(modeltree1,-10,-10,0.5f);
+
+        treeList = randomPosition(100);
+        sandpitList = randomPosition(3);
+        treeInstance.transform.scl(0.05f);
+  //------------------------phase3 code ends----------------------------
         spriteBatch = new SpriteBatch();
         font = new BitmapFont();
 
@@ -128,7 +152,6 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
         camera.far = 100f;
         camera.fieldOfView = 300;
         camera.update();
-
         camController = new CameraInputController(camera);
         Gdx.input.setInputProcessor(camController);
 
@@ -167,11 +190,15 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
                 VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
         Coor = modelBuilder.createXYZCoordinates(20, new Material(ColorAttribute.createDiffuse(Color.GRAY)),
                 VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
-        ballLocation = new float[3];
+
+        modelLake = modelBuilder.createSphere(5,5,1,100,100, new Material(ColorAttribute.createDiffuse(new Color(0,191/255f,1f,1))),
+                VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
+        lakeInstance = new ModelInstance(modelLake,6,6,heightFunction(0,0)-0.5f);
+
+                ballLocation = new float[3];
         ballLocation[0] = (float) configuration.getInitialMotion().getXPosition();
         ballLocation[1] = (float) configuration.getInitialMotion().getYPosition();
-        ballLocation[2] = heightFunction(ballLocation[0], ballLocation[1]);
-
+        ballLocation[2] = heightFunction(ballLocation[0], ballLocation[1]+0.1f);
 
         ballModel = new ModelInstance(ball, ballLocation[0], ballLocation[1], ballLocation[2]);
         modelInstance3 = new ModelInstance(Coor, 0, 0, 0);
@@ -180,7 +207,7 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
         modelInstance6 = new ModelInstance(wall,0,0,-10);
 		blockPart = hole.nodes.get(0).parts.get(0);
 
-		renderable = new Renderable();
+        renderable = new Renderable();
 		blockPart.setRenderable(renderable);
 		renderable.environment = null;
 		renderable.worldTransform.idt();
@@ -192,35 +219,61 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
             ballModel = new ModelInstance(ball, x, y, z);
         }
     }
-    public void setHoleLocation(float x, float y) {
-        modelInstance4 = new ModelInstance(hole, x, y, heightFunction(x, y));
-
-        modelInstance4.transform.rotate(1000,0,0,90);
+    public float[] randomPosition(int number){
+        float[] list = new float[3*number];
+        int count = 0;
+        for(int i=0;i<number;i++){
+          float  x = (float)(Math.random()*42)-21;
+          float  y=(float)(Math.random()*42)-21;
+          float z = heightFunction(x,y);
+        list[count] = x;
+        count++;
+        list[count] = y;
+        count++;
+        list[count]=z;
+        count++;
+        }
+        return list;
     }
 
-    public void createTerrain() {
+    public void renderTrees(){
+        int size = treeList.length/3;
 
+        for (int i=0;i<size;i++){
+            ModelInstance treeInstance = new ModelInstance(modeltree1,treeList[3*i],treeList[3*i+1],treeList[3*i+2]-0.1f);
+            treeInstance.transform.scl(0.05f);
+            shadowBatch.render(treeInstance);
+            modelbatch.render(treeInstance,environment);
+        }
+    }
+
+    public void setHoleLocation(float x, float y) {
+        modelInstance4 = new ModelInstance(hole, x, y, heightFunction(x, y)-0.1f);
+        modelInstance4.transform.rotate(1000,0,0,90);
+    }
+// method to create the Terrain:
+    public void createTerrain() {
         modelBuilder2 = new ModelBuilder();
         modelBuilder2.begin();
 
+        Material currentMaterial = new Material(TextureAttribute.createDiffuse(grass));
         Material terrain = new Material(TextureAttribute.createDiffuse(grass));
-
+        Material sandpit = new Material(TextureAttribute.createDiffuse(sandTexture));
         // TODO: use both width and height
         range = (float) (configuration.getDimensions().getWidth() / 2);
         accuracy = 0.2f;
         float x0 = -1 * range, y0 = -1 * range;
-
         while (x0 <= range) {
             while (y0 <= range) {
+// the terrain is composed by GL_TRIANGLES
                 mb1 =modelBuilder2.part("part"+x0+y0, GL30.GL_TRIANGLES, VertexAttributes.Usage.Position|VertexAttributes.Usage.TextureCoordinates |VertexAttributes.Usage.Normal, terrain);
-
                 int count = 0;
                 float[] ff = verticeList(x0, y0, x0 + 1, y0 + 1, accuracy);
                 while (count < 18 * 2 / accuracy / accuracy) {
+
                     MeshPartBuilder.VertexInfo va = new MeshPartBuilder.VertexInfo().setPos(ff[count],
                             ff[count + 1], ff[count + 2]).setNor(0, 0, 1).setCol(null).setUV(0.0f, 0.0f);
                    // here assign Color:
-
                     count += 3;
                     MeshPartBuilder.VertexInfo vb = new MeshPartBuilder.VertexInfo().setPos(ff[count],
                             ff[count + 1], ff[count + 2]).setNor(0, 0, 1).setCol(null).setUV(0.0f, 0.0f);
@@ -228,8 +281,8 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
                     MeshPartBuilder.VertexInfo vc = new MeshPartBuilder.VertexInfo().setPos(ff[count],
                             ff[count + 1], ff[count + 2]).setNor(0, 0, 1).setCol(null).setUV(0.0f, 0.0f);
                     count += 3;
-
                     mb1.triangle(va, vb, vc);
+
                 }
                 y0++;
             }
@@ -238,33 +291,68 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
         }
         model = modelBuilder2.end();
         modelInstance = new ModelInstance(model, 0, 0, 0);
-    }
 
+        //____________-_______-____-__-__-_-___----- here we add sandpits:
+        modelBuilder3 = new ModelBuilder();
+        modelBuilder3.begin();
+        float x1 = -1 * range, y1 = -1 * range;
+        while (x1 <= range) {
+            while (y1 <= range) {
+                mb2 =modelBuilder3.part("sandPitPart"+x1+y1, GL30.GL_TRIANGLES, VertexAttributes.Usage.Position|VertexAttributes.Usage.TextureCoordinates |VertexAttributes.Usage.Normal, sandpit);
+                int count = 0;
+                float[] ff = verticeList(x1, y1, x1 + 1, y1 + 1, accuracy);
+                while (count < 18 * 2 / accuracy / accuracy) {
+
+                    boolean isgrass = true;
+                    for(int i=0; i<sandpitList.length/3;i++){
+                        float radius = 3; //r of sandPit
+                        float distanceSqr = (ff[count]-sandpitList[3*i])*(ff[count]-sandpitList[3*i])+(ff[count+1]-sandpitList[3*i+1])*(ff[count+1]-sandpitList[3*i+1]);
+                        if(distanceSqr<radius*radius){
+                            isgrass = false;
+                        }
+                    }
+                    MeshPartBuilder.VertexInfo va = new MeshPartBuilder.VertexInfo().setPos(ff[count],
+                            ff[count + 1], ff[count + 2]).setNor(0, 0, 1).setCol(null).setUV(0.0f, 0.0f);
+                    count += 3;
+                    MeshPartBuilder.VertexInfo vb = new MeshPartBuilder.VertexInfo().setPos(ff[count],
+                            ff[count + 1], ff[count + 2]).setNor(0, 0, 1).setCol(null).setUV(0.0f, 0.0f);
+                    count += 3;
+                    MeshPartBuilder.VertexInfo vc = new MeshPartBuilder.VertexInfo().setPos(ff[count],
+                            ff[count + 1], ff[count + 2]).setNor(0, 0, 1).setCol(null).setUV(0.0f, 0.0f);
+                    count += 3;
+                    if(!isgrass) {
+                        mb2.triangle(va, vb, vc);
+                    }
+                }
+                y1++;
+            }
+            x1++;
+            y1 = -1 * range;
+        }
+        modelSandPits = modelBuilder3.end();
+        sandpitsInstance = new ModelInstance(modelSandPits, 0, 0, 0.05f);
+    }
 
     public Color assignColor(float z) {
         float para = 0.5f+Math.abs(z)*10;
         Color color = new Color(0,para,0,100);
-
             return color;
     }
-
-
-
 
     @Override
     public void render() {
         shadowLight.begin(camera);
         shadowBatch.begin(shadowLight.getCamera());
-
         shadowBatch.render(ballModel);
         shadowBatch.render(modelInstance);
         shadowBatch.render(modelInstance4);     //hole
         shadowBatch.render(modelInstance5);     //water
         shadowBatch.render(modelInstance6);      //wall
 
+          shadowBatch.render(sandpitsInstance);
+
         camera.update();
         camController.update();
-
         shadowBatch.end();
         shadowLight.end();
 
@@ -357,11 +445,14 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
         camController.update();
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         modelbatch.render(modelInstance, environment);      //terrain
+        modelbatch.render(sandpitsInstance, environment);      //sandPits
         modelbatch.render(ballModel, environment);          //ball
         modelbatch.render(modelInstance4, environment);     //hole
         modelbatch.render(modelInstance5, environment);     //water
         modelbatch.render(modelInstance6,environment);      //wall
-
+        modelbatch.render(treeInstance,environment);
+        modelbatch.render(lakeInstance,environment);
+        renderTrees();
         camera.update();
         camController.update();
         modelbatch.end();
@@ -413,7 +504,6 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
         List<Round> history = state.getRounds().stream()
                 .skip(Math.max(0, state.getRounds().size() - 3))
                 .toList();
-
         if (!history.isEmpty()) {
             info.append("History (up to 3 last rounds):\n");
             for (Round round : history) {
