@@ -55,6 +55,7 @@ dependencies {
     implementation 'org.jetbrains:annotations:20.1.0'
 
     testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
     testImplementation("org.hamcrest:hamcrest-all:$hamcrestVersion")
     testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
 }
@@ -100,5 +101,10 @@ task dist(type: Jar) {
     with jar
 }
 
-
 dist.dependsOn classes
+
+javadoc {
+    source = sourceSets.main.allJava
+    classpath = configurations.compileClasspath
+    destinationDir = project.buildscript.sourceFile.toPath().parent.resolve("doc/generated").toFile()
+}

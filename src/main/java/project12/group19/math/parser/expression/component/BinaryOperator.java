@@ -1,11 +1,11 @@
 package project12.group19.math.parser.expression.component;
 
-import project12.group19.math.parser.OperatorDefinition;
+import project12.group19.math.parser.BinaryOperatorDefinition;
 
 import java.util.OptionalDouble;
 import java.util.Stack;
 
-public record Operator(String source, OperatorDefinition definition) implements Component {
+public record BinaryOperator(String source, BinaryOperatorDefinition definition) implements Component {
     @Override
     public String getSource() {
         return source;
@@ -14,7 +14,7 @@ public record Operator(String source, OperatorDefinition definition) implements 
     @Override
     public boolean process(Stack<Double> stack) {
         if (stack.size() < 2) {
-            throw new IllegalStateException("Less than two variables left on stack for processing operator " + source);
+            throw new IllegalArgumentException("Less than two variables left on stack for processing operator " + source);
         }
 
         double right = stack.pop();

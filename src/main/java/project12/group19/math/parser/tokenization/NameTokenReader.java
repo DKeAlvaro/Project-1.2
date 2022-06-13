@@ -1,5 +1,6 @@
 package project12.group19.math.parser.tokenization;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -8,7 +9,7 @@ public class NameTokenReader implements TokenReader<String> {
     private static final Pattern BRACE_PATTERN = Pattern.compile("\\s*\\(");
 
     @Override
-    public Token<String> read(String input, int offset) {
+    public Token<String> read(String input, int offset, List<Token<?>> preceding) {
         Matcher matcher = NAME_PATTERN.matcher(input);
 
         if (!matcher.find(offset) || matcher.start() != offset) {

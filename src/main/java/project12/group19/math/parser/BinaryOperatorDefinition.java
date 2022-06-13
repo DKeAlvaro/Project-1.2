@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.OptionalDouble;
 import java.util.Set;
 
-public interface OperatorDefinition {
+public interface BinaryOperatorDefinition {
     String getName();
     Set<String> getAliases();
     BinaryOperation getOperation();
@@ -22,17 +22,17 @@ public interface OperatorDefinition {
             int precedence,
             boolean leftAssociative,
             Set<String> aliases
-    ) implements OperatorDefinition {
-        public static final OperatorDefinition ADD = new Standard("+", (left, right) -> OptionalDouble.of(left + right), 1, true);
-        public static final OperatorDefinition SUBTRACT = new Standard("-", (left, right) -> OptionalDouble.of(left - right), 1, true);
-        public static final OperatorDefinition MULTIPLY = new Standard("*", (left, right) -> OptionalDouble.of(left * right), 2, true);
-        public static final OperatorDefinition DIVIDE = new Standard(
+    ) implements BinaryOperatorDefinition {
+        public static final BinaryOperatorDefinition ADD = new Standard("+", (left, right) -> OptionalDouble.of(left + right), 1, true);
+        public static final BinaryOperatorDefinition SUBTRACT = new Standard("-", (left, right) -> OptionalDouble.of(left - right), 1, true);
+        public static final BinaryOperatorDefinition MULTIPLY = new Standard("*", (left, right) -> OptionalDouble.of(left * right), 2, true);
+        public static final BinaryOperatorDefinition DIVIDE = new Standard(
                 "/",
                 (left, right) -> right == 0 ? OptionalDouble.empty() : OptionalDouble.of(left / right),
                 2,
                 true
         );
-        public static final OperatorDefinition POWER = new Standard("^", (left, right) -> OptionalDouble.of(Math.pow(left, right)), 3, false);
+        public static final BinaryOperatorDefinition POWER = new Standard("^", (left, right) -> OptionalDouble.of(Math.pow(left, right)), 3, false);
 
         public Standard(String name, BinaryOperation operation, int precedence, boolean leftAssociative) {
             this(name, operation, precedence, leftAssociative, Collections.emptySet());
