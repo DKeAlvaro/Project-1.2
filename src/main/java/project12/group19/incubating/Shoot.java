@@ -1,7 +1,7 @@
 package project12.group19.incubating;
 import project12.group19.api.motion.*;
 
-import static project12.group19.incubating.HillClimbing2.*;
+import static project12.group19.incubating.HillClimbing3.*;
 
 public class Shoot {
 
@@ -16,7 +16,7 @@ public class Shoot {
     private boolean inWater = false;
     private double distanceToHole;
 
-    public static Solver solver = HillClimbing2.solver;
+    public static Solver solver = HillClimbing3.solver;
 
     public Shoot(double xDir, double yDir, double startingX, double startingY){
         this.xDir = xDir;
@@ -25,8 +25,22 @@ public class Shoot {
         this.startingY = startingY;
         this.inHole = false;
 
-        MotionState starting = new MotionState.Standard(xDir, yDir, startingX, startingY);
-        getShotDistanceToHole(friction, profile, starting, this);
+        getShotDistanceToHole(friction, profile, this);
+        combs.add(new Comb(this.getxDir(), this.getYDir(), this.getDistanceToHole()));
+        alreadyShot.add(this);
+        iterations++;
+
+    }
+
+    public Shoot(double angle, double vel, double startingX,double startingY, boolean b){
+        this.xDir = Math.cos(angle) * vel;
+        this.yDir = Math.sin(angle) * vel;
+        this.startingX = startingX;
+        this.startingY = startingY;
+        getShotDistanceToHole(friction, profile, this);
+        combs.add(new Comb(this.getxDir(), this.getYDir(), this.getDistanceToHole()));
+        alreadyShot.add(this);
+        iterations++;
 
     }
     public double getxDir() {
@@ -45,7 +59,6 @@ public class Shoot {
 
     public void setInHole() {
         this.inHole = true;
-        //this.inWater = false;
     }
 
     public void setDistanceToHole(double distanceToHole) {
@@ -79,7 +92,21 @@ public class Shoot {
         return inWater;
     }
     public void setInWater(){
-        this.distanceToHole = 1000;
+        //System.out.println("Shot got into the water! ");
+        this.distanceToHole = 10;
         this.inWater = true;
     }
+
+    public boolean hasConverged(){
+        return optimiseShot(this).getDistanceToHole() >= distanceToHole || inHole;
+    }
+
+    public double getAngle(){
+        return Math.toDegrees(Math.atan2(this.getYDir(), this.getxDir()));
+    }
+
+    public double getVel(){
+        return getDistance(xDir, 0, yDir, 0);
+    }
+
 }

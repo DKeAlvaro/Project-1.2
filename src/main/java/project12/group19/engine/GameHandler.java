@@ -8,6 +8,7 @@ import project12.group19.api.game.state.Round;
 import project12.group19.api.motion.MotionResult;
 import project12.group19.api.motion.MotionState;
 
+import java.io.FileNotFoundException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -25,7 +26,7 @@ public class GameHandler implements Engine {
             try {
                 state.set(tick(state.get(), setup));
                 return true;
-            } catch (RuntimeException e) {
+            } catch (RuntimeException | FileNotFoundException e) {
                 e.printStackTrace();
                 return false;
             }
@@ -45,7 +46,7 @@ public class GameHandler implements Engine {
         CompletableFuture.allOf(calculations, refresh).join();
     }
 
-    private State tick(State current, Setup setup) {
+    private State tick(State current, Setup setup) throws FileNotFoundException {
         if (current.isTerminal()) {
             return current;
         }

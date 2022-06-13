@@ -3,6 +3,7 @@ package project12.group19.api.domain;
 import project12.group19.api.geometry.plane.PlanarCoordinate;
 import project12.group19.api.motion.MotionState;
 
+import java.io.FileNotFoundException;
 import java.util.Optional;
 
 /**
@@ -11,7 +12,7 @@ import java.util.Optional;
  * optional) or refuse to (by returning empty optional).
  */
 public interface Player {
-    Optional<Hit> play(State state);
+    Optional<Hit> play(State state) throws FileNotFoundException;
     default Optional<PlanarCoordinate> position(PlanarCoordinate start, PlanarCoordinate end) {
         return Optional.of(start);
     }

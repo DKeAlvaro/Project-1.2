@@ -30,7 +30,7 @@ import project12.group19.api.geometry.plane.PlanarRectangle;
 import project12.group19.api.motion.Solver;
 import project12.group19.engine.GameHandler;
 import project12.group19.engine.motion.StandardMotionHandler;
-import project12.group19.incubating.HillClimbing2;
+import project12.group19.incubating.HillClimbing3;
 import project12.group19.incubating.WaterLake;
 import project12.group19.math.ode.Euler;
 import project12.group19.math.ode.ODESolver;
@@ -39,6 +39,7 @@ import project12.group19.math.ode.RK4;
 import project12.group19.player.ai.HitCalculator;
 import project12.group19.player.ai.NaiveBot;
 
+import java.io.FileNotFoundException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
@@ -291,9 +292,16 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
                 menu = LAUNCH_MENU;
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.B)){
-                HillClimbing2 hillClimbing = new HillClimbing2(new Solver(solver, configuration.getHeightProfile(), configuration.getGroundFriction()), configuration);
-                bot = state -> hillClimbing.hillClimbing1(state.getBallState().getXPosition(), state.getBallState().getYPosition());
-                System.out.println("Hillclimbing based Bot");
+                HillClimbing3 hillClimbing = new HillClimbing3(new Solver(solver, configuration.getHeightProfile(), configuration.getGroundFriction()), configuration);
+                bot = state -> {
+                    try {
+                        return hillClimbing.hillClimbing(state.getBallState().getXPosition(), state.getBallState().getYPosition());
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    return Optional.empty();
+                };
+                System.out.println("Random Bot");
                 menu = LAUNCH_MENU;
             }
         } else if (!launched) {

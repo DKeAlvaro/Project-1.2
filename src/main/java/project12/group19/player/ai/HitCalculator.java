@@ -7,8 +7,9 @@ import project12.group19.api.geometry.plane.PlanarCoordinate;
 import project12.group19.api.geometry.space.Hole;
 import project12.group19.api.motion.MotionState;
 import project12.group19.api.motion.Solver;
-import project12.group19.incubating.HillClimbing2;
+import project12.group19.incubating.HillClimbing3;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -37,7 +38,7 @@ public interface HitCalculator {
      * @param tolerance Distance from the point that is counted as ok.
      * @return A hit that is necessary to end up at target.
      */
-    Optional<Player.Hit> shootAt(State state, PlanarCoordinate target, double tolerance);
+    Optional<Player.Hit> shootAt(State state, PlanarCoordinate target, double tolerance) throws FileNotFoundException;
     /**
      * Projects a hit required for ball to pass within a specified
      * distance of target. This is a relaxed condition compared to
@@ -51,7 +52,7 @@ public interface HitCalculator {
      * @return A hit that would put the ball through the target within
      * specified tolerance.
      */
-    default Optional<Player.Hit> shootThrough(State state, PlanarCoordinate target, double tolerance) {
+    default Optional<Player.Hit> shootThrough(State state, PlanarCoordinate target, double tolerance) throws FileNotFoundException {
         return shootAt(state, target, tolerance);
     }
 
@@ -90,7 +91,7 @@ public interface HitCalculator {
         }
 
         @Override
-        public Optional<Player.Hit> shootAt(State state, PlanarCoordinate target, double tolerance) {
+        public Optional<Player.Hit> shootAt(State state, PlanarCoordinate target, double tolerance) throws FileNotFoundException {
             return hillCLimbing(solver, configuration, state);
         }
 
@@ -102,7 +103,7 @@ public interface HitCalculator {
         private static Optional<Player.Hit> ruleBased(State state){
             MotionState ball = state.getBallState();
             Hole hole = state.getCourse().getHole();
-            double force =HillClimbing2.getDistance(hole.getxHole(), ball.getXPosition(), hole.getyHole(), ball.getYPosition());
+            double force =HillClimbing3.getDistance(hole.getxHole(), ball.getXPosition(), hole.getyHole(), ball.getYPosition());
             double xPath = hole.getxHole() - ball.getXPosition();
             double yPath = hole.getyHole() - ball.getYPosition();
             double angle = Math.atan2(yPath, xPath);
@@ -111,10 +112,10 @@ public interface HitCalculator {
             return Optional.of(Player.Hit.create(xVelocity, yVelocity));
 
         }
-        private static Optional<Player.Hit> hillCLimbing(Solver solver, Configuration configuration, State state){
-            HillClimbing2 hillClimbing2 = new HillClimbing2(solver, configuration);
+        private static Optional<Player.Hit> hillCLimbing(Solver solver, Configuration configuration, State state) throws FileNotFoundException {
+            HillClimbing3 hillClimbing3 = new HillClimbing3(solver, configuration);
             System.out.println();
-            return hillClimbing2.hillClimbing1(state.getBallState().getXPosition(), state.getBallState().getYPosition());
+            return hillClimbing3.hillClimbing(state.getBallState().getXPosition(), state.getBallState().getYPosition());
         }
 
     }

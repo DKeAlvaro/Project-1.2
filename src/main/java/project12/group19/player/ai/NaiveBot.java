@@ -5,6 +5,7 @@ import project12.group19.api.domain.State;
 import project12.group19.api.geometry.plane.PlanarCoordinate;
 import project12.group19.api.geometry.space.Hole;
 
+import java.io.FileNotFoundException;
 import java.util.Optional;
 
 public class NaiveBot implements Player {
@@ -15,7 +16,7 @@ public class NaiveBot implements Player {
     }
 
     @Override
-    public Optional<Hit> play(State state) {
+    public Optional<Hit> play(State state) throws FileNotFoundException {
         Hole target = state.getCourse().getHole();
         return calculator.shootThrough(state, PlanarCoordinate.create(target.getxHole(), target.getyHole()), target.getRadius());
     }
