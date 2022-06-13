@@ -9,13 +9,15 @@ import project12.group19.math.ode.RK4;
 import java.util.Collection;
 import java.util.List;
 import java.util.OptionalDouble;
+import java.util.Set;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Solvers {
     private static final List<ODESolver> SOLVERS = List.of(new Euler(), new RK4(), new RK2());
-    private static final List<Double> STEPS = List.of(0.1, 0.04, 0.07, 0.01, 0.003,0.007, 0.001, 0.0003, 0.0007, 0.0001, 0.00001, 0.000001, 0.00000001);
+    private static final List<Double> STEPS = List.of(0.1, 0.1, 0.05, 0.01, 0.005, 0.001, 0.0005,   0.0001, 0.00001, 0.000001, 0.0000001, 0.00000001);
+    private static final long MINIMUM_RUN_TIME = 1_000_000_000L; // 5 second in nanoseconds
 
     private record Round(
             String solver,
@@ -24,7 +26,8 @@ public class Solvers {
             double value,
             double estimation,
             double absoluteError,
-            double relativeError
+            double relativeError,
+            long time
     ) {}
 
     private static Round run(ODESolver solver, double y, double t, double tMax, double step, BinaryOperation derivative, double exact) {
@@ -32,10 +35,21 @@ public class Solvers {
         double estimation = y;
         double tCurrent = t;
 
-        for (iterations = 0; iterations < tMax/step; iterations++) {
-            estimation = solver.apply(estimation, tCurrent, step, derivative).getAsDouble();
-            tCurrent += step;
-        }
+        long timeStart = System.nanoTime();
+        int outerIterations = 0;
+        do {
+            iterations = 0;
+            estimation = y;
+            tCurrent = t;
+            for (iterations = 0; iterations < tMax / step; iterations++) {
+                estimation = solver.apply(estimation, tCurrent, step, derivative).getAsDouble();
+                tCurrent += step;
+            }
+            outerIterations++;
+        } while (System.nanoTime() < timeStart + MINIMUM_RUN_TIME);
+        long timeEnd = System.nanoTime();
+
+        long time = timeEnd - timeStart;
 
 //        for (tCurrent = t; tCurrent < tMax; tCurrent += step) {
 //            iterations++;
@@ -51,7 +65,8 @@ public class Solvers {
                 exact,
                 estimation,
                 absoluteError,
-                relativeError
+                relativeError,
+                time / outerIterations
         );
     }
 
@@ -88,8 +103,18 @@ public class Solvers {
 
         BinaryOperation derivative = (t, y) -> OptionalDouble.of(0.5 * y - 4);
 
+        // warmup to let JIT kick in
+        long duration = 10 * 1000; // ten seconds
+        long start = System.currentTimeMillis();
+
+        System.out.printf("Warming up for %.2f seconds...\n", duration / 1000.0);
+        while (System.currentTimeMillis() < start + duration) {
+            run(SOLVERS, 8.1, 0, 10, Set.of(0.001), derivative, exact.applyAsDouble(10.0));
+        }
+        System.out.println("Warm up done!");
+
         run(8.1, 0, 10, derivative, exact.applyAsDouble(10.0)).forEach(round ->
-                System.out.printf("%s: step=%.7f result=%.12f relative error=%.18f\n", round.solver, round.step, round.estimation, round.relativeError)
+                System.out.printf("%s: step=%.8f result=%.5f error=%.18f time: %d\n", round.solver, round.step, round.estimation, round.relativeError, round.time)
         );
     }
 
