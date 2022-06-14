@@ -20,11 +20,11 @@ environment
 ## Group 19 - Team Members
 
 - [Zijian Dong](https://github.com/zijiandongkurt)
-- Ana Godorogea
+- [Ana Godorogea](https://github.com/AnaGodorogea)
 - [Julia Grassot](https://github.com/juliagrst)
 - [Álvaro Menéndez Ros](https://github.com/DKeAlvaro)
 - [Anna Nowowiejska](https://github.com/annanowo)
-- Agata Oskroba
+- [Agata Oskroba](https://github.com/agata-oskroba)
 - [Arseny Trifonov](https://github.com/etki)
 
 ## Software
@@ -117,10 +117,10 @@ Option listed below that don't have default values
 | course.width                    |               | 50      | Course width, in meters                 |
 | course.height                   |               | 50      | Course height, in meters                |
 | course.surface                  | heightProfile |         | Course surface function                 |
-| course.friction.default.static  | mus           |         | Ground static friction coefficient      |
-| course.friction.default.kinetic | muk           |         | Ground kinetic friction coefficient     |
-| course.friction.sand.static     | muss          |         | Sand static friction coefficient        |
-| course.friction.sand.kinetic    | muks          |         | Sand kinetic friction coefficient       |
+| course.friction.default.static  | mus           | 0.2     | Ground static friction coefficient      |
+| course.friction.default.kinetic | muk           | 0.1     | Ground kinetic friction coefficient     |
+| course.friction.sand.static     | muss          | 0.3     | Sand static friction coefficient        |
+| course.friction.sand.kinetic    | muks          | 0.25    | Sand kinetic friction coefficient       |
 | course.target.x                 | xt            |         | Position of the hole, x-axis component  |
 | course.target.y                 | yt            |         | Position of the hole, y-axis component  |
 | course.target.radius            | r             | 0.1     | Radius of the hole                      |
@@ -150,12 +150,12 @@ circular surfaces.
 
 ### Engine options
 
-| Key                  | Aliases   | Default | Description                                                                                                                                                                                               |
-|:---------------------|:----------|:--------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| noise.velocity       |           |         | Maximum noise added to or subtracted from hit velocity, as a fraction of actual velocity                                                                                                                  |
-| noise.direction      |           |         | Maximum noise added to or subtracted from hit direction, as a fraction of pi (so 1.0 would allow full circle from -pi to + pi)                                                                            |
-| noise.value          |           |         | Allows to set both of the above as one value, acts as fallback (i.e. if one of the above is not set, engine will look for this value)                                                                     |
-| engine.rates.tick    |           | 100     | Number of times per second engine updates its state                                                                                                                                                       |
-| engine.rates.refresh |           | 60      | Number of times per second state is propagated to UI                                                                                                                                                      |
-| engine.rates.scale   | timeScale | 1.0     | Relative time scale, forces engine to simulate this amount of time in one time unit. For example, if set to 1.5, engine will simulate 1.5 speed (events would happen 1.5 times faster than in real world) |
+| Key                    | Aliases   | Default | Description                                                                                                                                                                                               |
+|:-----------------------|:----------|:--------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| engine.noise.velocity  |           |         | Maximum noise added to or subtracted from hit velocity, as a fraction of actual velocity                                                                                                                  |
+| engine.noise.direction |           |         | Maximum noise added to or subtracted from hit direction, as a fraction of pi (so 1.0 would allow full circle from -pi to + pi)                                                                            |
+| engine.noise.value     |           |         | Allows to set both of the above as one value, acts as fallback (i.e. if one of the above is not set, engine will look for this value)                                                                     |
+| engine.rates.tick      |           | 100     | Number of times per second engine updates its state                                                                                                                                                       |
+| engine.rates.refresh   |           | 60      | Number of times per second state is propagated to UI                                                                                                                                                      |
+| engine.rates.scale     | timeScale | 1.0     | Relative time scale, forces engine to simulate this amount of time in one time unit. For example, if set to 1.5, engine will simulate 1.5 speed (events would happen 1.5 times faster than in real world) |
 

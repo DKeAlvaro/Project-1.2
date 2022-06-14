@@ -4,6 +4,7 @@ import project12.group19.api.domain.Course;
 import project12.group19.api.domain.Player;
 import project12.group19.api.domain.State;
 import project12.group19.api.game.Configuration;
+import project12.group19.api.game.HitMutator;
 import project12.group19.api.game.Rules;
 import project12.group19.api.motion.MotionHandler;
 
@@ -39,6 +40,7 @@ public interface Setup {
     List<Consumer<State>> getListeners();
     Course getCourse();
     Rules getRules();
+    HitMutator getHitMutator();
 
     record Standard(
             Configuration configuration,
@@ -48,6 +50,7 @@ public interface Setup {
             int desiredRefreshRate,
             MotionHandler motionHandler,
             Player player,
+            HitMutator hitMutator,
             List<Consumer<State>> listeners
     ) implements Setup {
         @Override
@@ -88,6 +91,11 @@ public interface Setup {
         @Override
         public Rules getRules() {
             return rules;
+        }
+
+        @Override
+        public HitMutator getHitMutator() {
+            return hitMutator;
         }
     }
 }

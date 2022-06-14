@@ -2,6 +2,7 @@ package project12.group19.api.domain;
 
 import project12.group19.api.geometry.plane.PlanarCoordinate;
 import project12.group19.api.motion.MotionState;
+import project12.group19.api.physics.Velocity;
 
 import java.io.FileNotFoundException;
 import java.util.Optional;
@@ -17,17 +18,9 @@ public interface Player {
         return Optional.of(start);
     }
 
-    interface Hit {
-        double getXVelocity();
-        double getYVelocity();
-
+    interface Hit extends Velocity {
         default MotionState apply(MotionState state) {
-            return new MotionState.Standard(
-                    state.getXSpeed() + getXVelocity(),
-                    state.getYSpeed() + getYVelocity(),
-                    state.getXPosition(),
-                    state.getYPosition()
-            );
+            return state.withSpeed(state.getXSpeed() + getXVelocity(), state.getYSpeed() + getYVelocity());
         }
 
         record Standard(double xVelocity, double yVelocity) implements Hit {
@@ -44,6 +37,14 @@ public interface Player {
 
         static Hit create(double xVelocity, double yVelocity) {
             return new Standard(xVelocity, yVelocity);
+        }
+
+        static Hit polar(double velocity, double angle) {
+            return new Standard(velocity * Math.cos(angle), velocity * Math.sin(angle));
+        }
+
+        static Hit create(Velocity velocity) {
+            return new Standard(velocity.getXVelocity(), velocity.getYVelocity());
         }
     }
 }

@@ -14,6 +14,7 @@ import project12.group19.math.parser.expression.PostfixExpression;
 
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalDouble;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -48,8 +49,8 @@ public class ConfigurationTranslator {
 
         // TODO: merge lakes into obstacles
 
-        double velocityNoise = container.getDouble(List.of("noise.velocity", "noise.value"), 0.0);
-        double directionNoise = container.getDouble(List.of("noise.direction", "noise.value"), 0.0);
+        OptionalDouble velocityNoise = container.tryGetDouble("engine.noise.velocity", "engine.noise.value");
+        OptionalDouble directionNoise = container.tryGetDouble("engine.noise.direction", "engine.noise.value");
 
         return new Configuration.Standard(
                 container.getValue(List.of("heightProfile", "course.surface"), value -> {
@@ -78,17 +79,17 @@ public class ConfigurationTranslator {
                         container.getDouble(List.of("y0", "course.ball.position.y"), 0.0)
                 ),
                 Friction.create(
-                        container.getDouble("mus", "course.friction.default.static"),
-                        container.getDouble("muk", "course.friction.default.kinetic")
+                        container.getDouble(List.of("mus", "course.friction.default.static"), 0.2),
+                        container.getDouble(List.of("muk", "course.friction.default.kinetic"), 0.1)
                 ),
                 Friction.create(
-                        container.getDouble("muss", "course.friction.sand.static"),
-                        container.getDouble("muks", "course.friction.sand.kinetic")
+                        container.getDouble(List.of("muss", "course.friction.sand.static"), 0.3),
+                        container.getDouble(List.of("muks", "course.friction.sand.kinetic"), 0.25)
                 ),
                 new Hole(
                         container.getDouble("xt", "course.target.x"),
                         container.getDouble("yt", "course.target.y"),
-                        container.getDouble("r", "course.target.radius")
+                        container.getDouble(List.of("r", "course.target.radius"), 0.1)
                 ),
                 container.getDouble(List.of("timeScale", "engine.rates.scale"), 1.0),
                 container.getString("player"),
@@ -99,7 +100,7 @@ public class ConfigurationTranslator {
                 ),
                 container.getInt("engine.rates.tick", 100),
                 container.getInt("engine.rates.refresh", 60),
-                velocityNoise > 0 || directionNoise > 0 ? new Configuration.Noise.Standard(velocityNoise, directionNoise) : null
+                new Configuration.Noise.Standard(velocityNoise, directionNoise)
         );
     }
 }
