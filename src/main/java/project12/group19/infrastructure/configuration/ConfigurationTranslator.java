@@ -92,7 +92,7 @@ public class ConfigurationTranslator {
                         container.getDouble(List.of("r", "course.target.radius"), 0.1)
                 ),
                 container.getDouble(List.of("timeScale", "engine.rates.scale"), 1.0),
-                container.getString("player"),
+                container.getString("player", "bot.naive"),
                 lakes,
                 PlanarDimensions.create(
                         container.getDouble("course.width", 50.0),
