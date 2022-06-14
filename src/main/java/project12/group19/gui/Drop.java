@@ -26,6 +26,7 @@ import project12.group19.api.domain.Player;
 import project12.group19.api.domain.State;
 import project12.group19.api.engine.Setup;
 import project12.group19.api.game.Configuration;
+import project12.group19.api.game.HitMutator;
 import project12.group19.api.game.Rules;
 import project12.group19.api.game.state.Round;
 import project12.group19.api.geometry.plane.PlanarRectangle;
@@ -427,6 +428,12 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
                             true
                     );
 
+                    // TODO this is a bit dirty. Continue to use optionals instead of zeros.
+                    double velocityNoiseRange = configuration.getNoise().getVelocityRange().orElse(0);
+                    double directionNoiseRange = configuration.getNoise().getDirectionRange().orElse(0);
+                    boolean useNoiseMutator = velocityNoiseRange > 0 || directionNoiseRange > 0;
+                    HitMutator hitMutator = useNoiseMutator ? HitMutator.noise(velocityNoiseRange, directionNoiseRange) : HitMutator.identity();
+
                     Setup.Standard setup = new Setup.Standard(
                             configuration,
                             course,
@@ -435,6 +442,7 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
                             configuration.getDesiredRefreshRate(),
                             new StandardMotionHandler(course, rules, solver),
                             bot,
+                            hitMutator,
                             List.of(gameState::set)
                     );
 

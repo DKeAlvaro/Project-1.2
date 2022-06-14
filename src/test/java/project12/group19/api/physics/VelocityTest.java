@@ -26,6 +26,6 @@ class VelocityTest {
     @ParameterizedTest
     @MethodSource("angleInputs")
     public void providesCorrectAngle(double x, double y, double expectation) {
-        assertThat(Velocity.create(x, y).getVelocityAngle(), closeTo(expectation, 1E-6));
+        assertThat(Velocity.euclidian(x, y).getVelocityAngle(), closeTo(expectation, 1E-6));
     }
 }

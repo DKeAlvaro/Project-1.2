@@ -165,6 +165,15 @@ public record ConfigurationContainer(Properties properties, List<String> anchor)
                 .orElse(OptionalDouble.empty());
     }
 
+    public OptionalDouble tryGetDouble(List<String> keys) {
+        return tryGetValue(keys, value -> OptionalDouble.of(Double.parseDouble(value)))
+                .orElse(OptionalDouble.empty());
+    }
+
+    public OptionalDouble tryGetDouble(String... keys) {
+        return tryGetDouble(Arrays.asList(keys));
+    }
+
     public double getDouble(String key, double fallback) {
         return tryGetDouble(key).orElse(fallback);
     }

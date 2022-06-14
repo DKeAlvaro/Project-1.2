@@ -8,7 +8,7 @@ import project12.group19.api.motion.Friction;
 import project12.group19.api.motion.MotionState;
 import project12.group19.incubating.WaterLake;
 
-import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.Set;
 
 public interface Configuration {
@@ -24,20 +24,20 @@ public interface Configuration {
     PlanarDimensions getDimensions();
     int getDesiredTickRate();
     int getDesiredRefreshRate();
-    Optional<Noise> getNoise();
+    Noise getNoise();
 
     interface Noise {
-        double getVelocityRange();
-        double getDirectionRange();
+        OptionalDouble getVelocityRange();
+        OptionalDouble getDirectionRange();
 
-        record Standard(double velocityRange, double directionRange) implements Noise {
+        record Standard(OptionalDouble velocityRange, OptionalDouble directionRange) implements Noise {
             @Override
-            public double getVelocityRange() {
+            public OptionalDouble getVelocityRange() {
                 return velocityRange;
             }
 
             @Override
-            public double getDirectionRange() {
+            public OptionalDouble getDirectionRange() {
                 return directionRange;
             }
         }
@@ -81,7 +81,7 @@ public interface Configuration {
                     dimensions,
                     60,
                     60,
-                    new Noise.Standard(0.0, 0.0)
+                    new Noise.Standard(OptionalDouble.empty(), OptionalDouble.empty())
             );
         }
         public Standard(
@@ -166,8 +166,8 @@ public interface Configuration {
         }
 
         @Override
-        public Optional<Noise> getNoise() {
-            return Optional.ofNullable(noise);
+        public Noise getNoise() {
+            return noise;
         }
     }
 }

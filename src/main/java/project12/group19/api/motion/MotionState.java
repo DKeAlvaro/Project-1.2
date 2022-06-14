@@ -34,6 +34,10 @@ public interface MotionState extends Velocity {
         return new Standard(getXSpeed(), ySpeed, getXPosition(), getYPosition());
     }
 
+    default MotionState withSpeed(double xSpeed, double ySpeed) {
+        return new Standard(xSpeed, ySpeed, getXPosition(), getYPosition());
+    }
+
     default MotionState withXPosition(double xPosition) {
         return new Standard(getXSpeed(), getYSpeed(), xPosition, getYPosition());
     }

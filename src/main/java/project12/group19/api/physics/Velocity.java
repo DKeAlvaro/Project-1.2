@@ -1,5 +1,7 @@
 package project12.group19.api.physics;
 
+import java.util.function.DoubleUnaryOperator;
+
 /**
  * A simple structure to hold information
  *
@@ -31,8 +33,57 @@ public interface Velocity {
         return Math.atan2(getYVelocity(), getXVelocity());
     }
 
-    static Velocity create(double xVelocity, double yVelocity) {
+    default Velocity mapAbsoluteVelocity(DoubleUnaryOperator transformer) {
+        double mutated = transformer.applyAsDouble(getAbsoluteVelocity());
+        return polar(mutated, getVelocityAngle());
+    }
+
+    default Velocity mapVelocityAngle(DoubleUnaryOperator transformer) {
+        double mutated = transformer.applyAsDouble(getVelocityAngle());
+        return polar(getAbsoluteVelocity(), mutated);
+    }
+
+    default Velocity deflectVelocity(double radians) {
+        return polar(getAbsoluteVelocity(), getVelocityAngle() + radians);
+    }
+
+    default Velocity scaleVelocity(double xMultiplier, double yMultiplier) {
+        return euclidian(getXVelocity() * xMultiplier, getYVelocity() * yMultiplier);
+    }
+
+    default Velocity scaleVelocity(double multiplier) {
+        return scaleVelocity(multiplier, multiplier);
+    }
+
+    default Velocity scaleXVelocity(double multiplier) {
+        return euclidian(getXVelocity() * multiplier, getYVelocity());
+    }
+
+    default Velocity scaleYVelocity(double multiplier) {
+        return euclidian(getXVelocity(), getYVelocity() * multiplier);
+    }
+
+    default Velocity addVelocity(double xAddendum, double yAddendum) {
+        return euclidian(getXVelocity() + xAddendum, getYVelocity() + yAddendum);
+    }
+
+    default Velocity addXVelocity(double addendum) {
+        return euclidian(getXVelocity() + addendum, getYVelocity());
+    }
+
+    default Velocity addYVelocity(double addendum) {
+        return euclidian(getXVelocity(), getYVelocity() + addendum);
+    }
+
+    default Velocity addToAbsoluteVelocity(double addendum) {
+        return polar(getAbsoluteVelocity() + addendum, getVelocityAngle());
+    }
+
+    static Velocity euclidian(double xVelocity, double yVelocity) {
         return new Standard(xVelocity, yVelocity);
+    }
+    static Velocity polar(double velocity, double angle) {
+        return new Standard(velocity * Math.cos(angle), velocity * Math.sin(angle));
     }
 
     record Standard(double x, double y) implements Velocity {
