@@ -51,10 +51,13 @@ public class HillClimbing3 {
         getAngles(startingX, startingY);
         double minAngle = HillClimbing3.minAngle;
         double maxAngle = HillClimbing3.maxAngle;
+        alreadyShot = new ArrayList<>();
+        combs = new ArrayList<>();
+        iterations = 0;
 
         Shoot currentShot = createShot(minAngle, maxAngle, startingX, startingY);
 
-        while (!currentShot.inHole() && iterations < 500){
+        while (!currentShot.inHole() && iterations < 100){
             currentShot = createShot(minAngle, maxAngle, startingX, startingY);
             while (!currentShot.hasConverged() && !currentShot.inHole()) {
                 currentShot = optimiseShot(currentShot);
@@ -144,16 +147,16 @@ public class HillClimbing3 {
         double newY = shoot.getYDir();
 
         if(!(Math.abs(shoot.getClosestX()-holeX) < holeR)){
-            if(shoot.getClosestX()>holeX){
+            if(shoot.getClosestX()>holeX && shoot.getVel() > (-5*deltaT)){
                 newX = shoot.getxDir() - deltaT;
-            }else {
+            }else if(shoot.getVel() < (5*deltaT)) {
                 newX = shoot.getxDir() + deltaT;
             }
         }
         if(!(Math.abs(shoot.getClosestY()-holeY) < holeR)){
-            if(shoot.getClosestY()>holeY){
+            if(shoot.getClosestY()>holeY && shoot.getVel() > (-5*deltaT)){
                 newY = shoot.getYDir() - deltaT;
-            }else {
+            }else if(shoot.getVel() < (5 *deltaT)){
                 newY = shoot.getYDir() + deltaT;
             }
         }
