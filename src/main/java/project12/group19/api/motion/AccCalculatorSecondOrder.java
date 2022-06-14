@@ -31,7 +31,7 @@ public class AccCalculatorSecondOrder implements AccelerationCalc{
                     (Math.sqrt(Math.pow(motion.getXSpeed(), 2) + Math.pow(motion.getYSpeed(), 2)+
                             Math.pow(dhdx* motion.getXSpeed()+dhdy* motion.getYSpeed(), 2) *Math.sqrt(1+ der2)));
         } else if (Math.abs(dh) > MOTION_ERROR * scale && dh > f.getStaticCoefficient()) {
-            accX = (-1) * g * (dhdx) - (f.getDynamicCoefficient() * g * dhdx / dh);
+            accX = (-1) * g * (dhdx)/(der2 +1) - (f.getDynamicCoefficient() * g * dhdx / (Math.sqrt(1+ der2)* Math.sqrt(der2 +Math.pow(der2, 2))));
 
 
         } else {
@@ -64,7 +64,7 @@ public class AccCalculatorSecondOrder implements AccelerationCalc{
 
         } else if (Math.abs(dh) > MOTION_ERROR * scale && dh > f.getStaticCoefficient()) {
 
-            accY = (-1) * g * (dhdy) - (f.getDynamicCoefficient() * g * dhdy / dh);
+            accY = (-1) * g * (dhdy)/(der2 +1) - (f.getDynamicCoefficient() * g * dhdy / (Math.sqrt(1+ der2)* Math.sqrt(der2 +Math.pow(der2, 2))));
 
         } else {
             return 0;
