@@ -4,6 +4,8 @@ import project12.group19.api.geometry.space.HeightProfile;
 import project12.group19.math.ode.ODESolver;
 import project12.group19.math.ode.RK4;
 
+import java.util.ArrayList;
+
 public class TestingClass {
     Friction friction;
     MotionState motion;
@@ -34,19 +36,24 @@ public class TestingClass {
         Friction f = Friction.create(0.2, 0.05);
         MotionState ms = new MotionState.Standard(5.0, 0.0, 0.0, 0.0  );
         ODESolver ode = new RK4();
-
+        ArrayList<Double> resultsX = new ArrayList<Double>();
+        ArrayList<Double> steps = new ArrayList<>();
         for (double i=0; i<=1.02; i+=0.05) {
 
             double a = i;
             System.out.println("Slope: " + a);
+            steps.add(a);
             HeightProfile h = (x,y) ->{
-                return  a *x +1;
+                return  a * Math.cos(x)+1;
+                //return Math.exp(-Math.pow(x,2)/a);
             } ;
             Solver s = new Solver(ode, h, f);
             TestingClass test = new TestingClass(f,ms,h,0.001, s);
+            resultsX.add(test.getFinalPosition().getXPosition());
 
-            test.getFinalPosition();
        }
+        System.out.println(steps.toString());
+        System.out.println(resultsX.toString());
     }
 
 }
