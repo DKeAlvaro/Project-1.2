@@ -1,12 +1,30 @@
 package project12.group19.api.motion;
 
 import project12.group19.api.geometry.plane.PlanarCoordinate;
+import project12.group19.api.physics.Velocity;
 
-public interface MotionState {
+/**
+ * State vector for the single moving item in the game, holds item
+ * position and velocity.
+ *
+ * TODO: fully deprecate x/y speed methods and rely on velocity methods
+ * only.
+ */
+public interface MotionState extends Velocity {
     double getXSpeed();
     double getYSpeed();
     double getXPosition();
     double getYPosition();
+
+    @Override
+    default double getXVelocity() {
+        return getXSpeed();
+    }
+
+    @Override
+    default double getYVelocity() {
+        return getYSpeed();
+    }
 
     default MotionState withXSpeed(double xSpeed) {
         return new Standard(xSpeed, getYSpeed(), getXPosition(), getYPosition());
@@ -34,6 +52,14 @@ public interface MotionState {
 
     static MotionState zero() {
         return new Standard(0, 0, 0, 0);
+    }
+
+    static MotionState create(Velocity velocity, PlanarCoordinate position) {
+        return new Standard(velocity.getXVelocity(), velocity.getYVelocity(), position.getX(), position.getY());
+    }
+
+    static MotionState create(double xVelocity, double yVelocity, double xPosition, double yPosition) {
+        return new Standard(xVelocity, yVelocity, xPosition, yPosition);
     }
 
     record Standard(
