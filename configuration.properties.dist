@@ -1,0 +1,34 @@
+# Commented settings are optional and duplicate default values, if such exist
+
+# course.width = 50
+# course.height = 50
+course.surface = 0.5 * (Math.sin((x - y) / 7) + 0.9)
+
+# course.friction.default.static = 0.2
+# course.friction.default.kinetic = 0.1
+# course.friction.sand.static = 0.3
+# course.friction.sand.kinetic = 0.25
+
+course.target.x = 4
+course.target.y = 1
+# course.target.radius = 0.1
+
+# course.ball.position.x = 0
+# course.ball.position.y = 0
+# course.ball.velocity.x = 0
+# course.ball.velocity.y = 0
+
+# course.obstacles.trees.1.x = 0.25
+# course.obstacles.trees.1.y = 1.5
+# course.obstacles.trees.2.x = 5
+# course.obstacles.trees.2.y = 5
+# course.obstacles.sandpits.1.x = -3
+# course.obstacles.sandpits.1.y = 2
+
+# engine.rates.tick = 100
+# engine.rates.refresh = 60
+# engine.rates.scale = 1.0
+
+# engine.noise.velocity =
+# engine.noise.direction =
+# engine.noise.value =

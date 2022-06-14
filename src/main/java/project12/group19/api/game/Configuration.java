@@ -8,6 +8,7 @@ import project12.group19.api.motion.Friction;
 import project12.group19.api.motion.MotionState;
 import project12.group19.incubating.WaterLake;
 
+import java.util.OptionalDouble;
 import java.util.Set;
 
 public interface Configuration {
@@ -23,6 +24,24 @@ public interface Configuration {
     PlanarDimensions getDimensions();
     int getDesiredTickRate();
     int getDesiredRefreshRate();
+    Noise getNoise();
+
+    interface Noise {
+        OptionalDouble getVelocityRange();
+        OptionalDouble getDirectionRange();
+
+        record Standard(OptionalDouble velocityRange, OptionalDouble directionRange) implements Noise {
+            @Override
+            public OptionalDouble getVelocityRange() {
+                return velocityRange;
+            }
+
+            @Override
+            public OptionalDouble getDirectionRange() {
+                return directionRange;
+            }
+        }
+    }
 
     record Standard(
             HeightProfile heightProfile,
@@ -36,8 +55,8 @@ public interface Configuration {
             Set<WaterLake> lakes,
             PlanarDimensions dimensions,
             int tickRate,
-            int refreshRate
-
+            int refreshRate,
+            Noise noise
     ) implements Configuration {
         public Standard(
                 HeightProfile heightProfile,
@@ -61,7 +80,8 @@ public interface Configuration {
                     lakes,
                     dimensions,
                     60,
-                    60
+                    60,
+                    new Noise.Standard(OptionalDouble.empty(), OptionalDouble.empty())
             );
         }
         public Standard(
@@ -143,6 +163,11 @@ public interface Configuration {
         @Override
         public int getDesiredRefreshRate() {
             return refreshRate;
+        }
+
+        @Override
+        public Noise getNoise() {
+            return noise;
         }
     }
 }

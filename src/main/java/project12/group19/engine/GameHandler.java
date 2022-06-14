@@ -76,9 +76,12 @@ public class GameHandler implements Engine {
                             .nextRound(next.getState().getPosition());
                 }
 
-                Optional<Player.Hit> hit = setup.getPlayer().play(current);
-                hit.ifPresent(v -> System.out.println("Performing a hit: " + v));
-                return hit
+                Optional<Player.Hit> originalHit = setup.getPlayer().play(current)
+                        .map(setup.getHitMutator());
+                originalHit.ifPresent(v -> System.out.println("Player submitted a hit: " + v));
+                Optional<Player.Hit> modifiedHit = originalHit.map(setup.getHitMutator());
+                modifiedHit.ifPresent(v -> System.out.println("Hit after applying a mutation: " + v));
+                return originalHit
                         .map(current::withHit)
                         .orElse(current);
             default:

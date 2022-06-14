@@ -8,6 +8,8 @@ import project12.group19.api.geometry.space.Hole;
 import project12.group19.api.motion.Friction;
 import project12.group19.api.motion.MotionState;
 import project12.group19.api.support.ConfigurationReader;
+import project12.group19.infrastructure.configuration.ConfigurationContainer;
+import project12.group19.infrastructure.configuration.ConfigurationTranslator;
 import project12.group19.math.parser.Parser;
 import project12.group19.math.parser.component.ComponentRegistry;
 import project12.group19.math.parser.expression.PostfixExpression;
@@ -37,13 +39,27 @@ public class Reader implements ConfigurationReader {
             double endingX = Double.parseDouble(values.get("endingLakeX"));
             double endingY = Double.parseDouble(values.get("endingLakeY"));
 
-            return new WaterLake(startingX,endingX,startingY,endingY);
+            return new WaterLake(startingX, endingX, startingY, endingY);
         }
 
         return null;
     }
 
     public Configuration read(String path) throws IOException {
+        Properties source = new Properties();
+        source.load(new BufferedReader(new FileReader(path)));
+        ConfigurationContainer container = new ConfigurationContainer(source);
+
+        int compatibility = container.getInt("api.configuration.version", 2);
+
+        if (compatibility == 2) {
+            return ConfigurationTranslator.translate(container);
+        }
+
+        // leaving previous configuration reader just in case of
+        // incompatibility issues
+        // set api.version = 1 in configuration.properties to switch
+        // back to it
 
         double xSpeed;
         double ySpeed;
@@ -146,7 +162,9 @@ public class Reader implements ConfigurationReader {
                 lake == null ? Set.of() : Set.of(lake),
                 field,
                 tickRate,
-                refreshRate
+                refreshRate,
+                null
         );
     }
+
 }

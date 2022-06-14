@@ -20,11 +20,11 @@ environment
 ## Group 19 - Team Members
 
 - [Zijian Dong](https://github.com/zijiandongkurt)
-- Ana Godorogea
+- [Ana Godorogea](https://github.com/AnaGodorogea)
 - [Julia Grassot](https://github.com/juliagrst)
 - [Álvaro Menéndez Ros](https://github.com/DKeAlvaro)
 - [Anna Nowowiejska](https://github.com/annanowo)
-- Agata Oskroba
+- [Agata Oskroba](https://github.com/agata-oskroba)
 - [Arseny Trifonov](https://github.com/etki)
 
 ## Software
@@ -94,3 +94,68 @@ made:
 - Press 1, 2 or 3 for Euler, RK2 or RK4 solvers accordingly
 - Press R for rule-based or B for hill-climbing bot
 - Press P to launch the configuration
+
+## Configuration reference
+
+The configuration is read as java properties file (sectionless 
+.ini-style, if you wish), with key-value pairs separated by equals sign,
+for example:
+
+```
+prefix.option = value
+```
+
+Downgrading to previous configuration reading style is possible by
+specifying `api.configuration.version = 1` anywhere in the file.
+
+Option listed below that don't have default values 
+
+### Course options
+
+| Key                             | Aliases       | Default | Description                             |
+|:--------------------------------|:--------------|:--------|:----------------------------------------|
+| course.width                    |               | 50      | Course width, in meters                 |
+| course.height                   |               | 50      | Course height, in meters                |
+| course.surface                  | heightProfile |         | Course surface function                 |
+| course.friction.default.static  | mus           | 0.2     | Ground static friction coefficient      |
+| course.friction.default.kinetic | muk           | 0.1     | Ground kinetic friction coefficient     |
+| course.friction.sand.static     | muss          | 0.3     | Sand static friction coefficient        |
+| course.friction.sand.kinetic    | muks          | 0.25    | Sand kinetic friction coefficient       |
+| course.target.x                 | xt            |         | Position of the hole, x-axis component  |
+| course.target.y                 | yt            |         | Position of the hole, y-axis component  |
+| course.target.radius            | r             | 0.1     | Radius of the hole                      |
+| course.ball.position.x          | x0            | 0       | Initial ball position, x-axis component |
+| course.ball.position.y          | y0            | 0       | Initial ball position, y-axis component |
+| course.ball.velocity.x          | vx            | 0       | Initial ball velocity, x-axis component |
+| course.ball.velocity.y          | vy            | 0       | Initial ball velocity, y-axis component |
+
+#### Obstacles
+
+All obstacles in this project are treated by engine as cylinders or 
+circular surfaces.
+
+`[identifier]` may be any arbitrary string, including numbers.
+
+| Key                                         | Aliases       | Default | Description                                                                            |
+|:--------------------------------------------|:--------------|:--------|:---------------------------------------------------------------------------------------|
+| course.obstacles.trees.[identifier].x       |               |         | Tree center x-axis component                                                           |
+| course.obstacles.trees.[identifier].y       |               |         | Tree center y-axis component                                                           |
+| course.obstacles.sandpits.[identifier].x    |               |         | Sandpit center x-axis component                                                        |
+| course.obstacles.sandpits.[identifier].y    |               |         | Sandpit center y-axis component                                                        |
+| course.obstacles.lakes.[identifier].start.x | startingLakeX |         | Lake top-left x-axis component, to be deprecated in favor of center + radius style     |
+| course.obstacles.lakes.[identifier].start.y | endingLakeX   |         | Lake top-left y-axis component, to be deprecated in favor of center + radius style     |
+| course.obstacles.lakes.[identifier].end.x   | startingLakeY |         | Lake bottom-right x-axis component, to be deprecated in favor of center + radius style |
+| course.obstacles.lakes.[identifier].end.y   | endingLakeY   |         | Lake bottom-right y-axis component, to be deprecated in favor of center + radius style |
+
+
+### Engine options
+
+| Key                    | Aliases   | Default | Description                                                                                                                                                                                               |
+|:-----------------------|:----------|:--------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| engine.noise.velocity  |           |         | Maximum noise added to or subtracted from hit velocity, as a fraction of actual velocity                                                                                                                  |
+| engine.noise.direction |           |         | Maximum noise added to or subtracted from hit direction, as a fraction of pi (so 1.0 would allow full circle from -pi to + pi)                                                                            |
+| engine.noise.value     |           |         | Allows to set both of the above as one value, acts as fallback (i.e. if one of the above is not set, engine will look for this value)                                                                     |
+| engine.rates.tick      |           | 100     | Number of times per second engine updates its state                                                                                                                                                       |
+| engine.rates.refresh   |           | 60      | Number of times per second state is propagated to UI                                                                                                                                                      |
+| engine.rates.scale     | timeScale | 1.0     | Relative time scale, forces engine to simulate this amount of time in one time unit. For example, if set to 1.5, engine will simulate 1.5 speed (events would happen 1.5 times faster than in real world) |
+
