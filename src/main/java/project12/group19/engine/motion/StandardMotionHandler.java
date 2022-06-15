@@ -3,7 +3,6 @@ package project12.group19.engine.motion;
 import project12.group19.api.domain.Course;
 import project12.group19.api.game.BallStatus;
 import project12.group19.api.game.Rules;
-import project12.group19.api.geometry.plane.PlanarRectangle;
 import project12.group19.api.motion.*;
 
 public class StandardMotionHandler implements MotionHandler {
@@ -25,7 +24,7 @@ public class StandardMotionHandler implements MotionHandler {
             return MotionResult.create(calculated, BallStatus.ESCAPED);
         }
 
-        if (calculated.getPosition().distanceTo(course.getHole().getPosition()) <= course.getHole().getRadius()) {
+        if (course.getTarget().includes(calculated.getPosition())) {
             return MotionResult.create(calculated, BallStatus.SCORED);
         }
 
@@ -33,13 +32,11 @@ public class StandardMotionHandler implements MotionHandler {
             return MotionResult.create(calculated, BallStatus.DROWNED);
         }
 
-        for (PlanarRectangle lake : course.getLakes()) {
-            if (lake.includes(calculated.getPosition())) {
-                return MotionResult.create(calculated, BallStatus.DROWNED);
-            }
+        if (course.getRestrictedZones().anyMatch(zone -> zone.includes(calculated.getPosition()))) {
+            return MotionResult.create(calculated, BallStatus.DROWNED);
         }
 
-        if (StopCondition.isMoving(course.getSurface(), calculated, course.getSurfaceFriction(), deltaT)) {
+        if (StopCondition.isMoving(course.getSurface(), calculated, deltaT)) {
             return MotionResult.create(calculated, BallStatus.MOVING);
         }
 

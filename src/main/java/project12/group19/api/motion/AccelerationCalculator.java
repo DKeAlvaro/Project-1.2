@@ -8,7 +8,7 @@ import project12.group19.api.geometry.space.HeightProfile;
  * simplifying calculations by ruling out some low-impact equation
  * components.
  */
-public interface AccelerationCalc {
+public interface AccelerationCalculator {
      static double accelerationX(HeightProfile profile, MotionState motion, Friction f, double scale) {
          return 0;
      }

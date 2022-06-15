@@ -2,7 +2,9 @@ package project12.group19.incubating;
 
 import project12.group19.api.domain.Item;
 import project12.group19.api.game.Configuration;
+import project12.group19.api.geometry.plane.PlanarCoordinate;
 import project12.group19.api.geometry.plane.PlanarDimensions;
+import project12.group19.api.geometry.plane.PlanarShape;
 import project12.group19.api.geometry.space.HeightProfile;
 import project12.group19.api.geometry.space.Hole;
 import project12.group19.api.motion.Friction;
@@ -77,7 +79,6 @@ public class Reader implements ConfigurationReader {
 
 
         HeightProfile heightProfile = null;
-        Set<Item> obstacles = Collections.emptySet();
         MotionState initialMotion;
         Friction groundFriction = null;
         Friction sandFriction = null;
@@ -130,7 +131,8 @@ public class Reader implements ConfigurationReader {
         int refreshRate = parseInteger(values.get("refreshRate"), 60);
         String player = values.get("player");
 
-        PostfixExpression heightExpression = new Parser(ComponentRegistry.standard()).parse(values.get("heightProfile"));
+        String expression = values.get("heightProfile");
+        PostfixExpression heightExpression = new Parser(ComponentRegistry.standard()).parse(expression);
         heightProfile = (x, y) -> {
             if (lake != null && lake.contains(x, y)) {
                 return -1;
@@ -151,19 +153,27 @@ public class Reader implements ConfigurationReader {
         hole = new Hole(xHole, yHole, radius);
 
         return new Configuration.Standard(
+                expression,
                 heightProfile,
-                obstacles,
+                Optional.ofNullable(lake)
+                        .<Set<Item>>map(identity -> {
+                            PlanarCoordinate position = PlanarCoordinate.create(identity.getStartingX(), identity.getStartingY());
+                            PlanarDimensions dimensions = PlanarDimensions.create(
+                                    identity.getFinishingX() - identity.getStartingX(),
+                                    identity.getFinishingY() - identity.getStartingY()
+                            );
+                            return Set.of(Item.RestrictedZone.create(new PlanarShape.Rectangle(position, dimensions)));
+                        })
+                        .orElse(Set.of()),
                 initialMotion,
                 groundFriction,
                 sandFriction,
                 hole,
                 timescale,
-                player,
-                lake == null ? Set.of() : Set.of(lake),
                 field,
                 tickRate,
                 refreshRate,
-                null
+                Configuration.Noise.empty()
         );
     }
 

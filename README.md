@@ -136,16 +136,16 @@ circular surfaces.
 
 `[identifier]` may be any arbitrary string, including numbers.
 
-| Key                                         | Aliases       | Default | Description                                                                            |
-|:--------------------------------------------|:--------------|:--------|:---------------------------------------------------------------------------------------|
-| course.obstacles.trees.[identifier].x       |               |         | Tree center x-axis component                                                           |
-| course.obstacles.trees.[identifier].y       |               |         | Tree center y-axis component                                                           |
-| course.obstacles.sandpits.[identifier].x    |               |         | Sandpit center x-axis component                                                        |
-| course.obstacles.sandpits.[identifier].y    |               |         | Sandpit center y-axis component                                                        |
-| course.obstacles.lakes.[identifier].start.x | startingLakeX |         | Lake top-left x-axis component, to be deprecated in favor of center + radius style     |
-| course.obstacles.lakes.[identifier].start.y | endingLakeX   |         | Lake top-left y-axis component, to be deprecated in favor of center + radius style     |
-| course.obstacles.lakes.[identifier].end.x   | startingLakeY |         | Lake bottom-right x-axis component, to be deprecated in favor of center + radius style |
-| course.obstacles.lakes.[identifier].end.y   | endingLakeY   |         | Lake bottom-right y-axis component, to be deprecated in favor of center + radius style |
+| Key                                               | Aliases       | Default | Description                                                                            |
+|:--------------------------------------------------|:--------------|:--------|:---------------------------------------------------------------------------------------|
+| course.items.trees.instances.[identifier].x       |               |         | Tree center x-axis component                                                           |
+| course.items.trees.instances..[identifier].y      |               |         | Tree center y-axis component                                                           |
+| course.items.sandpits.instances.[identifier].x    |               |         | Sandpit center x-axis component                                                        |
+| course.items.sandpits.instances.[identifier].y    |               |         | Sandpit center y-axis component                                                        |
+| course.items.lakes.instances.[identifier].start.x | startingLakeX |         | Lake top-left x-axis component, to be deprecated in favor of center + radius style     |
+| course.items.lakes.instances.[identifier].start.y | endingLakeX   |         | Lake top-left y-axis component, to be deprecated in favor of center + radius style     |
+| course.items.lakes.instances.[identifier].end.x   | startingLakeY |         | Lake bottom-right x-axis component, to be deprecated in favor of center + radius style |
+| course.items.lakes.instances.[identifier].end.y   | endingLakeY   |         | Lake bottom-right y-axis component, to be deprecated in favor of center + radius style |
 
 
 ### Engine options

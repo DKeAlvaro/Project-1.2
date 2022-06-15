@@ -121,9 +121,6 @@ public interface HitCalculator {
     }
 
     class Adjusting implements HitCalculator {
-        private static final double NOISE_PERCENTAGE = 0;
-        private static final Random NOISE = new Random();
-
         private final double start;
         private final double step;
 
@@ -141,22 +138,14 @@ public interface HitCalculator {
         @Override
         public Optional<Player.Hit> shootAt(State state, PlanarCoordinate target, double tolerance) {
             MotionState ball = state.getBallState();
-            Hole hole = state.getCourse().getHole();
             double force = start * Math.pow(1 + step, counter);
             counter++;
-            double xPath = hole.getxHole() - ball.getXPosition();
-            double yPath = hole.getyHole() - ball.getYPosition();
+            double xPath = target.getX() - ball.getXPosition();
+            double yPath = target.getY() - ball.getYPosition();
             double angle = Math.atan2(yPath, xPath);
-            double xVelocity = noisify(Math.cos(angle) * force);
-            double yVelocity = noisify(Math.sin(angle) * force);
+            double xVelocity = Math.cos(angle) * force;
+            double yVelocity = Math.sin(angle) * force;
             return Optional.of(Player.Hit.create(xVelocity, yVelocity));
-        }
-
-        private static double noisify(double value) {
-            double boundary = (NOISE.nextDouble() - 0.5) * 0.2;
-            double subject = Math.abs(value) > Math.abs(boundary) ? value : boundary;
-            double multiplier = 1 - NOISE_PERCENTAGE * (2 * NOISE.nextDouble() - 1);
-            return subject * multiplier;
         }
     }
 }
