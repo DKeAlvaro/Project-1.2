@@ -6,8 +6,7 @@ import project12.group19.api.geometry.plane.PlanarCoordinate;
 import project12.group19.api.geometry.plane.PlanarDimensions;
 import project12.group19.api.geometry.plane.PlanarShape;
 import project12.group19.api.geometry.space.Hole;
-import project12.group19.api.motion.Friction;
-import project12.group19.api.motion.MotionState;
+import project12.group19.api.motion.*;
 import project12.group19.math.parser.Parser;
 import project12.group19.math.parser.component.ComponentRegistry;
 import project12.group19.math.parser.expression.PostfixExpression;
@@ -179,6 +178,9 @@ public class ConfigurationTranslator {
                 ),
                 container.getInt("engine.rates.tick", 100),
                 container.getInt("engine.rates.refresh", 60),
+                container.tryGetString("engine.physics.acceleration")
+                        .map(String::toLowerCase)
+                        .orElse("basic"),
                 new Configuration.Noise.Standard(velocityNoise, directionNoise)
         );
     }

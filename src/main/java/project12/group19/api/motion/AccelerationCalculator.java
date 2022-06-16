@@ -1,6 +1,6 @@
 package project12.group19.api.motion;
 
-import project12.group19.api.geometry.space.HeightProfile;
+import project12.group19.api.domain.Surface;
 
 /**
  * This is an interface for acceleration calculator, which can be
@@ -9,11 +9,24 @@ import project12.group19.api.geometry.space.HeightProfile;
  * components.
  */
 public interface AccelerationCalculator {
-     static double accelerationX(HeightProfile profile, MotionState motion, Friction f, double scale) {
-         return 0;
-     }
-
-     static double accelerationY(HeightProfile profile, MotionState motion, Friction f, double scale) {
-         return 0;
-     }
+    /**
+     * @param surface Surface over which item is moving
+     * @param state Current moving item state.
+     * @param scale A number defining which at which precision
+     * calculator should operate, with 1 being as "standard". Lower
+     * values means more precision. It makes sense to use step size for
+     * it.
+     * @return X-axis acceleration component.
+     */
+     double getXAcceleration(Surface surface, MotionState state, double scale);
+    /**
+     * @param surface Surface over which item is moving
+     * @param state Current moving item state.
+     * @param scale A number defining which at which precision
+     * calculator should operate, with 1 being as "standard". Lower
+     * values means more precision. It makes sense to use step size for
+     * it.
+     * @return Y-axis acceleration component.
+     */
+     double getYAcceleration(Surface surface, MotionState state, double scale);
 }

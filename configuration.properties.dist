@@ -34,3 +34,6 @@ course.target.y = 1
 # engine.noise.velocity =
 # engine.noise.direction =
 # engine.noise.value =
+
+# engine.physics.acceleration = basic
+#   possible options are `basic` and `advanced`

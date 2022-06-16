@@ -173,6 +173,7 @@ public class Reader implements ConfigurationReader {
                 field,
                 tickRate,
                 refreshRate,
+                "basic",
                 Configuration.Noise.empty()
         );
     }

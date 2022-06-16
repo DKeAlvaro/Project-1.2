@@ -27,6 +27,9 @@ import project12.group19.api.game.HitMutator;
 import project12.group19.api.game.Rules;
 import project12.group19.api.game.state.Round;
 import project12.group19.api.geometry.plane.PlanarRectangle;
+import project12.group19.api.motion.AccelerationCalculator;
+import project12.group19.api.motion.AdvancedAccelerationCalculator;
+import project12.group19.api.motion.BasicAccelerationCalculator;
 import project12.group19.api.motion.Solver;
 import project12.group19.domain.StandardSurface;
 import project12.group19.engine.GameHandler;
@@ -53,6 +56,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Drop extends ApplicationAdapter implements ApplicationListener {
+    private static final Map<String, AccelerationCalculator> ACCELERATION_CALCULATORS = Map.of(
+            "basic", new BasicAccelerationCalculator(),
+            "advanced", new AdvancedAccelerationCalculator()
+    );
     private static final NumberFormat DECIMAL_PRINT_FORMAT = new DecimalFormat("#.000");
     private static final String SOLVER_SELECTION_MENU = "Select solver:\n1.Euler\n2.Runge-Kutta 2nd Order\n3.Runge-Kutta 4th Order";
     private static final String BOT_SELECTION_MENU = "Press keys:\nR: Rule-based Bot\nB: Hill-Climbing Bot";
@@ -399,7 +406,6 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
                 });
 
                 containment.submit(() -> {
-                    Solver solver = new Solver(new Euler(), configuration.getHeightProfile(), configuration.getGroundFriction());
                     Item target = Item.Target.create(configuration.getHole().getPosition(), configuration.getHole().getRadius());
                     Set<Item> items = Stream.concat(configuration.getItems().stream(), Stream.of(target)).collect(Collectors.toSet());
                     Parser parser = new Parser(ComponentRegistry.standard());
@@ -444,7 +450,17 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
                             rules,
                             configuration.getDesiredTickRate(),
                             configuration.getDesiredRefreshRate(),
-                            new StandardMotionHandler(course, rules, solver),
+                            new StandardMotionHandler(course, rules, new Solver(
+                                    solver,
+                                    course.getSurface(),
+                                    Optional.ofNullable(configuration.getAccelerationCalculator())
+                                            .map(ACCELERATION_CALCULATORS::get)
+                                            .orElseGet(() -> {
+                                                String type = configuration.getAccelerationCalculator();
+                                                System.out.println("Unknown acceleration calculator type " + type + ", using basic one");
+                                                return new BasicAccelerationCalculator();
+                                            })
+                            )),
                             bot,
                             hitMutator,
                             List.of(gameState::set)
