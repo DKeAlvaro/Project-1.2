@@ -1,5 +1,6 @@
 package project12.group19.api.motion;
 
+import project12.group19.api.domain.Surface;
 import project12.group19.api.geometry.space.HeightProfile;
 import project12.group19.math.ode.ODESolver;
 
@@ -7,21 +8,25 @@ import java.util.OptionalDouble;
 
 public class Solver implements MotionCalculator {
     private final ODESolver solver;
-    private final HeightProfile profile;
-    private final Friction friction;
+    private final Surface surface;
+    private final AccelerationCalculator calculator;
 
+    @Deprecated
     public Solver(ODESolver solver, HeightProfile profile, Friction friction) {
+        this(solver, Surface.homogeneous(profile::getHeight, friction), new BasicAccelerationCalculator());
+    }
+
+    public Solver(ODESolver solver, Surface surface, AccelerationCalculator calculator) {
         this.solver = solver;
-        this.profile = profile;
-        this.friction = friction;
+        this.surface = surface;
+        this.calculator = calculator;
     }
 
     private OptionalDouble getXSpeed(MotionState state, double deltaT) {
         return solver.apply(state.getXSpeed(), 0, deltaT, (time, speed) -> {
-            return OptionalDouble.of(AccCalculator.accelerationX(
-                    profile,
+            return OptionalDouble.of(calculator.getXAcceleration(
+                    surface,
                     state.withXSpeed(speed),
-                    friction,
                     deltaT
             ));
         });
@@ -29,10 +34,9 @@ public class Solver implements MotionCalculator {
 
     private OptionalDouble getYSpeed(MotionState state, double deltaT) {
         return solver.apply(state.getYSpeed(), 0, deltaT, (time, speed) -> {
-            return OptionalDouble.of(AccCalculator.accelerationY(
-                    profile,
+            return OptionalDouble.of(calculator.getYAcceleration(
+                    surface,
                     state.withYSpeed(speed),
-                    friction,
                     deltaT
             ));
         });

@@ -29,6 +29,7 @@ public interface Configuration {
     PlanarDimensions getDimensions();
     int getDesiredTickRate();
     int getDesiredRefreshRate();
+    String getAccelerationCalculator();
     Noise getNoise();
 
     interface Noise {
@@ -64,6 +65,7 @@ public interface Configuration {
             PlanarDimensions dimensions,
             int tickRate,
             int refreshRate,
+            String accelerationCalculator,
             Noise noise
     ) implements Configuration {
         public Standard(
@@ -88,6 +90,7 @@ public interface Configuration {
                     dimensions,
                     100,
                     60,
+                    "basic",
                     new Noise.Standard(OptionalDouble.empty(), OptionalDouble.empty())
             );
         }
@@ -166,6 +169,11 @@ public interface Configuration {
         @Override
         public int getDesiredRefreshRate() {
             return refreshRate;
+        }
+
+        @Override
+        public String getAccelerationCalculator() {
+            return accelerationCalculator;
         }
 
         @Override
