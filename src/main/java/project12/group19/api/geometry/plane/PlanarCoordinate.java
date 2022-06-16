@@ -8,6 +8,10 @@ public interface PlanarCoordinate {
         return Math.sqrt(Math.pow(getX() - other.getX(), 2) + Math.pow(getY() - other.getY(), 2));
     }
 
+    default PlanarCoordinate translate(double x, double y) {
+        return create(getX() + x, getY() + y);
+    }
+
     static PlanarCoordinate create(double x, double y) {
         return new Standard(x, y);
     }

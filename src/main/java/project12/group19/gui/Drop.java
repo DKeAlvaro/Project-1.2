@@ -20,10 +20,7 @@ import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
-import project12.group19.api.domain.Course;
-import project12.group19.api.domain.Item;
-import project12.group19.api.domain.Player;
-import project12.group19.api.domain.State;
+import project12.group19.api.domain.*;
 import project12.group19.api.engine.Setup;
 import project12.group19.api.game.Configuration;
 import project12.group19.api.game.HitMutator;
@@ -31,14 +28,17 @@ import project12.group19.api.game.Rules;
 import project12.group19.api.game.state.Round;
 import project12.group19.api.geometry.plane.PlanarRectangle;
 import project12.group19.api.motion.Solver;
+import project12.group19.domain.StandardSurface;
 import project12.group19.engine.GameHandler;
 import project12.group19.engine.motion.StandardMotionHandler;
 import project12.group19.incubating.HillClimbing3;
-import project12.group19.incubating.WaterLake;
 import project12.group19.math.ode.Euler;
 import project12.group19.math.ode.ODESolver;
 import project12.group19.math.ode.RK2;
 import project12.group19.math.ode.RK4;
+import project12.group19.math.parser.Parser;
+import project12.group19.math.parser.component.ComponentRegistry;
+import project12.group19.math.parser.expression.PostfixExpression;
 import project12.group19.player.ai.HitCalculator;
 import project12.group19.player.ai.NaiveBot;
 
@@ -50,6 +50,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Drop extends ApplicationAdapter implements ApplicationListener {
     private static final NumberFormat DECIMAL_PRINT_FORMAT = new DecimalFormat("#.000");
@@ -335,12 +336,6 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
         sandpitsInstance = new ModelInstance(modelSandPits, 0, 0, 0.05f);
     }
 
-    public Color assignColor(float z) {
-        float para = 0.5f+Math.abs(z)*10;
-        Color color = new Color(0,para,0,100);
-            return color;
-    }
-
     @Override
     public void render() {
         shadowLight.begin(camera);
@@ -405,14 +400,23 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
 
                 containment.submit(() -> {
                     Solver solver = new Solver(new Euler(), configuration.getHeightProfile(), configuration.getGroundFriction());
+                    Item target = Item.Target.create(configuration.getHole().getPosition(), configuration.getHole().getRadius());
+                    Set<Item> items = Stream.concat(configuration.getItems().stream(), Stream.of(target)).collect(Collectors.toSet());
+                    Parser parser = new Parser(ComponentRegistry.standard());
+                    PostfixExpression expression = parser.parse(configuration.getSurface());
+                    Surface surface = new StandardSurface(
+                            expression,
+                            configuration.getGroundFriction(),
+                            configuration.getItems().stream()
+                                    .filter(item -> item instanceof Item.Overlay)
+                                    .map(Item.Overlay.class::cast)
+                                    .collect(Collectors.toSet())
+                    );
 
                     Course course = new Course.Standard(
-                            configuration.getHeightProfile(),
+                            surface,
                             configuration.getGroundFriction(),
-                            new Item.Standard("ball", configuration.getInitialMotion().getPosition()),
-                            configuration.getObstacles(),
-                            configuration.getLakes().stream().map(WaterLake::toPlanarRectangle).collect(Collectors.toSet()),
-                            configuration.getHole()
+                            items
                     );
 
                     PlanarRectangle field = PlanarRectangle.create(

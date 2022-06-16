@@ -2,7 +2,7 @@ package project12.group19.api.motion;
 
 import project12.group19.api.geometry.space.HeightProfile;
 
-public class AccCalculatorSecondOrder implements AccelerationCalc{
+public class AccCalculatorSecondOrder implements AccelerationCalculator {
     public static final double MOTION_ERROR = 1E-6;
     private static final double g = 9.81;
     public AccCalculatorSecondOrder(){

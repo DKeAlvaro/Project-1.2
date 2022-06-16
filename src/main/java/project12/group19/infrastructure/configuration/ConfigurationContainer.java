@@ -43,6 +43,9 @@ public record ConfigurationContainer(Properties properties, List<String> anchor)
     private String toPath(String key) {
         return Stream.concat(anchor.stream(), Stream.of(key)).collect(Collectors.joining("."));
     }
+    private String toPath(String... keys) {
+        return Stream.concat(anchor.stream(), Arrays.stream(keys)).collect(Collectors.joining("."));
+    }
 
     private String keySpecification(String key) {
         return key + " (full path: " + toPath(key) + ")";
@@ -57,8 +60,8 @@ public record ConfigurationContainer(Properties properties, List<String> anchor)
         String message = keys.stream()
                 .map(this::keySpecification)
                 .collect(Collectors.joining(
-                        "Configuration value for keys [",
                         ", ",
+                        "Configuration value for keys [",
                         "] is missing"
                 ));
         return new IllegalStateException(message);
@@ -86,6 +89,15 @@ public record ConfigurationContainer(Properties properties, List<String> anchor)
 
     public String getString(String key, String fallback) {
         return tryGetString(key).orElse(fallback);
+    }
+
+    public String getString(List<String> keys) {
+        return keys.stream()
+                .map(this::tryGetString)
+                .filter(Optional::isPresent)
+                .findFirst()
+                .flatMap(Function.identity())
+                .orElseThrow(() -> missingKeysException(keys));
     }
 
     public <T> Optional<T> tryGetValue(String key, BiFunction<? super String, ? super String, ? extends T> converter) {
@@ -222,20 +234,61 @@ public record ConfigurationContainer(Properties properties, List<String> anchor)
         return tryGetBoolean(key).orElseThrow(() -> missingKeyException(key));
     }
 
-    public Stream<ConfigurationContainer> streamChildren(String key) {
-        String prefix = toPath(key) + ".";
+    private static boolean isPrefixOf(String prefix, String key) {
+        return key.length() > prefix.length() && key.startsWith(prefix) && key.charAt(prefix.length()) == '.';
+    }
+
+    private Stream<String> streamDescendantKeysOf(List<String> path) {
+        String prefix = String.join(".", path);
+
         return properties.keySet().stream()
                 .map(Object::toString)
-                .filter(candidate -> candidate.startsWith(prefix))
-                .map(candidate -> {
-                    int nextDot = candidate.indexOf('.', prefix.length());
-                    int cutoff = nextDot > -1 ? nextDot : candidate.length();
-                    String qualifier = candidate.substring(prefix.length(), cutoff);
-                    List<String> path = Stream.concat(anchor.stream(), Stream.of(key, qualifier)).toList();
+                .filter(key -> isPrefixOf(prefix, key))
+                .map(key -> prefix.length() == 0 ? key : key.substring(prefix.length() + 1)).distinct();
+    }
+
+    private Stream<String> streamChildKeysOf(List<String> prefix) {
+        return streamDescendantKeysOf(prefix)
+                .map(key -> {
+                    int i = key.indexOf('.');
+                    return i == -1 ? key : key.substring(0, i);
+                })
+                .distinct();
+    }
+
+    public Stream<String> streamChildKeys() {
+        return streamChildKeysOf(anchor);
+    }
+
+    public Stream<String> streamDescendantKeys() {
+        return streamDescendantKeysOf(anchor);
+    }
+
+    private Stream<ConfigurationContainer> streamChildrenOf(List<String> prefix) {
+        return streamChildKeysOf(prefix)
+                .map(key -> {
+                    List<String> path = Stream.concat(prefix.stream(), Stream.of(key)).toList();
                     return new ConfigurationContainer(properties, path);
                 });
     }
-    public Map<String, ConfigurationContainer> getChildren(String key) {
-        return streamChildren(key).collect(Collectors.toMap(ConfigurationContainer::getName, Function.identity()));
+
+    private Stream<ConfigurationContainer> streamDescendantsOf(List<String> prefix) {
+        return streamDescendantKeysOf(prefix).map(this::getChild);
+    }
+
+    public Stream<ConfigurationContainer> streamChildren(String... path) {
+        return streamChildrenOf(Stream.concat(anchor.stream(), Arrays.stream(path)).toList());
+    }
+
+    public Map<String, ConfigurationContainer> getChildren(String... path) {
+        return streamChildren(path).collect(Collectors.toMap(ConfigurationContainer::getName, Function.identity()));
+    }
+
+    public ConfigurationContainer getChild(String key) {
+        return new ConfigurationContainer(properties, Stream.concat(anchor.stream(), Stream.of(key)).toList());
+    }
+
+    public <T> T scoped(String key, Function<ConfigurationContainer, T> factory) {
+        return factory.apply(getChild(key));
     }
 }

@@ -1,5 +1,11 @@
 package project12.group19.api.geometry.plane;
 
+/**
+ * @deprecated use {@link PlanarShape.Rectangle}
+ *
+ * TODO: remove completely
+ */
+@Deprecated
 public interface PlanarRectangle extends PlanarPositioned, PlanarDimensioned {
     static PlanarRectangle create(PlanarCoordinate coordinate, PlanarDimensions dimensions) {
         return new Standard(coordinate, dimensions);

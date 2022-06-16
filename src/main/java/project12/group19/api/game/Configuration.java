@@ -1,5 +1,6 @@
 package project12.group19.api.game;
 
+import project12.group19.api.domain.Course;
 import project12.group19.api.domain.Item;
 import project12.group19.api.geometry.plane.PlanarDimensions;
 import project12.group19.api.geometry.space.HeightProfile;
@@ -12,15 +13,19 @@ import java.util.OptionalDouble;
 import java.util.Set;
 
 public interface Configuration {
+    String getSurface();
+
+    /**
+     * @deprecated use {@link Course#getSurface()}
+     */
+    @Deprecated
     HeightProfile getHeightProfile();
-    Set<Item> getObstacles();
+    Set<Item> getItems();
     MotionState getInitialMotion();
     Friction getGroundFriction();
     Friction getSandFriction();
     Hole getHole();
     double getTimeScale();
-    String getPlayer();
-    Set<WaterLake> getLakes();
     PlanarDimensions getDimensions();
     int getDesiredTickRate();
     int getDesiredRefreshRate();
@@ -29,6 +34,10 @@ public interface Configuration {
     interface Noise {
         OptionalDouble getVelocityRange();
         OptionalDouble getDirectionRange();
+
+        static Noise empty() {
+            return new Standard(OptionalDouble.empty(), OptionalDouble.empty());
+        }
 
         record Standard(OptionalDouble velocityRange, OptionalDouble directionRange) implements Noise {
             @Override
@@ -44,6 +53,7 @@ public interface Configuration {
     }
 
     record Standard(
+            String surface,
             HeightProfile heightProfile,
             Set<Item> obstacles,
             MotionState initialMotion,
@@ -51,42 +61,40 @@ public interface Configuration {
             Friction sandFriction,
             Hole hole,
             double timeScale,
-            String player,
-            Set<WaterLake> lakes,
             PlanarDimensions dimensions,
             int tickRate,
             int refreshRate,
             Noise noise
     ) implements Configuration {
         public Standard(
+                String surface,
                 HeightProfile heightProfile,
-                Set<Item> obstacles,
+                Set<Item> items,
                 MotionState initialMotion,
                 Friction groundFriction,
                 Friction sandFriction,
                 Hole hole,
-                Set<WaterLake> lakes,
                 PlanarDimensions dimensions
         ) {
             this(
+                    surface,
                     heightProfile,
-                    obstacles,
+                    items,
                     initialMotion,
                     groundFriction,
                     sandFriction,
                     hole,
                     1,
-                    null,
-                    lakes,
                     dimensions,
-                    60,
+                    100,
                     60,
                     new Noise.Standard(OptionalDouble.empty(), OptionalDouble.empty())
             );
         }
         public Standard(
+                String surface,
                 HeightProfile heightProfile,
-                Set<Item> obstacles,
+                Set<Item> items,
                 MotionState initialMotion,
                 Friction groundFriction,
                 Friction sandFriction,
@@ -94,15 +102,20 @@ public interface Configuration {
                 Set<WaterLake> lakes
         ) {
             this(
+                    surface,
                     heightProfile,
-                    obstacles,
+                    items,
                     initialMotion,
                     groundFriction,
                     sandFriction,
                     hole,
-                    lakes,
                     PlanarDimensions.create(50, 50)
             );
+        }
+
+        @Override
+        public String getSurface() {
+            return surface;
         }
 
         @Override
@@ -111,7 +124,7 @@ public interface Configuration {
         }
 
         @Override
-        public Set<Item> getObstacles() {
+        public Set<Item> getItems() {
             return obstacles;
         }
 
@@ -138,16 +151,6 @@ public interface Configuration {
         @Override
         public double getTimeScale() {
             return timeScale;
-        }
-
-        @Override
-        public String getPlayer() {
-            return player;
-        }
-
-        @Override
-        public Set<WaterLake> getLakes(){
-            return lakes;
         }
 
         @Override
