@@ -2,6 +2,7 @@ package project12.group19.api.game;
 
 import project12.group19.api.domain.Course;
 import project12.group19.api.domain.Item;
+import project12.group19.api.game.configuration.EngineConfiguration;
 import project12.group19.api.geometry.plane.PlanarDimensions;
 import project12.group19.api.geometry.space.HeightProfile;
 import project12.group19.api.geometry.space.Hole;
@@ -9,14 +10,13 @@ import project12.group19.api.motion.Friction;
 import project12.group19.api.motion.MotionState;
 import project12.group19.incubating.WaterLake;
 
-import java.util.OptionalDouble;
 import java.util.Set;
 
 public interface Configuration {
     String getSurface();
 
     /**
-     * @deprecated use {@link Course#getSurface()}
+     * @deprecated use {@link Course}
      */
     @Deprecated
     HeightProfile getHeightProfile();
@@ -25,32 +25,21 @@ public interface Configuration {
     Friction getGroundFriction();
     Friction getSandFriction();
     Hole getHole();
-    double getTimeScale();
     PlanarDimensions getDimensions();
-    int getDesiredTickRate();
-    int getDesiredRefreshRate();
-    String getAccelerationCalculator();
-    Noise getNoise();
+    EngineConfiguration getEngineConfiguration();
 
-    interface Noise {
-        OptionalDouble getVelocityRange();
-        OptionalDouble getDirectionRange();
-
-        static Noise empty() {
-            return new Standard(OptionalDouble.empty(), OptionalDouble.empty());
-        }
-
-        record Standard(OptionalDouble velocityRange, OptionalDouble directionRange) implements Noise {
-            @Override
-            public OptionalDouble getVelocityRange() {
-                return velocityRange;
-            }
-
-            @Override
-            public OptionalDouble getDirectionRange() {
-                return directionRange;
-            }
-        }
+    default Configuration withEngineConfiguration(EngineConfiguration configuration) {
+        return new Standard(
+                getSurface(),
+                getHeightProfile(),
+                getItems(),
+                getInitialMotion(),
+                getGroundFriction(),
+                getSandFriction(),
+                getHole(),
+                getDimensions(),
+                configuration
+        );
     }
 
     record Standard(
@@ -61,12 +50,8 @@ public interface Configuration {
             Friction groundFriction,
             Friction sandFriction,
             Hole hole,
-            double timeScale,
             PlanarDimensions dimensions,
-            int tickRate,
-            int refreshRate,
-            String accelerationCalculator,
-            Noise noise
+            EngineConfiguration engineConfiguration
     ) implements Configuration {
         public Standard(
                 String surface,
@@ -86,12 +71,8 @@ public interface Configuration {
                     groundFriction,
                     sandFriction,
                     hole,
-                    1,
                     dimensions,
-                    100,
-                    60,
-                    "basic",
-                    new Noise.Standard(OptionalDouble.empty(), OptionalDouble.empty())
+                    EngineConfiguration.defaults()
             );
         }
         public Standard(
@@ -152,33 +133,13 @@ public interface Configuration {
         }
 
         @Override
-        public double getTimeScale() {
-            return timeScale;
-        }
-
-        @Override
         public PlanarDimensions getDimensions() {
             return dimensions;
         }
 
         @Override
-        public int getDesiredTickRate() {
-            return tickRate;
-        }
-
-        @Override
-        public int getDesiredRefreshRate() {
-            return refreshRate;
-        }
-
-        @Override
-        public String getAccelerationCalculator() {
-            return accelerationCalculator;
-        }
-
-        @Override
-        public Noise getNoise() {
-            return noise;
+        public EngineConfiguration getEngineConfiguration() {
+            return engineConfiguration;
         }
     }
 }
