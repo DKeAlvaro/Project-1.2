@@ -29,7 +29,7 @@ public class HillClimbing3 {
     static double minAngle; //
     static double maxAngleVar = 30;  //Maximum variation of angle to generate shots. Angle 0 is Straight shot
     static int iterations = 0;
-    static double stepSize = 0.05;
+    static double stepSize = 0.01;
     static boolean combsPrinted = false;
 
 
@@ -44,27 +44,30 @@ public class HillClimbing3 {
     }
 
     public Optional<Player.Hit> hillClimbing(double startingX, double startingY) throws FileNotFoundException {
-        PrintStream o = new PrintStream("hillClimbing2.txt");
+        PrintStream o = new PrintStream("newHillClimbing.txt");
         PrintStream console = System.out;
         System.setOut(console);
 
-        getAngles(startingX, startingY);
-        double minAngle = HillClimbing3.minAngle;
-        double maxAngle = HillClimbing3.maxAngle;
         alreadyShot = new ArrayList<>();
         combs = new ArrayList<>();
         iterations = 0;
+        getAngles(startingX, startingY);
+        double minAngle = HillClimbing3.minAngle;
+        double maxAngle = HillClimbing3.maxAngle;
+        double distanceToHole = getDistance(holeX, startingX, holeY, startingY);
+        double straightX = (maxVel * (holeX-startingX))/distanceToHole;
+        double straightY = (maxVel * (holeY-startingY))/distanceToHole;
 
-        Shoot currentShot = createShot(minAngle, maxAngle, startingX, startingY);
 
-        while (!currentShot.inHole() && iterations < 100){
-            currentShot = createShot(minAngle, maxAngle, startingX, startingY);
-            while (!currentShot.hasConverged() && !currentShot.inHole()) {
-                currentShot = optimiseShot(currentShot);
-                System.out.println("Distance to hole: " + currentShot.getDistanceToHole());
+        Shoot currentShot = new Shoot(straightX, straightY, startingX, startingY);
+
+        while (!currentShot.inHole() && iterations < 500){
+            if(iterations != 0){
+                currentShot = createShot(minAngle, maxAngle, startingX, startingY);
             }
-
-
+            while (!currentShot.hasConverged()) {
+                currentShot = optimiseShot(currentShot);
+            }
             System.out.println("Iterations: "+iterations);
         }
         combs.sort(Comparator.comparingDouble(Comb::getDistanceToHole));
@@ -76,6 +79,8 @@ public class HillClimbing3 {
             combsPrinted = true;
         }
         System.setOut(console);
+        System.out.println("Iterations: "+iterations);
+
         if(currentShot.inHole()){
             System.out.println("Distance to hole: "+currentShot.getDistanceToHole());
             return Optional.of(Player.Hit.create(currentShot.getxDir(), currentShot.getYDir()));
@@ -89,11 +94,9 @@ public class HillClimbing3 {
 
     public static Shoot createShot(double minAngle, double maxAngle, double startingX, double startingY){
         double angle = random(minAngle, maxAngle);
-        System.out.println("Angle: "+angle);
         double vel = Math.sqrt(Math.random()) * maxVel; //TODO: Explain why there is a sqrt()
         double xDir = vel * Math.cos(Math.toRadians(angle));
         double yDir = vel * Math.sin(Math.toRadians(angle));
-        System.out.println("x Dir: "+xDir+ " y Dir: "+yDir);
         return new Shoot(xDir, yDir, startingX, startingY);
     }
 
@@ -142,25 +145,22 @@ public class HillClimbing3 {
     }
 
     public static Shoot optimiseShot(Shoot shoot){
-        double deltaT = 0.1*Math.sqrt(shoot.getDistanceToHole());
-        double newX = shoot.getxDir();
-        double newY = shoot.getYDir();
+        double angleVar = 60;
+        double stepSize = 0.1*Math.sqrt(shoot.getDistanceToHole());
+        double initialXDir = shoot.getxDir();
+        double initialYDir = shoot.getYDir();
+        double startingX = shoot.getStartingX();
+        double startingY = shoot.getStartingY();
+        List<Shoot> newShots = new ArrayList<Shoot>();
+        for(int angle = 0; angle < 360; angle+= angleVar){
+            Shoot movement = new Shoot(angle, stepSize, shoot.getStartingX(), shoot.getStartingY(), true);
+            double moveX = movement.getxDir();
+            double moveY = movement.getYDir();
+            newShots.add(new Shoot(initialXDir+moveX, initialYDir+moveY, startingX, startingY));
+        }
+        newShots.sort(Comparator.comparingDouble(Shoot::getDistanceToHole));
+        return newShots.get(0);
 
-        if(!(Math.abs(shoot.getClosestX()-holeX) < holeR)){
-            if(shoot.getClosestX()>holeX && shoot.getVel() > (-5*deltaT)){
-                newX = shoot.getxDir() - deltaT;
-            }else if(shoot.getVel() < (5*deltaT)) {
-                newX = shoot.getxDir() + deltaT;
-            }
-        }
-        if(!(Math.abs(shoot.getClosestY()-holeY) < holeR)){
-            if(shoot.getClosestY()>holeY && shoot.getVel() > (-5*deltaT)){
-                newY = shoot.getYDir() - deltaT;
-            }else if(shoot.getVel() < (5 *deltaT)){
-                newY = shoot.getYDir() + deltaT;
-            }
-        }
-        return new Shoot(newX, newY, shoot.getStartingX(), shoot.getStartingY());
     }
 
     static void setClosestDistances(Shoot shoot, MotionState current){

@@ -33,14 +33,10 @@ public class Shoot {
     }
 
     public Shoot(double angle, double vel, double startingX,double startingY, boolean b){
-        this.xDir = Math.cos(angle) * vel;
-        this.yDir = Math.sin(angle) * vel;
+        this.xDir = Math.cos(Math.toRadians(angle)) * vel;
+        this.yDir = Math.sin(Math.toRadians(angle)) * vel;
         this.startingX = startingX;
         this.startingY = startingY;
-        getShotDistanceToHole(friction, profile, this);
-        combs.add(new Comb(this.getxDir(), this.getYDir(), this.getDistanceToHole()));
-        alreadyShot.add(this);
-        iterations++;
 
     }
     public double getxDir() {
