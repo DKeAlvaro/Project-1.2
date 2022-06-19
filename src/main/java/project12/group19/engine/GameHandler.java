@@ -1,6 +1,6 @@
 package project12.group19.engine;
 
-import project12.group19.api.domain.Player;
+import project12.group19.api.domain.Hit;
 import project12.group19.api.domain.State;
 import project12.group19.api.engine.Engine;
 import project12.group19.api.engine.Setup;
@@ -23,14 +23,6 @@ public class GameHandler implements Engine {
         this.executor = executor;
     }
 
-    /**
-     * @deprecated Use {@link GameHandler#GameHandler(EventLoop)}.
-     */
-    @Deprecated
-    public GameHandler() {
-        this(ScheduledEventLoop.standard());
-    }
-
     private record StateWrapper(State state, long ticks, boolean exceptional) {
         public StateWrapper next(State state, boolean exceptional) {
             return new StateWrapper(state, ticks + 1, exceptional);
@@ -49,7 +41,7 @@ public class GameHandler implements Engine {
     public CompletableFuture<GameStats> launch(Setup setup) {
         MotionState initialMotion = setup.getConfiguration().getInitialMotion();
         EventLoop.Task<StateWrapper> task = handle -> {
-            State state = handle.state;
+            State state;
             try {
                 state = tick(handle.state, setup);
             } catch (RuntimeException | FileNotFoundException e) {
@@ -93,12 +85,12 @@ public class GameHandler implements Engine {
 
         switch (next.getStatus()) {
             case SCORED:
-                System.out.println("Successfully scored!");
+                System.out.println("Successfully scored at " + next.getState().getPosition());
                 return current.terminateRound(next.getState().getPosition(), next.getStatus());
             case DROWNED:
                 // intentional fallthrough
             case ESCAPED:
-                System.out.println("Foul: ended in " + next.getStatus() + " state");
+                System.out.println("Foul: ended in " + next.getStatus() + " state at " + next.getState().getPosition());
                 return current
                     .terminateRound(next.getState().getPosition(), next.getStatus())
                     .nextRound(round.getStartingPosition());
@@ -106,16 +98,16 @@ public class GameHandler implements Engine {
                 return current.withBallState(next.getState());
             case STOPPED:
                 if (round.getHit() != null) {
-                    System.out.println("Ball has stopped after a hit");
+                    System.out.println("Ball has stopped after a hit at " + next.getState().getPosition());
                     return current
                             .terminateRound(next.getState().getPosition(), next.getStatus())
                             .nextRound(next.getState().getPosition());
                 }
 
-                Optional<Player.Hit> originalHit = setup.getPlayer().play(current)
+                Optional<Hit> originalHit = setup.getPlayer().play(current)
                         .map(setup.getHitMutator());
                 originalHit.ifPresent(v -> System.out.println("Player submitted a hit: " + v));
-                Optional<Player.Hit> modifiedHit = originalHit.map(setup.getHitMutator());
+                Optional<Hit> modifiedHit = originalHit.map(setup.getHitMutator());
                 modifiedHit.ifPresent(v -> System.out.println("Hit after applying a mutation: " + v));
                 return originalHit
                         .map(current::withHit)

@@ -160,4 +160,3 @@ circular surfaces.
 | engine.timing.step                   |         | 0.01    | Simulated timestep between two calculations, in seconds.                                                                                                                                  |
 | engine.timing.intervals.computation  |         |         | Time interval between two calculations, in seconds. By default, when omitted, it is calculated as {step} seconds.                                                                         |
 | engine.timing.intervals.notification |         | 0.016   | Time interval between updates to GUI, in seconds. Please note that GUI updates are linked to computations and only done as end of computation operation, thus this number is approximate. |
-

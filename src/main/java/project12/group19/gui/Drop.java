@@ -28,19 +28,19 @@ import project12.group19.api.game.state.Round;
 import project12.group19.api.motion.AccelerationCalculator;
 import project12.group19.api.motion.AdvancedAccelerationCalculator;
 import project12.group19.api.motion.BasicAccelerationCalculator;
-import project12.group19.api.motion.Solver;
+import project12.group19.api.motion.MotionHandler;
 import project12.group19.engine.EngineFactory;
 import project12.group19.engine.GameHandler;
+import project12.group19.engine.ScheduledEventLoop;
 import project12.group19.engine.StandardThreadFactory;
-import project12.group19.incubating.HillClimbing3;
 import project12.group19.math.ode.Euler;
 import project12.group19.math.ode.ODESolver;
 import project12.group19.math.ode.RK2;
 import project12.group19.math.ode.RK4;
 import project12.group19.player.ai.HitCalculator;
 import project12.group19.player.ai.NaiveBot;
+import project12.group19.player.ai.hc.HillClimbingBot;
 
-import java.io.FileNotFoundException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
@@ -379,16 +379,9 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
                 menu = LAUNCH_MENU;
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.B)){
-                HillClimbing3 hillClimbing = new HillClimbing3(new Solver(solver, configuration.getHeightProfile(), configuration.getGroundFriction()), configuration);
-                bot = state -> {
-                    try {
-                        return hillClimbing.hillClimbing(state.getBallState().getXPosition(), state.getBallState().getYPosition());
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    return Optional.empty();
-                };
-                System.out.println("Random Bot");
+                MotionHandler motionHandler = EngineFactory.createMotionHandler(configuration);
+                bot = new HillClimbingBot(motionHandler, configuration);
+                System.out.println("Hill climbing bot");
                 menu = LAUNCH_MENU;
             }
         } else if (!launched) {
@@ -400,7 +393,7 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
                 containment.submit(() -> {
                     Setup setup = EngineFactory.createSetup(configuration, bot, List.of(gameState::set));
 
-                    new GameHandler().launch(setup).join();
+                    new GameHandler(ScheduledEventLoop.standard()).launch(setup).join();
 
                     System.out.println("That's all, folks!");
                 });

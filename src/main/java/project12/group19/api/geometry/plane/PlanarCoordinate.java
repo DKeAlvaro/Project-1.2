@@ -4,8 +4,12 @@ public interface PlanarCoordinate {
     double getX();
     double getY();
 
+    default double distanceTo(double x, double y) {
+        return Math.sqrt(Math.pow(getX() - x, 2) + Math.pow(getY() - y, 2));
+    }
+
     default double distanceTo(PlanarCoordinate other) {
-        return Math.sqrt(Math.pow(getX() - other.getX(), 2) + Math.pow(getY() - other.getY(), 2));
+        return distanceTo(other.getX(), other.getY());
     }
 
     default PlanarCoordinate translate(double x, double y) {

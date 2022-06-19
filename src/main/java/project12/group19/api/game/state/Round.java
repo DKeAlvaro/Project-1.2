@@ -1,6 +1,6 @@
 package project12.group19.api.game.state;
 
-import project12.group19.api.domain.Player;
+import project12.group19.api.domain.Hit;
 import project12.group19.api.game.BallStatus;
 import project12.group19.api.geometry.plane.PlanarCoordinate;
 
@@ -31,7 +31,7 @@ public interface Round {
     /**
      * @return Hit made by the player.
      */
-    Player.Hit getHit();
+    Hit getHit();
 
     /**
      * @return Status of the ball at the round termination.
@@ -42,7 +42,7 @@ public interface Round {
         return Optional.ofNullable(getEndingPosition());
     }
 
-    default Optional<Player.Hit> tryGetHit() {
+    default Optional<Hit> tryGetHit() {
         return Optional.ofNullable(getHit());
     }
 
@@ -58,7 +58,7 @@ public interface Round {
             int index,
             PlanarCoordinate startingPosition,
             PlanarCoordinate endingPosition,
-            Player.Hit hit,
+            Hit hit,
             BallStatus terminationReason
     ) implements Round {
         @Override
@@ -77,7 +77,7 @@ public interface Round {
         }
 
         @Override
-        public Player.Hit getHit() {
+        public Hit getHit() {
             return hit;
         }
 
