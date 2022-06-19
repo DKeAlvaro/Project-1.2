@@ -181,7 +181,7 @@ public interface Item extends PlanarShape {
         }
 
         public static Target create(PlanarCoordinate coordinate, double radius, Map<Object, Object> metadata) {
-            return new Target(PlanarShape.Ellipse.centered(coordinate, radius, radius), metadata);
+            return new Target(PlanarShape.Ellipse.centered(coordinate, radius * 2, radius * 2), metadata);
         }
 
         public static Target create(PlanarCoordinate coordinate, double radius) {
