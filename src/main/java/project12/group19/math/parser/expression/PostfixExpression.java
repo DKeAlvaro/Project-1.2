@@ -10,6 +10,9 @@ import java.util.OptionalDouble;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
+/**
+ * TODO: implement {@link project12.group19.api.math.expression.Expression} interface
+ */
 public record PostfixExpression(List<Component> components, CharSequence source) {
     public PostfixExpression(List<Component> components) {
         this(components, null);

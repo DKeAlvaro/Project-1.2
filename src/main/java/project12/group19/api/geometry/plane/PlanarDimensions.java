@@ -4,20 +4,20 @@ public interface PlanarDimensions {
     double getWidth();
     double getHeight();
 
-    default PlanarDimensions scale(double widthMultiplier, double heightMultiplier) {
-        return new Standard(getWidth() * widthMultiplier, getHeight() * heightMultiplier);
+    default double getHalfWidth() {
+        return getWidth() / 2;
     }
 
-    default PlanarDimensions scale(double multiplier) {
-        return scale(multiplier, multiplier);
+    default double getHalfHeight() {
+        return getHeight() / 2;
     }
 
-    default PlanarDimensions scaleWidth(double multiplier) {
-        return scale(multiplier, 1);
+    default double getSmallerDimension() {
+        return Math.min(getWidth(), getHeight());
     }
 
-    default PlanarDimensions scaleHeight(double multiplier) {
-        return scale(1, multiplier);
+    default double getLargerDimension() {
+        return Math.max(getWidth(), getHeight());
     }
 
     static PlanarDimensions create(double width, double height) {

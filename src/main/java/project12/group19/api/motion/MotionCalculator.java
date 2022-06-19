@@ -17,10 +17,10 @@ public interface MotionCalculator {
     /**
      * A dummy implementation that would make the ball rotate around origin
      */
-    class Circlular implements MotionCalculator {
+    class Circular implements MotionCalculator {
         private final PlanarCoordinate origin;
 
-        public Circlular(PlanarCoordinate origin) {
+        public Circular(PlanarCoordinate origin) {
             this.origin = origin;
         }
 
@@ -40,7 +40,7 @@ public interface MotionCalculator {
         }
 
         public static MotionCalculator rooted() {
-            return new Circlular(PlanarCoordinate.origin());
+            return new Circular(PlanarCoordinate.origin());
         }
     }
 }

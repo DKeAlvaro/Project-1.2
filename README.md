@@ -136,26 +136,28 @@ circular surfaces.
 
 `[identifier]` may be any arbitrary string, including numbers.
 
-| Key                                         | Aliases       | Default | Description                                                                            |
-|:--------------------------------------------|:--------------|:--------|:---------------------------------------------------------------------------------------|
-| course.obstacles.trees.[identifier].x       |               |         | Tree center x-axis component                                                           |
-| course.obstacles.trees.[identifier].y       |               |         | Tree center y-axis component                                                           |
-| course.obstacles.sandpits.[identifier].x    |               |         | Sandpit center x-axis component                                                        |
-| course.obstacles.sandpits.[identifier].y    |               |         | Sandpit center y-axis component                                                        |
-| course.obstacles.lakes.[identifier].start.x | startingLakeX |         | Lake top-left x-axis component, to be deprecated in favor of center + radius style     |
-| course.obstacles.lakes.[identifier].start.y | endingLakeX   |         | Lake top-left y-axis component, to be deprecated in favor of center + radius style     |
-| course.obstacles.lakes.[identifier].end.x   | startingLakeY |         | Lake bottom-right x-axis component, to be deprecated in favor of center + radius style |
-| course.obstacles.lakes.[identifier].end.y   | endingLakeY   |         | Lake bottom-right y-axis component, to be deprecated in favor of center + radius style |
+| Key                                               | Aliases       | Default | Description                                                                            |
+|:--------------------------------------------------|:--------------|:--------|:---------------------------------------------------------------------------------------|
+| course.items.trees.instances.[identifier].x       |               |         | Tree center x-axis component                                                           |
+| course.items.trees.instances..[identifier].y      |               |         | Tree center y-axis component                                                           |
+| course.items.sandpits.instances.[identifier].x    |               |         | Sandpit center x-axis component                                                        |
+| course.items.sandpits.instances.[identifier].y    |               |         | Sandpit center y-axis component                                                        |
+| course.items.lakes.instances.[identifier].start.x | startingLakeX |         | Lake top-left x-axis component, to be deprecated in favor of center + radius style     |
+| course.items.lakes.instances.[identifier].start.y | endingLakeX   |         | Lake top-left y-axis component, to be deprecated in favor of center + radius style     |
+| course.items.lakes.instances.[identifier].end.x   | startingLakeY |         | Lake bottom-right x-axis component, to be deprecated in favor of center + radius style |
+| course.items.lakes.instances.[identifier].end.y   | endingLakeY   |         | Lake bottom-right y-axis component, to be deprecated in favor of center + radius style |
 
 
 ### Engine options
 
-| Key                    | Aliases   | Default | Description                                                                                                                                                                                               |
-|:-----------------------|:----------|:--------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| engine.noise.velocity  |           |         | Maximum noise added to or subtracted from hit velocity, as a fraction of actual velocity                                                                                                                  |
-| engine.noise.direction |           |         | Maximum noise added to or subtracted from hit direction, as a fraction of pi (so 1.0 would allow full circle from -pi to + pi)                                                                            |
-| engine.noise.value     |           |         | Allows to set both of the above as one value, acts as fallback (i.e. if one of the above is not set, engine will look for this value)                                                                     |
-| engine.rates.tick      |           | 100     | Number of times per second engine updates its state                                                                                                                                                       |
-| engine.rates.refresh   |           | 60      | Number of times per second state is propagated to UI                                                                                                                                                      |
-| engine.rates.scale     | timeScale | 1.0     | Relative time scale, forces engine to simulate this amount of time in one time unit. For example, if set to 1.5, engine will simulate 1.5 speed (events would happen 1.5 times faster than in real world) |
+| Key                                  | Aliases | Default | Description                                                                                                                                                                               |
+|:-------------------------------------|:--------|:--------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| engine.physics.acceleration          |         | basic   | Physics implementation to use. Possible options are "basic" and "advanced".                                                                                                               |
+| engine.physics.ode-solver            |         | euler   | ODE solver selection. When used with GUI, the latter will overwrite this value. Possible options are "euler", "rk2" and "rk4".                                                            |
+| engine.noise.velocity                |         |         | Maximum noise added to or subtracted from hit velocity, as a fraction of actual velocity                                                                                                  |
+| engine.noise.direction               |         |         | Maximum noise added to or subtracted from hit direction, as a fraction of pi (so 1.0 would allow full circle from -pi to + pi)                                                            |
+| engine.noise.value                   |         |         | Allows to set both of the above as one value, acts as fallback (i.e. if one of the above is not set, engine will look for this value)                                                     |
+| engine.timing.step                   |         | 0.01    | Simulated timestep between two calculations, in seconds.                                                                                                                                  |
+| engine.timing.intervals.computation  |         |         | Time interval between two calculations, in seconds. By default, when omitted, it is calculated as {step} seconds.                                                                         |
+| engine.timing.intervals.notification |         | 0.016   | Time interval between updates to GUI, in seconds. Please note that GUI updates are linked to computations and only done as end of computation operation, thus this number is approximate. |
 

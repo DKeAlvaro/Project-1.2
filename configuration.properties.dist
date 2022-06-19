@@ -18,12 +18,14 @@ course.target.y = 1
 # course.ball.velocity.x = 0
 # course.ball.velocity.y = 0
 
-# course.obstacles.trees.1.x = 0.25
-# course.obstacles.trees.1.y = 1.5
-# course.obstacles.trees.2.x = 5
-# course.obstacles.trees.2.y = 5
-# course.obstacles.sandpits.1.x = -3
-# course.obstacles.sandpits.1.y = 2
+# course.items.trees.instances.1.x = 0.25
+# course.items.trees.instances.1.y = 1.5
+# course.items.trees.instances.2.x = 5
+# course.items.trees.instances.2.y = 5
+# course.items.sandpits.instances.1.x = -3
+# course.items.sandpits.instances.1.y = 2
+# course.items.sandpits.instances.1.width = 1.5
+# course.items.sandpits.instances.1.height = 0.75
 
 # engine.rates.tick = 100
 # engine.rates.refresh = 60
@@ -32,3 +34,6 @@ course.target.y = 1
 # engine.noise.velocity =
 # engine.noise.direction =
 # engine.noise.value =
+
+# engine.physics.acceleration = basic
+#   possible options are `basic` and `advanced`

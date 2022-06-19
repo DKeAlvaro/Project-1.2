@@ -8,7 +8,6 @@ import project12.group19.api.motion.MotionState;
 import project12.group19.api.motion.Solver;
 import project12.group19.api.motion.StopCondition;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.*;
