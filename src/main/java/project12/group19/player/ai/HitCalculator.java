@@ -5,9 +5,9 @@ import project12.group19.api.domain.State;
 import project12.group19.api.game.Configuration;
 import project12.group19.api.geometry.plane.PlanarCoordinate;
 import project12.group19.api.geometry.space.Hole;
+import project12.group19.api.motion.MotionHandler;
 import project12.group19.api.motion.MotionState;
-import project12.group19.api.motion.Solver;
-import project12.group19.incubating.HillClimbing3;
+import project12.group19.incubating.HillClimbingVersionGamma;
 
 import java.io.FileNotFoundException;
 import java.util.List;
@@ -82,17 +82,17 @@ public interface HitCalculator {
         private static final double NOISE_PERCENTAGE = 0;
         private static final Random NOISE = new Random();
         private static Configuration configuration;
-        private final Solver solver;
+        private final MotionHandler motionHandler;
 
-        public Directed(Solver solver, Configuration configuration) {
-            this.solver = solver;
+        public Directed(MotionHandler motionHandler, Configuration configuration) {
+            this.motionHandler = motionHandler;
             this.configuration = configuration;
 
         }
 
         @Override
         public Optional<Hit> shootAt(State state, PlanarCoordinate target, double tolerance) throws FileNotFoundException {
-            return hillClimbing(solver, configuration, state);
+            return hillClimbing(motionHandler, configuration, state);
         }
 
         private static double noisify(double value) {
@@ -103,7 +103,7 @@ public interface HitCalculator {
         private static Optional<Hit> ruleBased(State state){
             MotionState ball = state.getBallState();
             Hole hole = state.getCourse().getHole();
-            double force = HillClimbing3.getDistance(hole.getxHole(), ball.getXPosition(), hole.getyHole(), ball.getYPosition());
+            double force = HillClimbingVersionGamma.getDistance(hole.getxHole(), ball.getXPosition(), hole.getyHole(), ball.getYPosition());
             double xPath = hole.getxHole() - ball.getXPosition();
             double yPath = hole.getyHole() - ball.getYPosition();
             double angle = Math.atan2(yPath, xPath);
@@ -112,10 +112,10 @@ public interface HitCalculator {
             return Optional.of(Hit.create(xVelocity, yVelocity));
         }
 
-        private static Optional<Hit> hillClimbing(Solver solver, Configuration configuration, State state) throws FileNotFoundException {
-            HillClimbing3 hillClimbing3 = new HillClimbing3(solver, configuration);
+        private static Optional<Hit> hillClimbing(MotionHandler motionHandler, Configuration configuration, State state) throws FileNotFoundException {
+            HillClimbingVersionGamma hillClimbingVersionGamma = new HillClimbingVersionGamma(motionHandler, configuration);
             System.out.println();
-            return hillClimbing3.hillClimbing(state.getBallState().getXPosition(), state.getBallState().getYPosition());
+            return hillClimbingVersionGamma.hillClimbing(state.getBallState().getXPosition(), state.getBallState().getYPosition());
         }
 
     }

@@ -7,10 +7,7 @@ import project12.group19.api.game.HitMutator;
 import project12.group19.api.game.Rules;
 import project12.group19.api.game.configuration.EngineConfiguration;
 import project12.group19.api.geometry.plane.PlanarRectangle;
-import project12.group19.api.motion.AccelerationCalculator;
-import project12.group19.api.motion.AdvancedAccelerationCalculator;
-import project12.group19.api.motion.BasicAccelerationCalculator;
-import project12.group19.api.motion.Solver;
+import project12.group19.api.motion.*;
 import project12.group19.domain.StandardSurface;
 import project12.group19.engine.motion.StandardMotionHandler;
 import project12.group19.math.ode.Euler;
@@ -51,7 +48,7 @@ public class EngineFactory {
         );
     }
 
-    public static Solver createSolver(Configuration configuration) {
+    public static MotionCalculator createMotionCalculator(Configuration configuration) {
         EngineConfiguration.Physics physics = configuration.getEngineConfiguration().getPhysics();
         return new Solver(
                 physics.getOdeSolver()
@@ -61,6 +58,14 @@ public class EngineFactory {
                 physics.getAccelerationCalculator()
                         .map(EngineFactory::resolveAccelerationCalculator)
                         .orElse(new BasicAccelerationCalculator())
+        );
+    }
+
+    public static MotionHandler createMotionHandler(Configuration configuration) {
+        return new StandardMotionHandler(
+                createCourse(configuration),
+                createRules(configuration),
+                createMotionCalculator(configuration)
         );
     }
 
@@ -76,21 +81,24 @@ public class EngineFactory {
         );
     }
 
-    public static Setup createSetup(Configuration configuration, Player player, List<Consumer<State>> listeners) {
-        Course course = createCourse(configuration);
-
+    public static Rules createRules(Configuration configuration) {
         PlanarRectangle field = PlanarRectangle.create(
                 -configuration.getDimensions().getWidth() / 2,
                 -configuration.getDimensions().getHeight() / 2,
                 configuration.getDimensions()
         );
 
-        Rules rules = new Rules.Standard(
+        return new Rules.Standard(
                 OptionalInt.of(3),
                 OptionalInt.empty(),
                 field,
                 true
         );
+    }
+
+    public static Setup createSetup(Configuration configuration, Player player, List<Consumer<State>> listeners) {
+        Course course = createCourse(configuration);
+        Rules rules = createRules(configuration);
 
         // TODO this is a bit dirty. Continue to use optionals instead of zeros.
         double velocityNoiseRange = configuration.getEngineConfiguration().getNoise().getVelocityRange().orElse(0);

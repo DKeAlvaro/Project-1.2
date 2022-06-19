@@ -1,15 +1,19 @@
 package project12.group19.cli;
 
+import project12.group19.api.domain.Course;
 import project12.group19.api.domain.Player;
 import project12.group19.api.engine.Setup;
 import project12.group19.api.game.Configuration;
+import project12.group19.api.game.Rules;
 import project12.group19.api.game.configuration.EngineConfiguration;
-import project12.group19.api.motion.Solver;
+import project12.group19.api.motion.MotionCalculator;
+import project12.group19.api.motion.MotionHandler;
 import project12.group19.api.support.ConfigurationReader;
 import project12.group19.engine.EngineFactory;
 import project12.group19.engine.GameHandler;
 import project12.group19.engine.ScheduledEventLoop;
-import project12.group19.incubating.HillClimbing3;
+import project12.group19.engine.motion.StandardMotionHandler;
+import project12.group19.incubating.HillClimbingVersionGamma;
 import project12.group19.incubating.Reader;
 import project12.group19.infrastructure.cli.Argument;
 import project12.group19.infrastructure.cli.Command;
@@ -45,13 +49,16 @@ public class ExperimentCommands {
                                     )
                             )
                     );
-                    Solver solver = EngineFactory.createSolver(configuration);
+                    MotionCalculator solver = EngineFactory.createMotionCalculator(configuration);
+                    Course course = EngineFactory.createCourse(configuration);
+                    Rules rules = EngineFactory.createRules(configuration);
 
                     for (int i = 0; i < invocation.tryGetOptionValue("iterations").map(Integer::parseInt).orElse(100); i++) {
                         System.out.println();
-                        System.out.println("--- Beginning simulation ---");
+                        System.out.println("--- Beginning simulation #" + i + " ---");
                         String bot = invocation.tryGetOptionValue("bot").orElse("naive");
-                        HillClimbing3 base = new HillClimbing3(solver, configuration);
+                        MotionHandler motionHandler = new StandardMotionHandler(course, rules, solver);
+                        HillClimbingVersionGamma base = new HillClimbingVersionGamma(motionHandler, configuration);
                         Player player = switch (bot) {
                             case "naive" -> new NaiveBot(new HitCalculator.Adjusting());
                             case "hill-climbing" -> state -> base.hillClimbing(state.getBallState().getXPosition(), state.getBallState().getYPosition());
