@@ -2,13 +2,13 @@ package project12.group19.engine;
 
 import project12.group19.api.domain.Hit;
 import project12.group19.api.domain.State;
-import project12.group19.api.engine.Engine;
-import project12.group19.api.engine.Setup;
-import project12.group19.api.engine.core.EventLoop;
+import project12.group19.api.game.Engine;
+import project12.group19.api.game.Setup;
+import project12.group19.api.engine.EventLoop;
 import project12.group19.api.game.lifecycle.GameStats;
 import project12.group19.api.game.state.Round;
-import project12.group19.api.motion.MotionResult;
-import project12.group19.api.motion.MotionState;
+import project12.group19.api.physics.motion.MotionResult;
+import project12.group19.api.physics.motion.MotionState;
 
 import java.io.FileNotFoundException;
 import java.util.Optional;
@@ -35,44 +35,52 @@ public class GameHandler implements Engine {
         public StateWrapper failed() {
             return next(state, true);
         }
+
+        public static StateWrapper create(State state) {
+            return new StateWrapper(state, 0, false);
+        }
     }
 
     @Override
     public CompletableFuture<GameStats> launch(Setup setup) {
         MotionState initialMotion = setup.getConfiguration().getInitialMotion();
+        Setup.Timing timing = setup.getTiming();
+        double computationToNotificationRatio = timing.getComputationInterval() / (double) timing.getNotificationInterval();
         EventLoop.Task<StateWrapper> task = handle -> {
             State state;
             try {
-                state = tick(handle.state, setup);
+                state = tick(handle.state(), setup);
             } catch (RuntimeException | FileNotFoundException e) {
                 e.printStackTrace();
                 return EventLoop.Iteration.terminal(handle.failed());
             }
 
-            // todo: notify only on corresponding ticks
-            for (Consumer<State> listener : setup.getListeners()) {
-                try {
-                    listener.accept(state);
-                } catch (RuntimeException e) {
-                    e.printStackTrace();
+            // The notifications are ran only when rounded-down current
+            // number of ticks divided by ratio is different from
+            // previous one
+            // this makes notifications run only the first time number
+            // of ticks divided by ratio gets bigger than some specific
+            // number
+            long notificationsPreviousTick = (long) ((handle.ticks() - 1) / computationToNotificationRatio);
+            long notificationsThisTick = (long) (handle.ticks() / computationToNotificationRatio);
+            if (notificationsPreviousTick != notificationsThisTick) {
+                for (Consumer<State> listener : setup.getListeners()) {
+                    try {
+                        listener.accept(state);
+                    } catch (RuntimeException e) {
+                        System.out.println("Error in listener " + listener + ": " + e.getMessage());
+                        e.printStackTrace();
+                    }
                 }
             }
 
             return EventLoop.Iteration.create(handle.next(state), state.isTerminal());
         };
 
-        StateWrapper bootstrap = new StateWrapper(
-                State.initial(initialMotion, setup.getCourse(), setup.getRules()),
-                0,
-                false
-        );
+        StateWrapper bootstrap = StateWrapper.create(State.initial(initialMotion, setup.getCourse(), setup.getRules()));
 
-        return executor.submit(task, bootstrap, setup.getTiming().getComputationInterval(), TimeUnit.NANOSECONDS)
+        return executor.submit(task, bootstrap, timing.getComputationInterval(), TimeUnit.NANOSECONDS)
                 .thenApply(handle -> new GameStats.Standard(handle.state().getRounds(), handle.exceptional()));
-    }
-
-    private static GameStats toStats(State state, boolean endedExceptionally) {
-        return new GameStats.Standard(state.getRounds(), endedExceptionally);
     }
 
     private State tick(State current, Setup setup) throws FileNotFoundException {

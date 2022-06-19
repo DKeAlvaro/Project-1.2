@@ -1,42 +1,31 @@
 package project12.group19.api.game;
 
-import project12.group19.api.domain.Course;
 import project12.group19.api.domain.Item;
 import project12.group19.api.game.configuration.EngineConfiguration;
 import project12.group19.api.geometry.plane.PlanarDimensions;
-import project12.group19.api.geometry.space.HeightProfile;
-import project12.group19.api.geometry.space.Hole;
-import project12.group19.api.motion.Friction;
-import project12.group19.api.motion.MotionState;
-import project12.group19.incubating.WaterLake;
+import project12.group19.api.physics.motion.Friction;
+import project12.group19.api.physics.motion.MotionState;
 
 import java.util.Set;
 
 public interface Configuration {
     String getSurface();
-
-    /**
-     * @deprecated use {@link Course}
-     */
-    @Deprecated
-    HeightProfile getHeightProfile();
     Set<Item> getItems();
     MotionState getInitialMotion();
     Friction getGroundFriction();
     Friction getSandFriction();
-    Hole getHole();
+    Item.Target getTarget();
     PlanarDimensions getDimensions();
     EngineConfiguration getEngineConfiguration();
 
     default Configuration withEngineConfiguration(EngineConfiguration configuration) {
         return new Standard(
                 getSurface(),
-                getHeightProfile(),
                 getItems(),
                 getInitialMotion(),
                 getGroundFriction(),
                 getSandFriction(),
-                getHole(),
+                getTarget(),
                 getDimensions(),
                 configuration
         );
@@ -44,67 +33,17 @@ public interface Configuration {
 
     record Standard(
             String surface,
-            HeightProfile heightProfile,
             Set<Item> obstacles,
             MotionState initialMotion,
             Friction groundFriction,
             Friction sandFriction,
-            Hole hole,
+            Item.Target target,
             PlanarDimensions dimensions,
             EngineConfiguration engineConfiguration
     ) implements Configuration {
-        public Standard(
-                String surface,
-                HeightProfile heightProfile,
-                Set<Item> items,
-                MotionState initialMotion,
-                Friction groundFriction,
-                Friction sandFriction,
-                Hole hole,
-                PlanarDimensions dimensions
-        ) {
-            this(
-                    surface,
-                    heightProfile,
-                    items,
-                    initialMotion,
-                    groundFriction,
-                    sandFriction,
-                    hole,
-                    dimensions,
-                    EngineConfiguration.defaults()
-            );
-        }
-        public Standard(
-                String surface,
-                HeightProfile heightProfile,
-                Set<Item> items,
-                MotionState initialMotion,
-                Friction groundFriction,
-                Friction sandFriction,
-                Hole hole,
-                Set<WaterLake> lakes
-        ) {
-            this(
-                    surface,
-                    heightProfile,
-                    items,
-                    initialMotion,
-                    groundFriction,
-                    sandFriction,
-                    hole,
-                    PlanarDimensions.create(50, 50)
-            );
-        }
-
         @Override
         public String getSurface() {
             return surface;
-        }
-
-        @Override
-        public HeightProfile getHeightProfile() {
-            return heightProfile;
         }
 
         @Override
@@ -128,8 +67,8 @@ public interface Configuration {
         }
 
         @Override
-        public Hole getHole(){
-            return hole;
+        public Item.Target getTarget(){
+            return target;
         }
 
         @Override

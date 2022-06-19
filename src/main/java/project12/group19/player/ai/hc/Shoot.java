@@ -1,7 +1,5 @@
 package project12.group19.player.ai.hc;
 
-import project12.group19.incubating.Comb;
-
 import static project12.group19.player.ai.hc.HillClimbingBot.*;
 
 public class Shoot {
@@ -25,7 +23,7 @@ public class Shoot {
         this.inHole = false;
 
         getShotDistanceToHole(this);
-        combs.add(new Comb(this.getXDir(), this.getYDir(), this.getDistanceToHole()));
+        combinations.add(new Combination(this.getXDir(), this.getYDir(), this.getDistanceToHole()));
         alreadyShot.add(this);
         iterations++;
 

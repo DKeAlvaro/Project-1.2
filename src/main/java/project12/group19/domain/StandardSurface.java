@@ -2,11 +2,10 @@ package project12.group19.domain;
 
 import project12.group19.api.domain.Item;
 import project12.group19.api.domain.Surface;
-import project12.group19.api.motion.Friction;
+import project12.group19.api.physics.motion.Friction;
 import project12.group19.math.parser.expression.PostfixExpression;
 
 import java.util.Map;
-import java.util.OptionalDouble;
 import java.util.Set;
 
 public record StandardSurface(
@@ -16,13 +15,12 @@ public record StandardSurface(
 ) implements Surface {
     @Override
     public double getHeight(double x, double y) {
-        OptionalDouble result = profile.resolve(Map.of("x", x, "y", y)).calculate();
-
-        if (result.isEmpty()) {
-            throw new IllegalArgumentException("Surface height is undefined at point x=" + x + ", y=" + y);
-        }
-
-        return result.getAsDouble();
+        return profile.resolve(Map.of("x", x, "y", y))
+                .calculate()
+                .orElseThrow(() -> {
+                    String message = "Surface height is undefined at point x=" + x + ", y=" + y;
+                    return new IllegalArgumentException(message);
+                });
     }
 
     @Override

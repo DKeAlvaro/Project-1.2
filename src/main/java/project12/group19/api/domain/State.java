@@ -5,7 +5,7 @@ import project12.group19.api.game.Rules;
 import project12.group19.api.game.state.GameStatus;
 import project12.group19.api.game.state.Round;
 import project12.group19.api.geometry.plane.PlanarCoordinate;
-import project12.group19.api.motion.MotionState;
+import project12.group19.api.physics.motion.MotionState;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -2,6 +2,7 @@ package project12.group19.api.game;
 
 import project12.group19.api.domain.Hit;
 
+import java.util.OptionalDouble;
 import java.util.Random;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.UnaryOperator;
@@ -16,19 +17,23 @@ public interface HitMutator extends UnaryOperator<Hit> {
         return Identity.INSTANCE;
     }
 
-    static HitMutator noise(Random random, DoubleUnaryOperator distribution, double velocityRange, double directionRange) {
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    static HitMutator noise(Random random, DoubleUnaryOperator distribution, OptionalDouble velocityRange, OptionalDouble directionRange) {
         return new Noise(random, distribution, velocityRange, directionRange);
     }
 
-    static HitMutator noise(Random random, double velocityRange, double directionRange) {
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    static HitMutator noise(Random random, OptionalDouble velocityRange, OptionalDouble directionRange) {
         return noise(random, DoubleUnaryOperator.identity(), velocityRange, directionRange);
     }
 
-    static HitMutator noise(DoubleUnaryOperator distribution, double velocityRange, double directionRange) {
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    static HitMutator noise(DoubleUnaryOperator distribution, OptionalDouble velocityRange, OptionalDouble directionRange) {
         return noise(new Random(), distribution, velocityRange, directionRange);
     }
 
-    static HitMutator noise(double velocityRange, double directionRange) {
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    static HitMutator noise(OptionalDouble velocityRange, OptionalDouble directionRange) {
         return noise(DoubleUnaryOperator.identity(), velocityRange, directionRange);
     }
 
@@ -82,8 +87,9 @@ public interface HitMutator extends UnaryOperator<Hit> {
      * result in direction within -pi/4..pi/4 sector with original angle
      * in center).
      */
-    record Noise(Random random, DoubleUnaryOperator distribution, double velocityRange, double directionRange) implements HitMutator {
-        public Noise(Random random, double velocityRange, double directionRange) {
+    record Noise(Random random, DoubleUnaryOperator distribution, OptionalDouble velocityRange, OptionalDouble directionRange) implements HitMutator {
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+        public Noise(Random random, OptionalDouble velocityRange, OptionalDouble directionRange) {
             this(random, DoubleUnaryOperator.identity(), velocityRange, directionRange);
         }
 
@@ -95,24 +101,24 @@ public interface HitMutator extends UnaryOperator<Hit> {
 
         @Override
         public Hit apply(Hit hit) {
-            if (velocityRange <= 0 && directionRange <= 0) {
+            if (velocityRange.isEmpty() && directionRange.isEmpty()) {
                 return hit;
             }
 
             double velocity = hit.getAbsoluteVelocity();
             double angle = hit.getVelocityAngle();
 
-            if (velocityRange > 0) {
-                double offset = velocityRange * next();
+            if (velocityRange.isPresent()) {
+                double offset = velocityRange.getAsDouble() * next();
                 velocity = velocity * (1 + offset);
             }
 
-            if (directionRange > 0) {
-                double deflection = Math.PI * directionRange * next();
+            if (directionRange.isPresent()) {
+                double deflection = Math.PI * directionRange.getAsDouble() * next();
                 angle = angle + deflection;
             }
 
-            return Hit.polar(velocity, angle);
+            return Hit.polar(velocity, angle, hit.getSimulations());
         }
     }
 
@@ -131,7 +137,7 @@ public interface HitMutator extends UnaryOperator<Hit> {
             }
 
             double multiplier = limit / velocity;
-            return Hit.create(hit.scaleVelocity(multiplier));
+            return Hit.create(hit.scaleVelocity(multiplier), hit.getSimulations());
         }
     }
 }

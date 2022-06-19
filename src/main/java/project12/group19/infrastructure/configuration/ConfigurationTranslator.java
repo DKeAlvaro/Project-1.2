@@ -6,9 +6,8 @@ import project12.group19.api.game.configuration.EngineConfiguration;
 import project12.group19.api.geometry.plane.PlanarCoordinate;
 import project12.group19.api.geometry.plane.PlanarDimensions;
 import project12.group19.api.geometry.plane.PlanarShape;
-import project12.group19.api.geometry.space.Hole;
-import project12.group19.api.motion.Friction;
-import project12.group19.api.motion.MotionState;
+import project12.group19.api.physics.motion.Friction;
+import project12.group19.api.physics.motion.MotionState;
 import project12.group19.math.parser.Parser;
 import project12.group19.math.parser.component.ComponentRegistry;
 import project12.group19.math.parser.expression.PostfixExpression;
@@ -158,26 +157,6 @@ public class ConfigurationTranslator {
         PostfixExpression expression = new Parser(ComponentRegistry.standard()).parse(surface);
         return new Configuration.Standard(
                 surface,
-                (x, y) -> {
-                    boolean withinLake = items.stream()
-                            .filter(candidate -> candidate.hasCollisionReaction(Item.CollisionReaction.RESET))
-                            .anyMatch(candidate -> candidate.includes(x, y));
-
-                    // TODO remove completely
-                    if (withinLake) {
-                        return -1;
-                    }
-                    PostfixExpression resolved = expression.resolve(Map.of("x", x, "y", y));
-                    return resolved.calculate().orElseThrow(() -> {
-                        String message = String.format(
-                                "Height profile function %s is not defined in point x=.4%f, y=.4%f",
-                                resolved,
-                                x,
-                                y
-                        );
-                        return new IllegalArgumentException(message);
-                    });
-                },
                 items,
                 MotionState.create(
                         container.getDouble(List.of("vx", "course.ball.velocity.x"), 0.0),
@@ -190,7 +169,7 @@ public class ConfigurationTranslator {
                         container.getDouble(List.of("muk", "course.friction.default.kinetic"), DEFAULT_KINETIC_FRICTION)
                 ),
                 sandFriction,
-                new Hole(
+                Item.Target.create(
                         container.getDouble("xt", "course.target.x"),
                         container.getDouble("yt", "course.target.y"),
                         container.getDouble(List.of("r", "course.target.radius"), 0.1)

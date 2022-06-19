@@ -1,7 +1,7 @@
 package project12.group19.engine;
 
 import org.junit.jupiter.api.Test;
-import project12.group19.api.engine.core.EventLoop;
+import project12.group19.api.engine.EventLoop;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
