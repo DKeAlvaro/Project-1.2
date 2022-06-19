@@ -17,6 +17,7 @@ import java.util.*;
 
 
 public class HillClimbingBot implements Player {
+    public static final double SIMULATION_TIME_LIMIT = 10.0;
     static MotionHandler motionHandler;
     static HeightProfile profile;
     static Friction friction;
@@ -72,8 +73,16 @@ public class HillClimbingBot implements Player {
             if(iterations != 0){
                 currentShot = createShot(minAngle, maxAngle, startingX, startingY);
             }
-            while (!currentShot.hasConverged()) {
-                currentShot = optimiseShot(currentShot);
+
+            Shoot optimized = optimiseShot(currentShot);
+            while (optimized.getDistanceToHole() < currentShot.getDistanceToHole()) {
+                currentShot = optimized;
+
+                if (currentShot.inHole()) {
+                    break;
+                }
+
+                optimized = optimiseShot(currentShot);
             }
             System.out.println("Iterations: "+iterations);
         }
@@ -142,6 +151,14 @@ public class HillClimbingBot implements Player {
         }
     }
 
+    private static void updateDistance(PlanarCoordinate position, PlanarCoordinate target, Shoot shoot) {
+        double distance = position.distanceTo(target);
+
+        if (distance < shoot.getDistanceToHole()) {
+            setClosestDistances(shoot, position);
+        }
+    }
+
     public static void getShotDistanceToHole(Shoot shoot) {
         double xDir = shoot.getXDir();
         double yDir = shoot.getYDir();
@@ -149,28 +166,33 @@ public class HillClimbingBot implements Player {
         double startingY = shoot.getStartingY();
         MotionState initial = new MotionState.Standard(xDir, yDir, startingX, startingY);
         setClosestDistances(shoot, initial.getPosition());
+        PlanarCoordinate target = PlanarCoordinate.create(holeX, holeY);
 
         MotionResult snapshot = MotionResult.create(initial, BallStatus.MOVING);
 
-        do {
-            snapshot = motionHandler.next(snapshot.getState(), stepSize);
-
+        for (int i = 0; i < SIMULATION_TIME_LIMIT / stepSize; i++) {
             if (snapshot.getStatus().isFoulTrigger()) {
-                shoot.setInWater();
                 break;
             }
 
+            updateDistance(snapshot.getState().getPosition(), target, shoot);
+
             if (snapshot.getStatus().equals(BallStatus.SCORED)) {
                 shoot.setInHole();
+                break;
             }
 
-            updateDistances(shoot, snapshot.getState().getPosition());
-        } while (snapshot.getStatus().equals(BallStatus.MOVING));
+            if (snapshot.getStatus().equals(BallStatus.STOPPED)) {
+                break;
+            }
+
+            snapshot = motionHandler.next(snapshot.getState(), stepSize);
+        }
     }
 
     public static Shoot optimiseShot(Shoot shoot){
         double angleVar = 60;
-        double stepSize = 0.1;
+        double stepSize = 0.1 * Math.sqrt(shoot.getDistanceToHole());
         double initialXDir = shoot.getXDir();
         double initialYDir = shoot.getYDir();
         double startingX = shoot.getStartingX();

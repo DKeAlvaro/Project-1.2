@@ -93,7 +93,7 @@ public class Shoot {
     }
 
     public boolean hasConverged(){
-        return optimiseShot(this).getDistanceToHole() >= distanceToHole || this.inHole;
+        return inHole || optimiseShot(this).getDistanceToHole() >= distanceToHole;
     }
 
     public double getAngle(){
