@@ -14,18 +14,7 @@ import java.util.function.Consumer;
 public interface Setup {
     Configuration getConfiguration();
 
-    /**
-     * @return Number of times per second engine calculates game state.
-     * Bigger values result in improved accuracy and increased CPU
-     * consumption.
-     */
-    int getDesiredTickRate();
-
-    /**
-     * @return Number of times per second UI should be refreshed. May be
-     * bounded by sane values (e.g. max 60Hz).
-     */
-    int getDesiredRefreshRate();
+    Timing getTiming();
 
     /**
      * @return Calculator used to update ball position.
@@ -42,12 +31,42 @@ public interface Setup {
     Rules getRules();
     HitMutator getHitMutator();
 
+    interface Timing {
+        double getStep();
+
+        /**
+         * @return Time between two computations, in nanoseconds
+         */
+        long getComputationInterval();
+
+        /**
+         * @return time between listeners are notified, in nanoseconds
+         */
+        long getNotificationInterval();
+
+        record Standard(double step, long computationInterval, long notificationInterval) implements Timing {
+            @Override
+            public double getStep() {
+                return step;
+            }
+
+            @Override
+            public long getComputationInterval() {
+                return computationInterval;
+            }
+
+            @Override
+            public long getNotificationInterval() {
+                return notificationInterval;
+            }
+        }
+    }
+
     record Standard(
             Configuration configuration,
             Course course,
             Rules rules,
-            int desiredTickRate,
-            int desiredRefreshRate,
+            Timing timing,
             MotionHandler motionHandler,
             Player player,
             HitMutator hitMutator,
@@ -59,13 +78,8 @@ public interface Setup {
         }
 
         @Override
-        public int getDesiredTickRate() {
-            return desiredTickRate;
-        }
-
-        @Override
-        public int getDesiredRefreshRate() {
-            return desiredRefreshRate;
+        public Timing getTiming() {
+            return timing;
         }
 
         @Override

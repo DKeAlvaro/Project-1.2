@@ -4,19 +4,29 @@ public enum BallStatus {
     /**
      * Ball is being positioned by player
      */
-    POSITIONING,
-    MOVING,
-    STOPPED,
+    POSITIONING(false),
+    MOVING(false),
+    STOPPED(false),
     /**
      * Ball ended up in water.
      */
-    DROWNED,
+    DROWNED(true),
     /**
      * Ball fell off the field.
      */
-    ESCAPED,
+    ESCAPED(true),
     /**
      * The hole was hit
      */
-    SCORED
+    SCORED(false);
+
+    private final boolean foulTrigger;
+
+    BallStatus(boolean foulTrigger) {
+        this.foulTrigger = foulTrigger;
+    }
+
+    public boolean isFoulTrigger() {
+        return foulTrigger;
+    }
 }

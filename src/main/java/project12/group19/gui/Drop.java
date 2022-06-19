@@ -20,40 +20,36 @@ import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
-import project12.group19.api.domain.*;
+import project12.group19.api.domain.Player;
+import project12.group19.api.domain.State;
 import project12.group19.api.engine.Setup;
 import project12.group19.api.game.Configuration;
-import project12.group19.api.game.HitMutator;
-import project12.group19.api.game.Rules;
 import project12.group19.api.game.state.Round;
-import project12.group19.api.geometry.plane.PlanarRectangle;
 import project12.group19.api.motion.AccelerationCalculator;
 import project12.group19.api.motion.AdvancedAccelerationCalculator;
 import project12.group19.api.motion.BasicAccelerationCalculator;
 import project12.group19.api.motion.Solver;
-import project12.group19.domain.StandardSurface;
+import project12.group19.engine.EngineFactory;
 import project12.group19.engine.GameHandler;
-import project12.group19.engine.motion.StandardMotionHandler;
+import project12.group19.engine.StandardThreadFactory;
 import project12.group19.incubating.HillClimbing3;
 import project12.group19.math.ode.Euler;
 import project12.group19.math.ode.ODESolver;
 import project12.group19.math.ode.RK2;
 import project12.group19.math.ode.RK4;
-import project12.group19.math.parser.Parser;
-import project12.group19.math.parser.component.ComponentRegistry;
-import project12.group19.math.parser.expression.PostfixExpression;
 import project12.group19.player.ai.HitCalculator;
 import project12.group19.player.ai.NaiveBot;
 
 import java.io.FileNotFoundException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Drop extends ApplicationAdapter implements ApplicationListener {
     private static final Map<String, AccelerationCalculator> ACCELERATION_CALCULATORS = Map.of(
@@ -399,74 +395,12 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
             if (Gdx.input.isKeyPressed(Input.Keys.P)) {
                 launched = true;
 
-                ExecutorService containment = Executors.newSingleThreadExecutor(runnable -> {
-                    var thread = new Thread(runnable);
-                    thread.setDaemon(true);
-                    return thread;
-                });
+                ExecutorService containment = Executors.newSingleThreadExecutor(StandardThreadFactory.daemon("main-loop-"));
 
                 containment.submit(() -> {
-                    Item target = Item.Target.create(configuration.getHole().getPosition(), configuration.getHole().getRadius());
-                    Set<Item> items = Stream.concat(configuration.getItems().stream(), Stream.of(target)).collect(Collectors.toSet());
-                    Parser parser = new Parser(ComponentRegistry.standard());
-                    PostfixExpression expression = parser.parse(configuration.getSurface());
-                    Surface surface = new StandardSurface(
-                            expression,
-                            configuration.getGroundFriction(),
-                            configuration.getItems().stream()
-                                    .filter(item -> item instanceof Item.Overlay)
-                                    .map(Item.Overlay.class::cast)
-                                    .collect(Collectors.toSet())
-                    );
+                    Setup setup = EngineFactory.createSetup(configuration, bot, List.of(gameState::set));
 
-                    Course course = new Course.Standard(
-                            surface,
-                            configuration.getGroundFriction(),
-                            items
-                    );
-
-                    PlanarRectangle field = PlanarRectangle.create(
-                            -configuration.getDimensions().getWidth() / 2,
-                            -configuration.getDimensions().getHeight() / 2,
-                            configuration.getDimensions()
-                    );
-
-                    Rules rules = new Rules.Standard(
-                            OptionalInt.of(3),
-                            OptionalInt.empty(),
-                            field,
-                            true
-                    );
-
-                    // TODO this is a bit dirty. Continue to use optionals instead of zeros.
-                    double velocityNoiseRange = configuration.getNoise().getVelocityRange().orElse(0);
-                    double directionNoiseRange = configuration.getNoise().getDirectionRange().orElse(0);
-                    boolean useNoiseMutator = velocityNoiseRange > 0 || directionNoiseRange > 0;
-                    HitMutator hitMutator = useNoiseMutator ? HitMutator.noise(velocityNoiseRange, directionNoiseRange) : HitMutator.identity();
-
-                    Setup.Standard setup = new Setup.Standard(
-                            configuration,
-                            course,
-                            rules,
-                            configuration.getDesiredTickRate(),
-                            configuration.getDesiredRefreshRate(),
-                            new StandardMotionHandler(course, rules, new Solver(
-                                    solver,
-                                    course.getSurface(),
-                                    Optional.ofNullable(configuration.getAccelerationCalculator())
-                                            .map(ACCELERATION_CALCULATORS::get)
-                                            .orElseGet(() -> {
-                                                String type = configuration.getAccelerationCalculator();
-                                                System.out.println("Unknown acceleration calculator type " + type + ", using basic one");
-                                                return new BasicAccelerationCalculator();
-                                            })
-                            )),
-                            bot,
-                            hitMutator,
-                            List.of(gameState::set)
-                    );
-
-                    new GameHandler().launch(setup);
+                    new GameHandler().launch(setup).join();
 
                     System.out.println("That's all, folks!");
                 });

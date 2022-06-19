@@ -2,6 +2,7 @@ package project12.group19.incubating;
 
 import project12.group19.api.domain.Item;
 import project12.group19.api.game.Configuration;
+import project12.group19.api.game.configuration.EngineConfiguration;
 import project12.group19.api.geometry.plane.PlanarCoordinate;
 import project12.group19.api.geometry.plane.PlanarDimensions;
 import project12.group19.api.geometry.plane.PlanarShape;
@@ -152,6 +153,11 @@ public class Reader implements ConfigurationReader {
         initialMotion = new MotionState.Standard(xSpeed, ySpeed, xPosition, yPosition);
         hole = new Hole(xHole, yHole, radius);
 
+        EngineConfiguration.Timing timing = new EngineConfiguration.Timing.Standard(
+                1 / (double) tickRate,
+                OptionalDouble.of(1 / (double) tickRate),
+                OptionalDouble.of(1 / (double) refreshRate)
+        );
         return new Configuration.Standard(
                 expression,
                 heightProfile,
@@ -169,12 +175,12 @@ public class Reader implements ConfigurationReader {
                 groundFriction,
                 sandFriction,
                 hole,
-                timescale,
                 field,
-                tickRate,
-                refreshRate,
-                "basic",
-                Configuration.Noise.empty()
+                new EngineConfiguration.Standard(
+                        timing,
+                        EngineConfiguration.Noise.empty(),
+                        EngineConfiguration.Physics.empty()
+                )
         );
     }
 
