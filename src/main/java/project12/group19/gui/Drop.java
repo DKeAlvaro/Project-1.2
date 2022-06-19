@@ -25,20 +25,22 @@ import project12.group19.api.domain.State;
 import project12.group19.api.engine.Setup;
 import project12.group19.api.game.Configuration;
 import project12.group19.api.game.state.Round;
-import project12.group19.api.motion.*;
+import project12.group19.api.motion.AccelerationCalculator;
+import project12.group19.api.motion.AdvancedAccelerationCalculator;
+import project12.group19.api.motion.BasicAccelerationCalculator;
+import project12.group19.api.motion.MotionHandler;
 import project12.group19.engine.EngineFactory;
 import project12.group19.engine.GameHandler;
 import project12.group19.engine.ScheduledEventLoop;
 import project12.group19.engine.StandardThreadFactory;
-import project12.group19.incubating.HillClimbingVersionGamma;
 import project12.group19.math.ode.Euler;
 import project12.group19.math.ode.ODESolver;
 import project12.group19.math.ode.RK2;
 import project12.group19.math.ode.RK4;
 import project12.group19.player.ai.HitCalculator;
 import project12.group19.player.ai.NaiveBot;
+import project12.group19.player.ai.hc.HillClimbingBot;
 
-import java.io.FileNotFoundException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
@@ -378,16 +380,8 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.B)){
                 MotionHandler motionHandler = EngineFactory.createMotionHandler(configuration);
-                HillClimbingVersionGamma hillClimbing = new HillClimbingVersionGamma(motionHandler, configuration);
-                bot = state -> {
-                    try {
-                        return hillClimbing.hillClimbing(state.getBallState().getXPosition(), state.getBallState().getYPosition());
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    return Optional.empty();
-                };
-                System.out.println("Random Bot");
+                bot = new HillClimbingBot(motionHandler, configuration);
+                System.out.println("Hill climbing bot");
                 menu = LAUNCH_MENU;
             }
         } else if (!launched) {

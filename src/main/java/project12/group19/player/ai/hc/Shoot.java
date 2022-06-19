@@ -1,7 +1,8 @@
-package project12.group19.incubating;
-import project12.group19.api.motion.*;
+package project12.group19.player.ai.hc;
 
-import static project12.group19.incubating.HillClimbing3.*;
+import project12.group19.incubating.Comb;
+
+import static project12.group19.player.ai.hc.HillClimbingBot.*;
 
 public class Shoot {
 
@@ -16,8 +17,6 @@ public class Shoot {
     private boolean inWater = false;
     private double distanceToHole;
 
-    public static Solver solver = HillClimbing3.solver;
-
     public Shoot(double xDir, double yDir, double startingX, double startingY){
         this.xDir = xDir;
         this.yDir = yDir;
@@ -25,8 +24,8 @@ public class Shoot {
         this.startingY = startingY;
         this.inHole = false;
 
-        getShotDistanceToHole(friction, profile, this);
-        combs.add(new Comb(this.getxDir(), this.getYDir(), this.getDistanceToHole()));
+        getShotDistanceToHole(this);
+        combs.add(new Comb(this.getXDir(), this.getYDir(), this.getDistanceToHole()));
         alreadyShot.add(this);
         iterations++;
 
@@ -39,7 +38,7 @@ public class Shoot {
         this.startingY = startingY;
 
     }
-    public double getxDir() {
+    public double getXDir() {
         return xDir;
     }
     public double getYDir() {
@@ -98,7 +97,7 @@ public class Shoot {
     }
 
     public double getAngle(){
-        return Math.toDegrees(Math.atan2(this.getYDir(), this.getxDir()));
+        return Math.toDegrees(Math.atan2(this.getYDir(), this.getXDir()));
     }
 
     public double getVel(){

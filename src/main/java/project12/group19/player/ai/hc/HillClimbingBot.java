@@ -1,20 +1,23 @@
-package project12.group19.incubating;
+package project12.group19.player.ai.hc;
 
 import project12.group19.api.domain.Hit;
+import project12.group19.api.domain.HitSimulation;
+import project12.group19.api.domain.Player;
+import project12.group19.api.domain.State;
+import project12.group19.api.game.BallStatus;
 import project12.group19.api.game.Configuration;
+import project12.group19.api.geometry.plane.PlanarCoordinate;
 import project12.group19.api.geometry.space.HeightProfile;
-import project12.group19.api.motion.Friction;
-import project12.group19.api.motion.MotionState;
-import project12.group19.api.motion.Solver;
-import project12.group19.api.motion.StopCondition;
+import project12.group19.api.motion.*;
+import project12.group19.incubating.Comb;
 
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.*;
 
 
-public class HillClimbing3 {
-    static Solver solver;
+public class HillClimbingBot implements Player {
+    static MotionHandler motionHandler;
     static HeightProfile profile;
     static Friction friction;
     static double holeX;
@@ -32,14 +35,19 @@ public class HillClimbing3 {
     static boolean combsPrinted = false;
 
 
-    public HillClimbing3(Solver solver, Configuration configuration) {
-        HillClimbing3.solver = solver;
-        HillClimbing3.profile = configuration.getHeightProfile();
-        HillClimbing3.friction = configuration.getGroundFriction();
-        HillClimbing3.holeX = configuration.getHole().getxHole();
-        HillClimbing3.holeY = configuration.getHole().getyHole();
-        HillClimbing3.holeR = configuration.getHole().getRadius();
-        HillClimbing3.configuration = configuration;
+    public HillClimbingBot(MotionHandler motionHandler, Configuration configuration) {
+        HillClimbingBot.motionHandler = motionHandler;
+        HillClimbingBot.profile = configuration.getHeightProfile();
+        HillClimbingBot.friction = configuration.getGroundFriction();
+        HillClimbingBot.holeX = configuration.getHole().getxHole();
+        HillClimbingBot.holeY = configuration.getHole().getyHole();
+        HillClimbingBot.holeR = configuration.getHole().getRadius();
+        HillClimbingBot.configuration = configuration;
+    }
+
+    @Override
+    public Optional<Hit> play(State state) throws FileNotFoundException {
+        return hillClimbing(state.getBallState().getXPosition(), state.getBallState().getYPosition());
     }
 
     public Optional<Hit> hillClimbing(double startingX, double startingY) throws FileNotFoundException {
@@ -51,8 +59,8 @@ public class HillClimbing3 {
         combs = new ArrayList<>();
         iterations = 0;
         getAngles(startingX, startingY);
-        double minAngle = HillClimbing3.minAngle;
-        double maxAngle = HillClimbing3.maxAngle;
+        double minAngle = HillClimbingBot.minAngle;
+        double maxAngle = HillClimbingBot.maxAngle;
         double distanceToHole = getDistance(holeX, startingX, holeY, startingY);
         double straightX = (maxVel * (holeX-startingX))/distanceToHole;
         double straightY = (maxVel * (holeY-startingY))/distanceToHole;
@@ -80,13 +88,24 @@ public class HillClimbing3 {
         System.setOut(console);
         System.out.println("Iterations: "+iterations);
 
+        List<HitSimulation> simulations = alreadyShot.stream()
+                .<HitSimulation>map(shoot -> new HitSimulation.Standard(
+                        shoot.getXDir(),
+                        shoot.getYDir(),
+                        PlanarCoordinate.create(startingX, startingY),
+                        PlanarCoordinate.create(shoot.getClosestX(), shoot.getClosestY()),
+                        shoot.getDistanceToHole()
+                ))
+                .toList();
+
         if(currentShot.inHole()){
             System.out.println("Distance to hole: "+currentShot.getDistanceToHole());
-            return Optional.of(Hit.create(currentShot.getxDir(), currentShot.getYDir()));
+            return Optional.of(Hit.create(currentShot.getXDir(), currentShot.getYDir(), simulations));
         }else{
             alreadyShot.sort(Comparator.comparingDouble(Shoot::getDistanceToHole));
             System.out.println("Best distance to hole: " + alreadyShot.get(0).getDistanceToHole());
-            return Optional.of(Hit.create(alreadyShot.get(0).getxDir(), alreadyShot.get(0).getYDir()));
+
+            return Optional.of(Hit.create(alreadyShot.get(0).getXDir(), alreadyShot.get(0).getYDir(), simulations));
         }
 
     }
@@ -113,59 +132,64 @@ public class HillClimbing3 {
         double straightX = (maxVel * (holeX-startingX))/distanceToHole;
         double straightY = (maxVel * (holeY-startingY))/distanceToHole;    //Straight shot to hole with maximum velocity
         double alpha = Math.toDegrees(Math.atan2(straightY, straightX));
-        HillClimbing3.maxAngle = alpha+maxAngleVar;
-        HillClimbing3.minAngle = alpha-maxAngleVar;
+        HillClimbingBot.maxAngle = alpha+maxAngleVar;
+        HillClimbingBot.minAngle = alpha-maxAngleVar;
     }
 
-    public static void getShotDistanceToHole(Friction friction, HeightProfile profile, Shoot shoot) {
-        double xDir = shoot.getxDir();
+    private static void updateDistances(Shoot shoot, PlanarCoordinate position) {
+        if (position.distanceTo(holeX, holeR) < shoot.getDistanceToHole()) {
+            setClosestDistances(shoot, position);
+        }
+    }
+
+    public static void getShotDistanceToHole(Shoot shoot) {
+        double xDir = shoot.getXDir();
         double yDir = shoot.getYDir();
         double startingX = shoot.getStartingX();
         double startingY = shoot.getStartingY();
-        MotionState current = new MotionState.Standard(xDir, yDir, startingX, startingY);
-        setClosestDistances(shoot, current);
-        double minDistance = getDistance(holeX, current.getXPosition(), holeY, current.getYPosition());
+        MotionState initial = new MotionState.Standard(xDir, yDir, startingX, startingY);
+        setClosestDistances(shoot, initial.getPosition());
 
-        while (StopCondition.isMoving(profile, current, friction, stepSize) && !shoot.inHole()) {
-            current = solver.calculate(current, stepSize);
-            if(getDistance(holeX, current.getXPosition(), holeY, current.getYPosition()) < minDistance){
-                minDistance = getDistance(holeX, current.getXPosition(), holeY, current.getYPosition());
-                setClosestDistances(shoot, current);
-                if(getDistance(holeX, current.getXPosition(), holeY, current.getYPosition()) < holeR*0.9 && !shoot.inWater()){
-                    shoot.setInHole();
-                    setClosestDistances(shoot, current);
-                }
-            }
-            if(profile.getHeight(current.getXPosition(), current.getYPosition()) < 0 && !shoot.inHole()) {
+        MotionResult snapshot = MotionResult.create(initial, BallStatus.MOVING);
+
+        do {
+            snapshot = motionHandler.next(snapshot.getState(), stepSize);
+
+            if (snapshot.getStatus().isFoulTrigger()) {
                 shoot.setInWater();
                 break;
             }
-        }
+
+            if (snapshot.getStatus().equals(BallStatus.SCORED)) {
+                shoot.setInHole();
+            }
+
+            updateDistances(shoot, snapshot.getState().getPosition());
+        } while (snapshot.getStatus().equals(BallStatus.MOVING));
     }
 
     public static Shoot optimiseShot(Shoot shoot){
         double angleVar = 60;
-        double stepSize = 0.1*Math.sqrt(shoot.getDistanceToHole());
-        double initialXDir = shoot.getxDir();
+        double stepSize = 0.1;
+        double initialXDir = shoot.getXDir();
         double initialYDir = shoot.getYDir();
         double startingX = shoot.getStartingX();
         double startingY = shoot.getStartingY();
         List<Shoot> newShots = new ArrayList<Shoot>();
         for(int angle = 0; angle < 360; angle+= angleVar){
             Shoot movement = new Shoot(angle, stepSize, shoot.getStartingX(), shoot.getStartingY(), true);
-            double moveX = movement.getxDir();
+            double moveX = movement.getXDir();
             double moveY = movement.getYDir();
             newShots.add(new Shoot(initialXDir+moveX, initialYDir+moveY, startingX, startingY));
         }
         newShots.sort(Comparator.comparingDouble(Shoot::getDistanceToHole));
         return newShots.get(0);
-
     }
 
-    static void setClosestDistances(Shoot shoot, MotionState current){
-        shoot.setDistanceToHole(getDistance(holeX, current.getXPosition(), holeY, current.getYPosition()));
-        shoot.setClosestX(current.getXPosition());
-        shoot.setClosestY(current.getYPosition());
+    static void setClosestDistances(Shoot shoot, PlanarCoordinate position){
+        shoot.setDistanceToHole(getDistance(holeX, position.getX(), holeY, position.getY()));
+        shoot.setClosestX(position.getX());
+        shoot.setClosestY(position.getY());
     }
 }
 
