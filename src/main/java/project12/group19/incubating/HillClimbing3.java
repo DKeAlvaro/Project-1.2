@@ -1,6 +1,6 @@
 package project12.group19.incubating;
 
-import project12.group19.api.domain.Player;
+import project12.group19.api.domain.Hit;
 import project12.group19.api.game.Configuration;
 import project12.group19.api.geometry.space.HeightProfile;
 import project12.group19.api.motion.Friction;
@@ -42,7 +42,7 @@ public class HillClimbing3 {
         HillClimbing3.configuration = configuration;
     }
 
-    public Optional<Player.Hit> hillClimbing(double startingX, double startingY) throws FileNotFoundException {
+    public Optional<Hit> hillClimbing(double startingX, double startingY) throws FileNotFoundException {
         PrintStream o = new PrintStream("newHillClimbing.txt");
         PrintStream console = System.out;
         System.setOut(console);
@@ -82,11 +82,11 @@ public class HillClimbing3 {
 
         if(currentShot.inHole()){
             System.out.println("Distance to hole: "+currentShot.getDistanceToHole());
-            return Optional.of(Player.Hit.create(currentShot.getxDir(), currentShot.getYDir()));
+            return Optional.of(Hit.create(currentShot.getxDir(), currentShot.getYDir()));
         }else{
             alreadyShot.sort(Comparator.comparingDouble(Shoot::getDistanceToHole));
             System.out.println("Best distance to hole: " + alreadyShot.get(0).getDistanceToHole());
-            return Optional.of(Player.Hit.create(alreadyShot.get(0).getxDir(), alreadyShot.get(0).getYDir()));
+            return Optional.of(Hit.create(alreadyShot.get(0).getxDir(), alreadyShot.get(0).getYDir()));
         }
 
     }

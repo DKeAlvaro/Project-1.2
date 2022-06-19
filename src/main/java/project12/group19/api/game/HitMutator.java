@@ -1,6 +1,6 @@
 package project12.group19.api.game;
 
-import project12.group19.api.domain.Player;
+import project12.group19.api.domain.Hit;
 
 import java.util.Random;
 import java.util.function.DoubleUnaryOperator;
@@ -11,7 +11,7 @@ import java.util.function.UnaryOperator;
  * make the task harder for player, for example, by adding noise to or
  * deflect hit by constant angle.
  */
-public interface HitMutator extends UnaryOperator<Player.Hit> {
+public interface HitMutator extends UnaryOperator<Hit> {
     static HitMutator identity() {
         return Identity.INSTANCE;
     }
@@ -47,7 +47,7 @@ public interface HitMutator extends UnaryOperator<Player.Hit> {
         public static final HitMutator INSTANCE = new Identity();
 
         @Override
-        public Player.Hit apply(Player.Hit hit) {
+        public Hit apply(Hit hit) {
             return hit;
         }
     }
@@ -59,10 +59,10 @@ public interface HitMutator extends UnaryOperator<Player.Hit> {
      */
     record Deflector(double deflection) implements HitMutator {
         @Override
-        public Player.Hit apply(Player.Hit hit) {
+        public Hit apply(Hit hit) {
             double angle = hit.getVelocityAngle() + deflection;
             double velocity = hit.getAbsoluteVelocity();
-            return Player.Hit.polar(velocity, angle);
+            return Hit.polar(velocity, angle);
         }
     }
 
@@ -94,7 +94,7 @@ public interface HitMutator extends UnaryOperator<Player.Hit> {
         }
 
         @Override
-        public Player.Hit apply(Player.Hit hit) {
+        public Hit apply(Hit hit) {
             if (velocityRange <= 0 && directionRange <= 0) {
                 return hit;
             }
@@ -112,7 +112,7 @@ public interface HitMutator extends UnaryOperator<Player.Hit> {
                 angle = angle + deflection;
             }
 
-            return Player.Hit.polar(velocity, angle);
+            return Hit.polar(velocity, angle);
         }
     }
 
@@ -123,7 +123,7 @@ public interface HitMutator extends UnaryOperator<Player.Hit> {
      */
     record Limiter(double limit) implements HitMutator {
         @Override
-        public Player.Hit apply(Player.Hit hit) {
+        public Hit apply(Hit hit) {
             double velocity = hit.getAbsoluteVelocity();
 
             if (velocity <= limit) {
@@ -131,7 +131,7 @@ public interface HitMutator extends UnaryOperator<Player.Hit> {
             }
 
             double multiplier = limit / velocity;
-            return Player.Hit.create(hit.scaleVelocity(multiplier));
+            return Hit.create(hit.scaleVelocity(multiplier));
         }
     }
 }

@@ -84,7 +84,7 @@ public interface State {
         return new Standard(getRounds(), getCourse(), state, getRules());
     }
 
-    default State withHit(Player.Hit hit) {
+    default State withHit(Hit hit) {
         return new Standard(
                 mapLastRound(getRounds(), round -> new Round.Standard(round.getIndex(), round.getStartingPosition(), null, hit, null)),
                 getCourse(),

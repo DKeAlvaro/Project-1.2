@@ -1,5 +1,6 @@
 package project12.group19.player.ai;
 
+import project12.group19.api.domain.Hit;
 import project12.group19.api.domain.Item;
 import project12.group19.api.domain.Player;
 import project12.group19.api.domain.State;

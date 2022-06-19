@@ -1,6 +1,6 @@
 package project12.group19.player.ai;
 
-import project12.group19.api.domain.Player;
+import project12.group19.api.domain.Hit;
 import project12.group19.api.domain.State;
 import project12.group19.api.game.Configuration;
 import project12.group19.api.geometry.plane.PlanarCoordinate;
@@ -38,7 +38,7 @@ public interface HitCalculator {
      * @param tolerance Distance from the point that is counted as ok.
      * @return A hit that is necessary to end up at target.
      */
-    Optional<Player.Hit> shootAt(State state, PlanarCoordinate target, double tolerance) throws FileNotFoundException;
+    Optional<Hit> shootAt(State state, PlanarCoordinate target, double tolerance) throws FileNotFoundException;
     /**
      * Projects a hit required for ball to pass within a specified
      * distance of target. This is a relaxed condition compared to
@@ -52,26 +52,26 @@ public interface HitCalculator {
      * @return A hit that would put the ball through the target within
      * specified tolerance.
      */
-    default Optional<Player.Hit> shootThrough(State state, PlanarCoordinate target, double tolerance) throws FileNotFoundException {
+    default Optional<Hit> shootThrough(State state, PlanarCoordinate target, double tolerance) throws FileNotFoundException {
         return shootAt(state, target, tolerance);
     }
 
     class Predefined implements HitCalculator {
-        private final List<Player.Hit> hits;
+        private final List<Hit> hits;
 
         private int counter;
 
-        public Predefined(List<Player.Hit> hits) {
+        public Predefined(List<Hit> hits) {
             this.hits = hits;
         }
 
         @Override
-        public Optional<Player.Hit> shootAt(State state, PlanarCoordinate target, double tolerance) {
+        public Optional<Hit> shootAt(State state, PlanarCoordinate target, double tolerance) {
             if (hits.isEmpty()) {
                 return Optional.empty();
             }
 
-            Player.Hit next = hits.get(counter);
+            Hit next = hits.get(counter);
             counter = (counter + 1) % hits.size();
 
             return Optional.of(next);
@@ -91,8 +91,8 @@ public interface HitCalculator {
         }
 
         @Override
-        public Optional<Player.Hit> shootAt(State state, PlanarCoordinate target, double tolerance) throws FileNotFoundException {
-            return hillCLimbing(solver, configuration, state);
+        public Optional<Hit> shootAt(State state, PlanarCoordinate target, double tolerance) throws FileNotFoundException {
+            return hillClimbing(solver, configuration, state);
         }
 
         private static double noisify(double value) {
@@ -100,19 +100,19 @@ public interface HitCalculator {
             return value * multiplier;
         }
 
-        private static Optional<Player.Hit> ruleBased(State state){
+        private static Optional<Hit> ruleBased(State state){
             MotionState ball = state.getBallState();
             Hole hole = state.getCourse().getHole();
-            double force =HillClimbing3.getDistance(hole.getxHole(), ball.getXPosition(), hole.getyHole(), ball.getYPosition());
+            double force = HillClimbing3.getDistance(hole.getxHole(), ball.getXPosition(), hole.getyHole(), ball.getYPosition());
             double xPath = hole.getxHole() - ball.getXPosition();
             double yPath = hole.getyHole() - ball.getYPosition();
             double angle = Math.atan2(yPath, xPath);
             double xVelocity = noisify(Math.cos(angle) * force);
             double yVelocity = noisify(Math.sin(angle) * force);
-            return Optional.of(Player.Hit.create(xVelocity, yVelocity));
-
+            return Optional.of(Hit.create(xVelocity, yVelocity));
         }
-        private static Optional<Player.Hit> hillCLimbing(Solver solver, Configuration configuration, State state) throws FileNotFoundException {
+
+        private static Optional<Hit> hillClimbing(Solver solver, Configuration configuration, State state) throws FileNotFoundException {
             HillClimbing3 hillClimbing3 = new HillClimbing3(solver, configuration);
             System.out.println();
             return hillClimbing3.hillClimbing(state.getBallState().getXPosition(), state.getBallState().getYPosition());
@@ -136,7 +136,7 @@ public interface HitCalculator {
         }
 
         @Override
-        public Optional<Player.Hit> shootAt(State state, PlanarCoordinate target, double tolerance) {
+        public Optional<Hit> shootAt(State state, PlanarCoordinate target, double tolerance) {
             MotionState ball = state.getBallState();
             double force = start * Math.pow(1 + step, counter);
             counter++;
@@ -145,7 +145,7 @@ public interface HitCalculator {
             double angle = Math.atan2(yPath, xPath);
             double xVelocity = Math.cos(angle) * force;
             double yVelocity = Math.sin(angle) * force;
-            return Optional.of(Player.Hit.create(xVelocity, yVelocity));
+            return Optional.of(Hit.create(xVelocity, yVelocity));
         }
     }
 }

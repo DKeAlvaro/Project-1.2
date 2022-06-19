@@ -31,6 +31,7 @@ import project12.group19.api.motion.BasicAccelerationCalculator;
 import project12.group19.api.motion.Solver;
 import project12.group19.engine.EngineFactory;
 import project12.group19.engine.GameHandler;
+import project12.group19.engine.ScheduledEventLoop;
 import project12.group19.engine.StandardThreadFactory;
 import project12.group19.incubating.HillClimbing3;
 import project12.group19.math.ode.Euler;
@@ -400,7 +401,7 @@ public class Drop extends ApplicationAdapter implements ApplicationListener {
                 containment.submit(() -> {
                     Setup setup = EngineFactory.createSetup(configuration, bot, List.of(gameState::set));
 
-                    new GameHandler().launch(setup).join();
+                    new GameHandler(ScheduledEventLoop.standard()).launch(setup).join();
 
                     System.out.println("That's all, folks!");
                 });

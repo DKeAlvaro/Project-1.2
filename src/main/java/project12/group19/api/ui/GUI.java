@@ -1,5 +1,6 @@
 package project12.group19.api.ui;
 
+import project12.group19.api.domain.Hit;
 import project12.group19.api.domain.Player;
 import project12.group19.api.domain.State;
 import project12.group19.api.geometry.space.HeightProfile;
@@ -146,7 +147,7 @@ public class GUI implements Renderer {
         hit.setOpaque(true);
         hit.setFocusable(false);
         hit.addActionListener(e -> {
-            transmitter.record(Player.Hit.create(
+            transmitter.record(Hit.create(
                     Double.parseDouble(fieldx.getText()),
                     Double.parseDouble(fieldy.getText())
             ));
