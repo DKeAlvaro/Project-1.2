@@ -71,21 +71,10 @@ The built JAR contains all definitions for launch:
 java -jar build/libs/project12.group19.putting-1.0.0.jar
 ```
 
-JAR supports two arguments:
-
-- Path to configuration file with surface function, friction values,
-and so on. By default, it looks for configuration.properties.
-- Path to configuration file with hits in following format:
-
-    ```
-    x = 10, y = -10
-    x = 1.0, y = 2
-    x = 3.5, y = 6.5
-    ```
-
-The configuration file (`configuration.properties`) is mandatory, but 
-one can be obtained just by copying `configuration.properties.dist` in
-the project directory.
+JAR supports an optional argument - path to configuration file, which by 
+default is just `configuration.properties`. The configuration file is
+mandatory, but one can be obtained just by copying
+`configuration.properties.dist` in the project directory.
 
 After the launch GUI will be presented, where someone has to select
 solver and bot through the menu. For unknown reasons on Windows 
