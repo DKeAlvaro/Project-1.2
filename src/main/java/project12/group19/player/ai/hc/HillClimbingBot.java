@@ -9,7 +9,11 @@ import project12.group19.api.physics.motion.MotionResult;
 import project12.group19.api.physics.motion.MotionState;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 
@@ -46,6 +50,13 @@ public class HillClimbingBot implements Player {
     }
 
     public Optional<Hit> hillClimbing(double startingX, double startingY) throws FileNotFoundException {
+        try {
+            if (!Files.isDirectory(Path.of("reports"))) {
+                Files.createDirectory(Path.of("reports"));
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
         PrintStream o = new PrintStream("reports/hill-climbing.txt");
         PrintStream console = System.out;
         System.setOut(console);
