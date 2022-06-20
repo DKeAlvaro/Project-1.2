@@ -44,4 +44,7 @@ functionality.
 
 ## Ball state prediction
 
-Within the `Motion`
+Within the `MotionHandler` an `ODESolver` is used to approximate next 
+ball velocity and position. `ODESolver` is an interface by itself, with 
+three implementations: Euler, RK2 and RK4, which implement corresponding
+numerical methods.

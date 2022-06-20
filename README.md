@@ -95,8 +95,8 @@ for example:
 prefix.option = value
 ```
 
-Full reference is available in [doc/configuration.md](). Most used 
-options are:
+Full reference is available in [doc/configuration.md](doc/configuration.md).
+Most used options are:
 
 | Key                                               | Aliases       | Default | Description                                                                            |
 |:--------------------------------------------------|:--------------|:--------|:---------------------------------------------------------------------------------------|
