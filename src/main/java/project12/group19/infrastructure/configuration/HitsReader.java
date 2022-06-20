@@ -6,12 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class HitsReader {
-
-    public static void main(String[] args) throws IOException {
-        HitsReader test = new HitsReader();
-        test.read("C:\\Users\\Alvaro\\Documents\\GitHub\\Project-1.2\\input-example-for-hits.txt");
-    }
-
     public double[][] read(String path) throws IOException {
         File file = new File(path);
 

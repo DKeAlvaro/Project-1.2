@@ -33,16 +33,4 @@ public class RK2 implements ODESolver {
     public OptionalDouble calcK(double step, OptionalDouble derivative) {
         return derivative.isEmpty() ? OptionalDouble.empty() : OptionalDouble.of(calcK(step, derivative.getAsDouble()));
     }
-
-    public static void main(String[] args) {
-        double x = 0;
-        double y = 0;
-        BinaryOperation derivative = (xc, any) -> OptionalDouble.of(xc * 2);
-        RK2 solver = new RK2();
-        for (int i = 0; i < 500; i++) {
-            y = solver.apply(y, x, 0.01, derivative).getAsDouble();
-            x += 0.01;
-        }
-        System.out.printf("x = %.2f, y = %.2f\\n", x, y);
-    }
 }

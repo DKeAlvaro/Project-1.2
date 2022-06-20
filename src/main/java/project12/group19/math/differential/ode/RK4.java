@@ -51,16 +51,4 @@ public class RK4 implements ODESolver {
 
         return OptionalDouble.of(calcK(step, derivative.getAsDouble()));
     }
-
-    public static void main(String[] args) {
-        double x = -5;
-        double y = 0;
-        BinaryOperation derivative = (xc, any) -> OptionalDouble.of(xc * 2);
-        RK4 solver = new RK4();
-        for (int i = 0; i < 500; i++) {
-            y = solver.apply(y, x, 0.01, derivative).getAsDouble();
-            x += 0.01;
-        }
-        System.out.printf("x = %.2f, y = %.2f\\n", x, y);
-    }
 }

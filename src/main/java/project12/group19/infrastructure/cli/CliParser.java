@@ -143,9 +143,4 @@ public class CliParser {
 
         return builder;
     }
-
-    public static void main(String[] args) {
-        Invocation invocation = new CliParser(Command.HELP).parse(args);
-        System.exit(invocation.getInvokedCommand().executor().applyAsInt(invocation));
-    }
 }

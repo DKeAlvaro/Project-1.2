@@ -4,7 +4,6 @@ import project12.group19.api.domain.Hit;
 import project12.group19.api.domain.Player;
 import project12.group19.api.domain.State;
 import project12.group19.api.domain.Surface;
-import project12.group19.api.physics.motion.Friction;
 import project12.group19.api.physics.motion.MotionState;
 import project12.group19.api.ui.Renderer;
 import project12.group19.infrastructure.support.ResourceLoader;
@@ -199,18 +198,6 @@ public class GUI implements Renderer {
         frame.setResizable(false);
         frame.setLayout(null);
         frame.setVisible(true);
-    }
-
-    /**
-     * Main method to launch the gold game program.
-     *
-     * @param args an array of Strings passed as
-     *             parameters when you are running your
-     *             application through command line in the OS.
-     */
-    public static void main(String[] args) {
-        // TODO: return HeightProfile lmao
-        new GUI(Surface.homogeneous((x, y) -> 1 + 0.1 * x, Friction.create(0, 0)), -10,18,2,-10,18,5);
     }
 
     /**
