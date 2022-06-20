@@ -71,6 +71,12 @@ The built JAR contains all definitions for launch:
 java -jar build/libs/project12.group19.putting-1.0.0.jar
 ```
 
+For Apple computers, `-XstartOnFirstThread` has to be set as well:
+
+```
+java -XstartOnFirstThread -jar build/libs/project12.group19.putting-1.0.0.jar
+```
+
 JAR supports an optional argument - path to configuration file, which by 
 default is just `configuration.properties`. The configuration file is
 mandatory, but one can be obtained just by copying
