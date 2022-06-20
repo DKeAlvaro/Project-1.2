@@ -10,3 +10,4 @@ configuration.properties
 .gradle
 allure-results
 *.txt
+.DS_Store
