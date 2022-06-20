@@ -1,6 +1,6 @@
 package project12.group19.api.domain;
 
-import project12.group19.api.motion.MotionState;
+import project12.group19.api.physics.motion.MotionState;
 import project12.group19.api.physics.Velocity;
 
 import java.util.List;

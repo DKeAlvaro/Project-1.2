@@ -4,6 +4,7 @@ import org.hamcrest.Matcher;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import project12.group19.math.differential.DerivativeEstimator;
 
 import java.util.OptionalDouble;
 import java.util.stream.DoubleStream;

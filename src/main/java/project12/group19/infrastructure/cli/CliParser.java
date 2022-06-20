@@ -1,5 +1,9 @@
 package project12.group19.infrastructure.cli;
 
+import project12.group19.api.infrastructure.cli.Argument;
+import project12.group19.api.infrastructure.cli.Command;
+import project12.group19.api.infrastructure.cli.Invocation;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

@@ -3,7 +3,7 @@ package project12.group19.player.ai;
 import project12.group19.api.domain.Hit;
 import project12.group19.api.domain.State;
 import project12.group19.api.geometry.plane.PlanarCoordinate;
-import project12.group19.api.motion.MotionState;
+import project12.group19.api.physics.motion.MotionState;
 
 import java.io.FileNotFoundException;
 import java.util.List;

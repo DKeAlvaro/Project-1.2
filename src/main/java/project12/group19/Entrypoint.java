@@ -3,10 +3,10 @@ package project12.group19;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import project12.group19.api.game.Configuration;
-import project12.group19.cli.CliRunner;
-import project12.group19.gui.Drop;
-import project12.group19.incubating.HitsReader;
-import project12.group19.incubating.Reader;
+import project12.group19.infrastructure.cli.CliRunner;
+import project12.group19.ui.libgdx.Drop;
+import project12.group19.infrastructure.configuration.HitsReader;
+import project12.group19.infrastructure.configuration.StandardConfigurationReader;
 
 import java.io.IOException;
 
@@ -15,7 +15,7 @@ public class Entrypoint {
 
     private static Configuration loadConfiguration(String path) throws IOException {
         System.out.println("Loading configuration from `" + path + "`");
-        return new Reader().read(path);
+        return new StandardConfigurationReader().read(path);
     }
 
     private static Configuration resolveConfiguration(String[] args) throws Exception {

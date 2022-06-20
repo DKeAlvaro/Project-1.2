@@ -3,7 +3,7 @@ package project12.group19.api.domain;
 import project12.group19.api.geometry.plane.PlanarCoordinate;
 import project12.group19.api.geometry.plane.PlanarDimensions;
 import project12.group19.api.geometry.plane.PlanarShape;
-import project12.group19.api.motion.Friction;
+import project12.group19.api.physics.motion.Friction;
 
 import java.util.Map;
 import java.util.Objects;

@@ -1,22 +1,25 @@
 package project12.group19.engine;
 
 import project12.group19.api.domain.*;
-import project12.group19.api.engine.Setup;
 import project12.group19.api.game.Configuration;
 import project12.group19.api.game.HitMutator;
 import project12.group19.api.game.Rules;
+import project12.group19.api.game.Setup;
 import project12.group19.api.game.configuration.EngineConfiguration;
 import project12.group19.api.geometry.plane.PlanarRectangle;
-import project12.group19.api.motion.*;
+import project12.group19.api.math.differential.ODESolver;
+import project12.group19.api.physics.motion.*;
 import project12.group19.domain.StandardSurface;
 import project12.group19.engine.motion.StandardMotionHandler;
-import project12.group19.math.ode.Euler;
-import project12.group19.math.ode.ODESolver;
-import project12.group19.math.ode.RK2;
-import project12.group19.math.ode.RK4;
+import project12.group19.math.differential.ode.Euler;
+import project12.group19.math.differential.ode.RK2;
+import project12.group19.math.differential.ode.RK4;
 import project12.group19.math.parser.Parser;
 import project12.group19.math.parser.component.ComponentRegistry;
 import project12.group19.math.parser.expression.PostfixExpression;
+import project12.group19.physics.motion.AdvancedAccelerationCalculator;
+import project12.group19.physics.motion.BasicAccelerationCalculator;
+import project12.group19.physics.motion.StandardMotionCalculator;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -50,7 +53,7 @@ public class EngineFactory {
 
     public static MotionCalculator createMotionCalculator(Configuration configuration) {
         EngineConfiguration.Physics physics = configuration.getEngineConfiguration().getPhysics();
-        return new Solver(
+        return new StandardMotionCalculator(
                 physics.getOdeSolver()
                         .map(EngineFactory::resolveODESolver)
                         .orElse(new Euler()),
@@ -70,7 +73,7 @@ public class EngineFactory {
     }
 
     public static Course createCourse(Configuration configuration) {
-        Item target = Item.Target.create(configuration.getHole().getPosition(), configuration.getHole().getRadius());
+        Item target = configuration.getTarget();
         Set<Item> items = Stream.concat(configuration.getItems().stream(), Stream.of(target)).collect(Collectors.toSet());
         Surface surface = createSurface(configuration);
 
@@ -100,10 +103,9 @@ public class EngineFactory {
         Course course = createCourse(configuration);
         Rules rules = createRules(configuration);
 
-        // TODO this is a bit dirty. Continue to use optionals instead of zeros.
-        double velocityNoiseRange = configuration.getEngineConfiguration().getNoise().getVelocityRange().orElse(0);
-        double directionNoiseRange = configuration.getEngineConfiguration().getNoise().getDirectionRange().orElse(0);
-        boolean useNoiseMutator = velocityNoiseRange > 0 || directionNoiseRange > 0;
+        OptionalDouble velocityNoiseRange = configuration.getEngineConfiguration().getNoise().getVelocityRange();
+        OptionalDouble directionNoiseRange = configuration.getEngineConfiguration().getNoise().getDirectionRange();
+        boolean useNoiseMutator = velocityNoiseRange.isPresent() || directionNoiseRange.isPresent();
         HitMutator hitMutator = useNoiseMutator ? HitMutator.noise(velocityNoiseRange, directionNoiseRange) : HitMutator.identity();
         EngineConfiguration.Timing timing = configuration.getEngineConfiguration().getTiming();
         EngineConfiguration.Physics physics = configuration.getEngineConfiguration().getPhysics();
@@ -117,7 +119,7 @@ public class EngineFactory {
                         toNanos(timing.resolveComputationalInterval()),
                         toNanos(timing.resolveNotificationInterval())
                 ),
-                new StandardMotionHandler(course, rules, new Solver(
+                new StandardMotionHandler(course, rules, new StandardMotionCalculator(
                         physics.getOdeSolver()
                                 .map(EngineFactory::resolveODESolver)
                                 .orElse(new Euler()),

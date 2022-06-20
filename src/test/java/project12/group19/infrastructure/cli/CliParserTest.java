@@ -1,6 +1,10 @@
 package project12.group19.infrastructure.cli;
 
 import org.junit.jupiter.api.Test;
+import project12.group19.api.infrastructure.cli.Argument;
+import project12.group19.api.infrastructure.cli.Command;
+import project12.group19.api.infrastructure.cli.Invocation;
+import project12.group19.api.infrastructure.cli.Option;
 
 import java.util.List;
 import java.util.Map;

@@ -1,10 +1,10 @@
 package project12.group19.engine.motion;
 
 import project12.group19.api.game.BallStatus;
-import project12.group19.api.motion.MotionHandler;
-import project12.group19.api.motion.MotionResult;
-import project12.group19.api.motion.MotionState;
-import project12.group19.api.motion.MovementPlotter;
+import project12.group19.api.physics.motion.MotionHandler;
+import project12.group19.api.physics.motion.MotionResult;
+import project12.group19.api.physics.motion.MotionState;
+import project12.group19.api.physics.motion.MovementPlotter;
 
 import java.util.function.BiFunction;
 

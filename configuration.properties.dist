@@ -27,9 +27,9 @@ course.target.y = 1
 # course.items.sandpits.instances.1.width = 1.5
 # course.items.sandpits.instances.1.height = 0.75
 
-# engine.rates.tick = 100
-# engine.rates.refresh = 60
-# engine.rates.scale = 1.0
+# engine.timing.step = 0.01
+# engine.timing.intervals.computation = 0.01
+# engine.timing.intervals.notification = 0.016
 
 # engine.noise.velocity =
 # engine.noise.direction =
@@ -37,3 +37,5 @@ course.target.y = 1
 
 # engine.physics.acceleration = basic
 #   possible options are `basic` and `advanced`
+# engine.physics.ode-solver = euler
+#   possible options are `euler`, `rk2`, `rk4`

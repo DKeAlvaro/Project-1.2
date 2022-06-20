@@ -1,7 +1,6 @@
 package project12.group19.api.domain;
 
-import project12.group19.api.geometry.space.Hole;
-import project12.group19.api.motion.Friction;
+import project12.group19.api.physics.motion.Friction;
 
 import java.util.Set;
 import java.util.function.Predicate;
@@ -53,19 +52,10 @@ public interface Course {
         return streamItems(Item.Obstacle.class);
     }
 
-    default Item getTarget() {
-        return streamItems(Item.CollisionReaction.SCORE)
+    default Item.Target getTarget() {
+        return streamItems(Item.Target.class)
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Target is not present among course items"));
-    }
-
-    /**
-     * @deprecated use {@link #getTarget()}
-     */
-    @Deprecated
-    default Hole getHole() {
-        Item target = getTarget();
-        return new Hole(target.getCenter().getX(), target.getCenter().getY(), target.getWidth());
     }
 
     record Standard(

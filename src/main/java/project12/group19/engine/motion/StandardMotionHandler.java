@@ -3,7 +3,8 @@ package project12.group19.engine.motion;
 import project12.group19.api.domain.Course;
 import project12.group19.api.game.BallStatus;
 import project12.group19.api.game.Rules;
-import project12.group19.api.motion.*;
+import project12.group19.api.physics.motion.*;
+import project12.group19.physics.motion.StopCondition;
 
 public class StandardMotionHandler implements MotionHandler {
     private final Course course;

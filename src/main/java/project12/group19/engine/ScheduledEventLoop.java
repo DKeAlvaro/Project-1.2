@@ -1,6 +1,6 @@
 package project12.group19.engine;
 
-import project12.group19.api.engine.core.EventLoop;
+import project12.group19.api.engine.EventLoop;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;

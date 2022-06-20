@@ -1,15 +1,12 @@
 package project12.group19.player.ai.hc;
 
-import project12.group19.api.domain.Hit;
-import project12.group19.api.domain.HitSimulation;
-import project12.group19.api.domain.Player;
-import project12.group19.api.domain.State;
+import project12.group19.api.domain.*;
 import project12.group19.api.game.BallStatus;
-import project12.group19.api.game.Configuration;
 import project12.group19.api.geometry.plane.PlanarCoordinate;
-import project12.group19.api.geometry.space.HeightProfile;
-import project12.group19.api.motion.*;
-import project12.group19.incubating.Comb;
+import project12.group19.api.physics.motion.Friction;
+import project12.group19.api.physics.motion.MotionHandler;
+import project12.group19.api.physics.motion.MotionResult;
+import project12.group19.api.physics.motion.MotionState;
 
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -19,14 +16,13 @@ import java.util.*;
 public class HillClimbingBot implements Player {
     public static final double SIMULATION_TIME_LIMIT = 10.0;
     static MotionHandler motionHandler;
-    static HeightProfile profile;
+    static Surface surface;
     static Friction friction;
     static double holeX;
     static double holeY;
     static double holeR;
-    static Configuration configuration;
     static List<Shoot> alreadyShot = new ArrayList<>();
-    static List<Comb> combs = new ArrayList<>();
+    static List<Combination> combinations = new ArrayList<>();
     static double maxVel = 5;
     static double maxAngle;
     static double minAngle; //
@@ -36,14 +32,12 @@ public class HillClimbingBot implements Player {
     static boolean combsPrinted = false;
 
 
-    public HillClimbingBot(MotionHandler motionHandler, Configuration configuration) {
+    public HillClimbingBot(MotionHandler motionHandler, Course course) {
         HillClimbingBot.motionHandler = motionHandler;
-        HillClimbingBot.profile = configuration.getHeightProfile();
-        HillClimbingBot.friction = configuration.getGroundFriction();
-        HillClimbingBot.holeX = configuration.getHole().getxHole();
-        HillClimbingBot.holeY = configuration.getHole().getyHole();
-        HillClimbingBot.holeR = configuration.getHole().getRadius();
-        HillClimbingBot.configuration = configuration;
+        HillClimbingBot.surface = course.getSurface();
+        HillClimbingBot.holeX = course.getTarget().getCenter().getX();
+        HillClimbingBot.holeY = course.getTarget().getCenter().getY();
+        HillClimbingBot.holeR = course.getTarget().getSmallerDimension();
     }
 
     @Override
@@ -52,12 +46,12 @@ public class HillClimbingBot implements Player {
     }
 
     public Optional<Hit> hillClimbing(double startingX, double startingY) throws FileNotFoundException {
-        PrintStream o = new PrintStream("newHillClimbing.txt");
+        PrintStream o = new PrintStream("reports/hill-climbing.txt");
         PrintStream console = System.out;
         System.setOut(console);
 
         alreadyShot = new ArrayList<>();
-        combs = new ArrayList<>();
+        combinations = new ArrayList<>();
         iterations = 0;
         getAngles(startingX, startingY);
         double minAngle = HillClimbingBot.minAngle;
@@ -86,11 +80,11 @@ public class HillClimbingBot implements Player {
             }
             System.out.println("Iterations: "+iterations);
         }
-        combs.sort(Comparator.comparingDouble(Comb::getDistanceToHole));
+        combinations.sort(Comparator.comparingDouble(Combination::getDistanceToHole));
         System.setOut(o);
         if(!combsPrinted){
-            for(Comb comb : combs){
-                System.out.println(comb.getComb());
+            for(Combination combination : combinations){
+                System.out.println(combination.getComb());
             }
             combsPrinted = true;
         }

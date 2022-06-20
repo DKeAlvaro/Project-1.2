@@ -1,8 +1,7 @@
 package project12.group19.api.domain;
 
 import project12.group19.api.geometry.plane.PlanarCoordinate;
-import project12.group19.api.geometry.space.HeightProfile;
-import project12.group19.api.motion.Friction;
+import project12.group19.api.physics.motion.Friction;
 
 import java.util.function.DoubleBinaryOperator;
 
@@ -10,7 +9,7 @@ import java.util.function.DoubleBinaryOperator;
  * This interface ties up available information about course surface for
  * downstream consumers to use.
  */
-public interface Surface extends HeightProfile {
+public interface Surface {
     /**
      * @param x Position, x-axis component.
      * @param y Position, y-axis component.
