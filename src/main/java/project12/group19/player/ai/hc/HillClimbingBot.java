@@ -29,7 +29,7 @@ public class HillClimbingBot implements Player {
     static List<Combination> combinations = new ArrayList<>();
     static double maxVel = 5;
     static double maxAngle;
-    static double minAngle; //
+    static double minAngle;
     static double maxAngleVar = 30;  //Maximum variation of angle to generate shots. Angle 0 is Straight shot
     static int iterations = 0;
     static double stepSize = 0.01;
@@ -57,7 +57,7 @@ public class HillClimbingBot implements Player {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        PrintStream o = new PrintStream("reports/hill-climbing.txt");
+        PrintStream o = new PrintStream("reports/hill-climbing3.txt");
         PrintStream console = System.out;
         System.setOut(console);
 
@@ -74,20 +74,19 @@ public class HillClimbingBot implements Player {
 
         Shoot currentShot = new Shoot(straightX, straightY, startingX, startingY);
 
-        while (!currentShot.inHole() && iterations < 500){
+        while (!currentShot.inHole() && iterations < 300){
             if(iterations != 0){
                 currentShot = createShot(minAngle, maxAngle, startingX, startingY);
             }
-
             Shoot optimized = optimiseShot(currentShot);
-            while (optimized.getDistanceToHole() < currentShot.getDistanceToHole()) {
+            while (optimized.getDistanceToHole() < currentShot.getDistanceToHole() && optimized.getVel() < maxVel) {
                 currentShot = optimized;
-
                 if (currentShot.inHole()) {
                     break;
                 }
 
                 optimized = optimiseShot(currentShot);
+
             }
             System.out.println("Iterations: "+iterations);
         }
@@ -116,6 +115,7 @@ public class HillClimbingBot implements Player {
             System.out.println("Distance to hole: "+currentShot.getDistanceToHole());
             return Optional.of(Hit.create(currentShot.getXDir(), currentShot.getYDir(), simulations));
         }else{
+            alreadyShot.removeIf(shot -> shot.getVel() > maxVel);
             alreadyShot.sort(Comparator.comparingDouble(Shoot::getDistanceToHole));
             System.out.println("Best distance to hole: " + alreadyShot.get(0).getDistanceToHole());
 
@@ -197,7 +197,7 @@ public class HillClimbingBot implements Player {
 
     public static Shoot optimiseShot(Shoot shoot){
         double angleVar = 60;
-        double stepSize = 0.1 * Math.sqrt(shoot.getDistanceToHole());
+        double stepSize = 0.5 * Math.sqrt(shoot.getDistanceToHole());
         double initialXDir = shoot.getXDir();
         double initialYDir = shoot.getYDir();
         double startingX = shoot.getStartingX();
@@ -207,7 +207,9 @@ public class HillClimbingBot implements Player {
             Shoot movement = new Shoot(angle, stepSize, shoot.getStartingX(), shoot.getStartingY(), true);
             double moveX = movement.getXDir();
             double moveY = movement.getYDir();
-            newShots.add(new Shoot(initialXDir+moveX, initialYDir+moveY, startingX, startingY));
+            if(getDistance(moveX, 0, moveY, 0) < 5){
+                newShots.add(new Shoot(initialXDir+moveX, initialYDir+moveY, startingX, startingY));
+            }
         }
         newShots.sort(Comparator.comparingDouble(Shoot::getDistanceToHole));
         return newShots.get(0);
